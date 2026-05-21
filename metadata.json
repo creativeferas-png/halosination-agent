@@ -1,0 +1,13 @@
+{
+  "use_case_id": "13",
+  "agents": [
+    { "name": "Intake", "role": "Parses employee request in plain language and structures the brief" },
+    { "name": "Search", "role": "Retrieves on-brand assets and brand guidelines using embeddings" },
+    { "name": "Brush", "role": "Generates or adapts content (copy and imagery) to brand specifications" },
+    { "name": "Route", "role": "Routes finalised brief or asset to the correct downstream owner (Marcom, OpCo lead)" },
+    { "name": "Validator", "role": "Scores output against brand rules, triggers revision loop if below threshold" }
+  ],
+  "tools_used": ["langgraph", "langchain", "compass-api", "fastapi", "openai-sdk"],
+  "data_sources": ["/data/brand_guidelines.md", "/data/asset_index.json"],
+  "output_type": "text"
+}
