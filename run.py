@@ -9,6 +9,7 @@ from datetime import datetime
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
@@ -34,6 +35,14 @@ logging.basicConfig(
 logger = logging.getLogger("halo")
 
 app = FastAPI(title="HALOsination Brand & Brief Agent", version="0.5.0")
+
+# Allow the optional UI on port 8001 to call this API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8001", "http://127.0.0.1:8001"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class RunRequest(BaseModel):
