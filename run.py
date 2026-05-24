@@ -1,5 +1,5 @@
 """
-HALO Brand & Brief Agent — Entry Point
+HALOsination Brand & Brief Agent — Entry Point
 Mandatory POST /run endpoint on port 8000 per G42 Agentathon spec.
 """
 import os
@@ -12,8 +12,11 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
-# Load environment variables from .env
+# Load environment variables from .env BEFORE importing agents
 load_dotenv()
+
+# Import agents after .env is loaded so the OpenAI client gets the right keys
+from app.intake_agent import run_intake
 
 # Configure logging — writes to logs/ for multi-agent collaboration evidence
 LOG_DIR = Path("logs")
@@ -30,7 +33,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("halo")
 
-app = FastAPI(title="HALO Brand & Brief Agent", version="0.1.0")
+app = FastAPI(title="HALOsination Brand & Brief Agent", version="0.2.0")
 
 
 class RunRequest(BaseModel):
@@ -50,39 +53,66 @@ class RunResponse(BaseModel):
 @app.get("/")
 def health():
     """Simple health check."""
-    return {"status": "ok", "service": "HALO Brand & Brief Agent"}
+    return {"status": "ok", "service": "HALOsination Brand & Brief Agent"}
 
 
 @app.post("/run", response_model=RunResponse)
 def run(payload: RunRequest):
     """
     Mandatory entry point. Accepts an employee request and routes it
-    through the HALO multi-agent system.
+    through the HALOsination multi-agent system.
 
-    Phase 1: returns a placeholder response so the interface is
-    verifiable. Phase 2+ wires in the real LangGraph agents.
+    Phase 2: Intake agent is live (real Compass call → structured BRIEF).
+    Downstream agents (Search, Brush, Validator, Route) are still placeholders.
     """
-    logger.info(f"Received request: {payload.request}")
+    logger.info(f"RUN_START | request={payload.request[:100]!r}")
+    trace = []
 
-    # Placeholder agent trace — will be replaced with real LangGraph trace
-    trace = [
-        {"agent": "Intake", "action": "received", "input": payload.request},
-        {"agent": "Validator", "action": "placeholder_check", "result": "ok"},
-    ]
-    for step in trace:
-        logger.info(f"AGENT_STEP | {json.dumps(step)}")
+    # ----- Agent 1: Intake -----
+    logger.info("AGENT_STEP | agent=Intake | action=invoke")
+    brief = run_intake(payload.request)
+    trace.append({
+        "agent": "Intake",
+        "action": "parse_request",
+        "input_preview": payload.request[:120],
+        "output": brief,
+        "status": "error" if "error" in brief else "ok",
+    })
 
-    response = RunResponse(
+    if "error" in brief:
+        logger.warning(f"RUN_DEGRADED | intake_failed | {brief.get('error')}")
+        return RunResponse(
+            status="degraded",
+            use_case_id="13",
+            output={
+                "message": "Intake agent failed to produce a structured brief.",
+                "detail": brief,
+            },
+            agent_trace=trace,
+        )
+
+    # ----- Agents 2-5 (Search / Brush / Validator / Route): placeholders for now -----
+    trace.append({
+        "agent": "Brush",
+        "action": "placeholder",
+        "note": "Phase 3 will wire real Compass call for asset generation.",
+    })
+    trace.append({
+        "agent": "Validator",
+        "action": "placeholder",
+        "note": "Phase 4 will wire rubric-based scoring with revision loop.",
+    })
+
+    logger.info(f"RUN_DONE | status=success | trace_steps={len(trace)}")
+    return RunResponse(
         status="success",
-        use_case_id="1",
+        use_case_id="13",
         output={
-            "message": "HALO scaffolding online. Real agents wired in Phase 2.",
-            "request_echo": payload.request,
+            "brief": brief,
+            "next_step": "Brush agent will draft asset from this brief (Phase 3).",
         },
         agent_trace=trace,
     )
-    logger.info(f"Completed request: {response.status}")
-    return response
 
 
 if __name__ == "__main__":
