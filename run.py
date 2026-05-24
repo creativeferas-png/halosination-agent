@@ -15,10 +15,11 @@ from dotenv import load_dotenv
 # Load environment variables from .env BEFORE importing agents
 load_dotenv()
 
-# Import agents after .env is loaded so the OpenAI client gets the right keys
+# Import agents after .env is loaded
 from app.intake_agent import run_intake
+from app.brush_agent import run_brush
 
-# Configure logging — writes to logs/ for multi-agent collaboration evidence
+# Configure logging
 LOG_DIR = Path("logs")
 LOG_DIR.mkdir(exist_ok=True)
 log_file = LOG_DIR / f"run_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
@@ -33,17 +34,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger("halo")
 
-app = FastAPI(title="HALOsination Brand & Brief Agent", version="0.2.0")
+app = FastAPI(title="HALOsination Brand & Brief Agent", version="0.3.0")
 
 
 class RunRequest(BaseModel):
-    """Input schema for POST /run."""
     request: str
     context: dict | None = None
 
 
 class RunResponse(BaseModel):
-    """Output schema for POST /run."""
     status: str
     use_case_id: str
     output: dict
@@ -52,18 +51,19 @@ class RunResponse(BaseModel):
 
 @app.get("/")
 def health():
-    """Simple health check."""
     return {"status": "ok", "service": "HALOsination Brand & Brief Agent"}
 
 
 @app.post("/run", response_model=RunResponse)
 def run(payload: RunRequest):
     """
-    Mandatory entry point. Accepts an employee request and routes it
-    through the HALOsination multi-agent system.
+    HALOsination multi-agent pipeline.
 
-    Phase 2: Intake agent is live (real Compass call → structured BRIEF).
-    Downstream agents (Search, Brush, Validator, Route) are still placeholders.
+    Phase 3 status:
+      [x] Intake agent — real Compass call (GPT-4.1)
+      [x] Brush agent — real Compass call (GPT-5.1)
+      [ ] Validator agent — placeholder (Phase 4)
+      [ ] Route agent — placeholder (Phase 5)
     """
     logger.info(f"RUN_START | request={payload.request[:100]!r}")
     trace = []
@@ -91,16 +91,45 @@ def run(payload: RunRequest):
             agent_trace=trace,
         )
 
-    # ----- Agents 2-5 (Search / Brush / Validator / Route): placeholders for now -----
+    # ----- Agent 2: Brush (real handoff from Intake) -----
+    logger.info(f"AGENT_HANDOFF | from=Intake | to=Brush | asset_type={brief.get('asset_type')}")
+    logger.info("AGENT_STEP | agent=Brush | action=invoke")
+    draft = run_brush(brief)
     trace.append({
         "agent": "Brush",
-        "action": "placeholder",
-        "note": "Phase 3 will wire real Compass call for asset generation.",
+        "action": "draft_asset",
+        "input_brief_summary": {
+            "asset_type": brief.get("asset_type"),
+            "audience": brief.get("audience"),
+            "tone_hints": brief.get("tone_hints"),
+        },
+        "output": draft,
+        "status": "error" if "error" in draft else "ok",
     })
+
+    if "error" in draft:
+        logger.warning(f"RUN_DEGRADED | brush_failed | {draft.get('error')}")
+        return RunResponse(
+            status="degraded",
+            use_case_id="13",
+            output={
+                "message": "Brush agent failed to produce a draft asset.",
+                "brief": brief,
+                "detail": draft,
+            },
+            agent_trace=trace,
+        )
+
+    # ----- Agents 3-4: Validator + Route (placeholders for Phase 4-5) -----
     trace.append({
         "agent": "Validator",
         "action": "placeholder",
-        "note": "Phase 4 will wire rubric-based scoring with revision loop.",
+        "note": "Phase 4 will wire rubric-based scoring (brand voice / visual spec / audience fit, 0-3 x3) with revision loop.",
+    })
+    trace.append({
+        "agent": "Route",
+        "action": "placeholder",
+        "note": "Phase 5 will route final asset to requester (and CC Marcom if Validator score < 7).",
     })
 
     logger.info(f"RUN_DONE | status=success | trace_steps={len(trace)}")
@@ -109,7 +138,8 @@ def run(payload: RunRequest):
         use_case_id="13",
         output={
             "brief": brief,
-            "next_step": "Brush agent will draft asset from this brief (Phase 3).",
+            "draft": draft,
+            "next_step": "Validator agent will score this draft against brand rubric (Phase 4).",
         },
         agent_trace=trace,
     )
