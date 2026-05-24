@@ -27,10 +27,10 @@
     line-height: 1.5;
     min-height: 100vh;
   }
-  .container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+  .container { max-width: 1300px; margin: 0 auto; padding: 32px 24px; }
   header {
     display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid var(--border);
+    margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border);
   }
   .logo { display: flex; align-items: center; gap: 12px; }
   .logo-mark {
@@ -42,31 +42,33 @@
   .logo-text h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
   .logo-text p { font-size: 12px; color: var(--text-dim); }
   .meta { font-size: 12px; color: var(--text-dim); font-family: var(--mono); }
-  .grid { display: grid; grid-template-columns: 380px 1fr; gap: 24px; }
+
+  .grid { display: grid; grid-template-columns: 380px 1fr; gap: 24px; align-items: start; }
   @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
 
   .panel {
     background: var(--bg-elev); border: 1px solid var(--border);
     border-radius: 12px; padding: 20px;
   }
+  .panel + .panel { margin-top: 20px; }
   .panel h2 {
     font-size: 13px; font-weight: 600; text-transform: uppercase;
     letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 14px;
   }
   textarea {
-    width: 100%; min-height: 140px; background: var(--bg-elev-2);
+    width: 100%; min-height: 120px; background: var(--bg-elev-2);
     border: 1px solid var(--border); border-radius: 8px; padding: 12px;
     color: var(--text); font-family: inherit; font-size: 14px; resize: vertical;
   }
   textarea:focus { outline: none; border-color: var(--accent); }
-  button {
+  button.primary {
     margin-top: 12px; width: 100%; padding: 12px 16px;
     background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
     color: white; border: none; border-radius: 8px; font-size: 14px;
     font-weight: 600; cursor: pointer; transition: opacity 0.2s;
   }
-  button:hover { opacity: 0.9; }
-  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  button.primary:hover { opacity: 0.9; }
+  button.primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
   .examples { margin-top: 16px; }
   .examples h3 {
@@ -77,7 +79,7 @@
     display: block; width: 100%; text-align: left; margin: 6px 0;
     padding: 10px 12px; background: var(--bg-elev-2); border: 1px solid var(--border);
     border-radius: 6px; color: var(--text); font-size: 12px; cursor: pointer;
-    transition: all 0.15s; line-height: 1.4;
+    transition: all 0.15s; line-height: 1.4; font-family: inherit;
   }
   .example-btn:hover { border-color: var(--accent); background: #1f2742; }
   .example-btn .label {
@@ -85,11 +87,13 @@
     text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px;
   }
 
+  /* Agent Activity Panel - all 5 stages always visible */
   .activity { font-family: var(--mono); font-size: 12px; }
   .stage {
-    padding: 10px 12px; margin: 6px 0; border-left: 3px solid var(--border);
+    padding: 9px 12px; margin: 5px 0; border-left: 3px solid var(--border);
     background: var(--bg-elev-2); border-radius: 0 6px 6px 0;
-    display: flex; align-items: center; gap: 10px; transition: all 0.2s;
+    display: flex; align-items: center; gap: 10px; transition: all 0.25s;
+    min-height: 44px;
   }
   .stage.active { border-left-color: var(--accent); background: #1a2545; }
   .stage.done { border-left-color: var(--success); }
@@ -107,18 +111,64 @@
   @keyframes pulse {
     0%, 100% { opacity: 1; } 50% { opacity: 0.5; }
   }
-  .stage-text { flex: 1; }
+  .stage-text { flex: 1; min-width: 0; }
+  .stage-name { font-weight: 600; }
   .stage-detail { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
 
-  .result { margin-top: 24px; }
-  .result-section { margin-bottom: 20px; }
-  .result-section h3 {
+  /* Sections in the right panel */
+  .section { margin-bottom: 22px; }
+  .section:last-child { margin-bottom: 0; }
+  .section-label {
     font-size: 11px; text-transform: uppercase; color: var(--text-dim);
     letter-spacing: 0.08em; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
   }
+  .agent-tag {
+    background: rgba(0, 168, 232, 0.1); color: var(--accent);
+    padding: 2px 8px; border-radius: 4px; font-family: var(--mono);
+    font-size: 10px; letter-spacing: 0.02em;
+  }
+
+  /* Verdict scorecard - now at the TOP */
+  .verdict-card {
+    background: linear-gradient(180deg, var(--bg-elev-2) 0%, var(--bg-elev) 100%);
+    border: 1px solid var(--border); border-radius: 10px; padding: 18px;
+  }
+  .verdict-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .verdict-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px; border-radius: 20px;
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .verdict-badge.pass { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+  .verdict-badge.revise { background: rgba(245, 158, 11, 0.15); color: var(--warn); }
+  .verdict-badge.escalate { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+  .verdict-badge::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%;
+    background: currentColor;
+  }
+  .verdict-meta { font-size: 11px; color: var(--text-dim); font-family: var(--mono); }
+
+  .score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+  .score-cell { text-align: center; padding: 12px 8px; background: var(--bg); border-radius: 8px; }
+  .score-num { font-size: 26px; font-weight: 700; color: var(--accent); line-height: 1; }
+  .score-num .denom { font-size: 13px; color: var(--text-dim); margin-left: 1px; }
+  .score-label {
+    font-size: 10px; text-transform: uppercase; color: var(--text-dim);
+    letter-spacing: 0.06em; margin-top: 6px;
+  }
+  .reasoning { font-size: 12px; line-height: 1.55; color: var(--text-dim); }
+  .reasoning p { margin: 4px 0; }
+  .reasoning strong { color: var(--text); }
+
+  /* Drafted asset */
   .headline {
     font-size: 24px; font-weight: 700; letter-spacing: -0.02em;
-    margin-bottom: 8px; color: var(--text);
+    margin-bottom: 6px; color: var(--text); line-height: 1.25;
   }
   .subhead { font-size: 15px; color: var(--text-dim); margin-bottom: 12px; }
   .body-text { font-size: 14px; line-height: 1.6; margin-bottom: 12px; }
@@ -133,71 +183,62 @@
     font-size: 13px; line-height: 1.6;
   }
   .visual-spec p { margin: 4px 0; }
-  .palette { display: flex; gap: 8px; margin-top: 10px; }
+  .palette { display: flex; gap: 8px; margin-top: 12px; padding-bottom: 22px; }
   .swatch {
     width: 40px; height: 40px; border-radius: 6px; border: 1px solid var(--border);
-    position: relative; cursor: default;
+    position: relative;
   }
   .swatch::after {
     content: attr(data-color); position: absolute; bottom: -18px; left: 50%;
     transform: translateX(-50%); font-family: var(--mono); font-size: 9px;
     color: var(--text-dim); white-space: nowrap;
   }
-  .palette-row { padding-bottom: 24px; }
 
+  /* Retrieved rules */
   .rules-list { display: flex; flex-direction: column; gap: 8px; }
   .rule-card {
     background: var(--bg-elev-2); border: 1px solid var(--border);
-    border-radius: 8px; padding: 12px; font-size: 12px;
+    border-radius: 8px; padding: 10px 12px; font-size: 12px;
   }
   .rule-header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 6px;
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
   }
   .rule-id {
     font-family: var(--mono); font-size: 11px; color: var(--accent);
     background: rgba(0, 168, 232, 0.1); padding: 2px 8px; border-radius: 4px;
+    flex-shrink: 0;
   }
+  .rule-title { font-weight: 600; color: var(--text); flex-shrink: 0; }
   .similarity-bar {
     flex: 1; height: 4px; background: var(--bg); border-radius: 2px;
-    overflow: hidden; margin: 0 12px;
+    overflow: hidden; min-width: 60px;
   }
   .similarity-fill {
     height: 100%; background: linear-gradient(90deg, var(--accent-deep), var(--accent));
-    transition: width 0.5s;
+    transition: width 0.6s;
   }
-  .similarity-pct { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
-  .rule-title { font-weight: 600; color: var(--text); }
+  .similarity-pct {
+    font-family: var(--mono); font-size: 11px; color: var(--text-dim);
+    flex-shrink: 0; min-width: 42px; text-align: right;
+  }
 
-  .scorecard {
-    background: var(--bg-elev-2); border-radius: 8px; padding: 16px;
+  /* Delivery */
+  .delivery-card {
+    background: var(--bg-elev-2); border-radius: 8px; padding: 12px 14px;
+    font-size: 13px;
   }
-  .verdict-badge {
-    display: inline-block; padding: 4px 12px; border-radius: 12px;
-    font-size: 11px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.08em; margin-bottom: 12px;
+  .delivery-path {
+    font-family: var(--mono); color: var(--accent); font-size: 12px;
+    margin-bottom: 4px;
   }
-  .verdict-badge.pass { background: rgba(34, 197, 94, 0.15); color: var(--success); }
-  .verdict-badge.revise { background: rgba(245, 158, 11, 0.15); color: var(--warn); }
-  .verdict-badge.escalate { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+  .delivery-msg { color: var(--text-dim); }
 
-  .score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 12px 0; }
-  .score-cell { text-align: center; padding: 12px 8px; background: var(--bg); border-radius: 6px; }
-  .score-num { font-size: 28px; font-weight: 700; color: var(--accent); }
-  .score-num .denom { font-size: 14px; color: var(--text-dim); }
-  .score-label {
-    font-size: 10px; text-transform: uppercase; color: var(--text-dim);
-    letter-spacing: 0.06em; margin-top: 4px;
-  }
-  .reasoning { font-size: 12px; line-height: 1.5; margin-top: 12px; color: var(--text-dim); }
-  .reasoning p { margin: 6px 0; }
-  .reasoning strong { color: var(--text); }
-
+  /* Empty state */
   .empty {
     text-align: center; color: var(--text-dim); font-size: 13px;
-    padding: 60px 20px;
+    padding: 50px 20px;
   }
-  .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+  .empty-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.35; }
   .error { color: var(--danger); padding: 12px; background: rgba(239, 68, 68, 0.1);
            border-radius: 6px; font-size: 13px; }
 </style>
@@ -221,7 +262,7 @@
       <div class="panel">
         <h2>Employee Request</h2>
         <textarea id="request" placeholder="e.g. 'Need a launch banner for Project Atlas, going out to healthcare audiences next week...'"></textarea>
-        <button id="submit">Generate on-brand asset →</button>
+        <button class="primary" id="submit">Generate on-brand asset →</button>
 
         <div class="examples">
           <h3>Try a sample request</h3>
@@ -244,14 +285,9 @@
         </div>
       </div>
 
-      <div class="panel" style="margin-top: 24px;">
+      <div class="panel">
         <h2>Agent Activity</h2>
-        <div id="activity" class="activity">
-          <div class="empty">
-            <div class="empty-icon">◇</div>
-            Submit a request to watch the agents collaborate
-          </div>
-        </div>
+        <div id="activity" class="activity"></div>
       </div>
     </div>
 
@@ -261,7 +297,7 @@
         <h2>Generated Asset</h2>
         <div class="empty">
           <div class="empty-icon">✦</div>
-          Your on-brand asset and verdict will appear here
+          Submit a request to see the 5 agents collaborate, then the verdict and the asset they produced
         </div>
       </div>
     </div>
@@ -284,35 +320,68 @@ document.querySelectorAll(".example-btn").forEach(btn => {
   });
 });
 
+// All 5 agents in the pipeline
 const STAGES = [
-  { id: "intake", label: "Intake", detail: "Parsing request into structured brief..." },
-  { id: "search", label: "Search", detail: "Retrieving top-3 brand rules via embeddings..." },
-  { id: "brush", label: "Brush", detail: "Drafting copy + visual spec..." },
-  { id: "validator", label: "Validator", detail: "Scoring against brand rubric..." }
+  { id: "intake",    name: "Intake",    detail: "Parsing request into structured brief" },
+  { id: "search",    name: "Search",    detail: "Retrieving top-3 brand rules via embeddings" },
+  { id: "brush",     name: "Brush",     detail: "Drafting copy + visual spec, grounded in rules" },
+  { id: "validator", name: "Validator", detail: "Scoring against the 3×3 brand rubric" },
+  { id: "route",     name: "Route",     detail: "Deciding delivery path from the verdict" }
 ];
 
-function renderStages(currentIdx, status="active") {
+function renderStages(currentIdx, mode = "active") {
   const html = STAGES.map((s, i) => {
     let cls = "stage";
-    if (i < currentIdx) cls += " done";
-    else if (i === currentIdx) cls += " " + status;
+    let detailText = "queued";
+    if (i < currentIdx) { cls += " done"; detailText = "✓ complete"; }
+    else if (i === currentIdx && mode === "active") { cls += " active"; detailText = s.detail; }
+    else if (mode === "done" && i === STAGES.length) { /* all done case */ }
     return `<div class="${cls}">
       <div class="stage-icon"></div>
       <div class="stage-text">
-        <div>${s.label}</div>
-        <div class="stage-detail">${i === currentIdx && status === "active" ? s.detail : (i < currentIdx ? "✓ complete" : "queued")}</div>
+        <div class="stage-name">${s.name}</div>
+        <div class="stage-detail">${detailText}</div>
       </div>
     </div>`;
   }).join("");
   document.getElementById("activity").innerHTML = html;
 }
 
+function renderStagesAllDone() {
+  const html = STAGES.map(s =>
+    `<div class="stage done">
+       <div class="stage-icon"></div>
+       <div class="stage-text">
+         <div class="stage-name">${s.name}</div>
+         <div class="stage-detail">✓ complete</div>
+       </div>
+     </div>`
+  ).join("");
+  document.getElementById("activity").innerHTML = html;
+}
+
+function renderStagesInitial() {
+  const html = STAGES.map(s =>
+    `<div class="stage">
+       <div class="stage-icon"></div>
+       <div class="stage-text">
+         <div class="stage-name">${s.name}</div>
+         <div class="stage-detail">queued</div>
+       </div>
+     </div>`
+  ).join("");
+  document.getElementById("activity").innerHTML = html;
+}
+
 async function animateStages() {
   for (let i = 0; i < STAGES.length; i++) {
     renderStages(i);
-    await new Promise(r => setTimeout(r, 900));
+    await new Promise(r => setTimeout(r, 850));
   }
 }
+
+// Show all 5 stages on initial load so a viewer sees the architecture
+renderStagesInitial();
 
 document.getElementById("submit").addEventListener("click", async () => {
   const request = document.getElementById("request").value.trim();
@@ -322,9 +391,9 @@ document.getElementById("submit").addEventListener("click", async () => {
   submitBtn.disabled = true;
   submitBtn.textContent = "Agents working...";
 
-  document.getElementById("results").innerHTML = '<h2>Generated Asset</h2><div class="empty"><div class="empty-icon">◐</div>Agents are working. Watch the activity panel.</div>';
+  document.getElementById("results").innerHTML =
+    '<h2>Generated Asset</h2><div class="empty"><div class="empty-icon">◐</div>Agents are working — watch the activity panel below</div>';
 
-  // Animate stages in parallel with the real API call
   const animation = animateStages();
   let response;
   try {
@@ -335,18 +404,14 @@ document.getElementById("submit").addEventListener("click", async () => {
     });
     response = await r.json();
   } catch (e) {
-    document.getElementById("activity").innerHTML = `<div class="error">Failed to reach API at ${API}. Is the server running on port 8000?</div>`;
+    document.getElementById("activity").innerHTML =
+      `<div class="error">Failed to reach API at ${API}. Is the server running on port 8000?</div>`;
     submitBtn.disabled = false;
     submitBtn.textContent = "Generate on-brand asset →";
     return;
   }
   await animation;
-
-  // Mark all stages done
-  renderStages(STAGES.length, "done");
-  document.getElementById("activity").innerHTML = STAGES.map(s =>
-    `<div class="stage done"><div class="stage-icon"></div><div class="stage-text"><div>${s.label}</div><div class="stage-detail">✓ complete</div></div></div>`
-  ).join("");
+  renderStagesAllDone();
 
   renderResults(response);
   submitBtn.disabled = false;
@@ -356,7 +421,8 @@ document.getElementById("submit").addEventListener("click", async () => {
 function renderResults(resp) {
   const out = resp.output;
   if (!out) {
-    document.getElementById("results").innerHTML = `<h2>Result</h2><div class="error">Unexpected response shape.</div>`;
+    document.getElementById("results").innerHTML =
+      `<h2>Generated Asset</h2><div class="error">Unexpected response shape.</div>`;
     return;
   }
   const draft = out.final_draft || {};
@@ -365,59 +431,20 @@ function renderResults(resp) {
   const verdict = out.verdict || {};
   const scores = verdict.scores || {};
   const rules = out.retrieved_rules || [];
-
-  // Headline draft section
-  const headlineHTML = `
-    <div class="result-section">
-      <h3>Drafted asset</h3>
-      <div class="headline">${escape(copy.headline || "—")}</div>
-      ${copy.subhead ? `<div class="subhead">${escape(copy.subhead)}</div>` : ""}
-      ${copy.body ? `<div class="body-text">${escape(copy.body)}</div>` : ""}
-      ${copy.cta ? `<div class="cta">${escape(copy.cta)}</div>` : ""}
-    </div>`;
-
-  // Visual spec
-  const swatches = (vs.palette || []).map(c =>
-    `<div class="swatch" style="background:${c};" data-color="${c}"></div>`
-  ).join("");
-  const visualHTML = `
-    <div class="result-section">
-      <h3>Visual direction</h3>
-      <div class="visual-spec">
-        <p><strong>Concept:</strong> ${escape(vs.concept || "—")}</p>
-        <p><strong>Mood:</strong> ${(vs.mood || []).join(" · ")}</p>
-        <p><strong>Composition:</strong> ${escape(vs.composition || "—")}</p>
-        <div class="palette-row"><div class="palette">${swatches}</div></div>
-      </div>
-    </div>`;
-
-  // Retrieved rules
-  const rulesHTML = rules.length ? `
-    <div class="result-section">
-      <h3>Retrieved brand rules (used by Brush & Validator)</h3>
-      <div class="rules-list">
-        ${rules.map(r => `
-          <div class="rule-card">
-            <div class="rule-header">
-              <span class="rule-id">Rule ${r.rule_id}</span>
-              <span class="rule-title">${escape(r.title)}</span>
-              <div class="similarity-bar">
-                <div class="similarity-fill" style="width:${(r.similarity * 100).toFixed(0)}%"></div>
-              </div>
-              <span class="similarity-pct">${(r.similarity * 100).toFixed(1)}%</span>
-            </div>
-          </div>
-        `).join("")}
-      </div>
-    </div>` : "";
-
-  // Validator scorecard
+  const delivery = out.delivery || {};
   const verdictClass = verdict.verdict || "pass";
+
+  // 1. VERDICT (now at the top)
   const verdictHTML = `
-    <div class="result-section">
-      <h3>Validator verdict</h3>
-      <div class="scorecard">
-        <span class="verdict-badge ${verdictClass}">${verdictClass} · ${verdict.total ?? "?"}/9</span>
+    <div class="section">
+      <div class="section-label">
+        Validator verdict <span class="agent-tag">VALIDATOR</span>
+      </div>
+      <div class="verdict-card">
+        <div class="verdict-header">
+          <span class="verdict-badge ${verdictClass}">${verdictClass} · ${verdict.total ?? "?"}/9</span>
+          <span class="verdict-meta">${out.revision_attempted ? "after 1 revision" : "first pass"}</span>
+        </div>
         <div class="score-grid">
           <div class="score-cell">
             <div class="score-num">${scores.brand_voice ?? "—"}<span class="denom">/3</span></div>
@@ -438,15 +465,78 @@ function renderResults(resp) {
             <p><strong>Visual:</strong> ${escape(verdict.reasoning.visual_spec || "")}</p>
             <p><strong>Audience:</strong> ${escape(verdict.reasoning.audience_fit || "")}</p>
           </div>` : ""}
-        ${out.revision_attempted ? `<p class="reasoning"><strong>Revision triggered:</strong> Brush revised once based on the Validator's feedback.</p>` : ""}
       </div>
     </div>`;
 
-  document.getElementById("results").innerHTML = `<h2>Generated Asset</h2>${headlineHTML}${visualHTML}${rulesHTML}${verdictHTML}`;
+  // 2. DRAFTED ASSET (Brush)
+  const draftHTML = `
+    <div class="section">
+      <div class="section-label">
+        Drafted asset <span class="agent-tag">BRUSH</span>
+      </div>
+      <div class="headline">${escape(copy.headline || "—")}</div>
+      ${copy.subhead ? `<div class="subhead">${escape(copy.subhead)}</div>` : ""}
+      ${copy.body ? `<div class="body-text">${escape(copy.body)}</div>` : ""}
+      ${copy.cta ? `<div class="cta">${escape(copy.cta)}</div>` : ""}
+    </div>`;
+
+  // 3. VISUAL DIRECTION (Brush)
+  const swatches = (vs.palette || []).map(c =>
+    `<div class="swatch" style="background:${c};" data-color="${c}"></div>`
+  ).join("");
+  const visualHTML = `
+    <div class="section">
+      <div class="section-label">
+        Visual direction <span class="agent-tag">BRUSH</span>
+      </div>
+      <div class="visual-spec">
+        <p><strong>Concept:</strong> ${escape(vs.concept || "—")}</p>
+        <p><strong>Mood:</strong> ${(vs.mood || []).join(" · ")}</p>
+        <p><strong>Composition:</strong> ${escape(vs.composition || "—")}</p>
+        <div class="palette">${swatches}</div>
+      </div>
+    </div>`;
+
+  // 4. RETRIEVED RULES (Search)
+  const rulesHTML = rules.length ? `
+    <div class="section">
+      <div class="section-label">
+        Retrieved brand rules <span class="agent-tag">SEARCH</span>
+      </div>
+      <div class="rules-list">
+        ${rules.map(r => `
+          <div class="rule-card">
+            <div class="rule-header">
+              <span class="rule-id">Rule ${r.rule_id}</span>
+              <span class="rule-title">${escape(r.title)}</span>
+              <div class="similarity-bar">
+                <div class="similarity-fill" style="width:${(r.similarity * 100).toFixed(0)}%"></div>
+              </div>
+              <span class="similarity-pct">${(r.similarity * 100).toFixed(1)}%</span>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    </div>` : "";
+
+  // 5. DELIVERY (Route)
+  const deliveryHTML = `
+    <div class="section">
+      <div class="section-label">
+        Delivery decision <span class="agent-tag">ROUTE</span>
+      </div>
+      <div class="delivery-card">
+        <div class="delivery-path">→ ${escape(delivery.path || "deliver_to_requester")}</div>
+        <div class="delivery-msg">${escape(delivery.message || "Ready to deliver.")}</div>
+      </div>
+    </div>`;
+
+  document.getElementById("results").innerHTML =
+    `<h2>Generated Asset</h2>${verdictHTML}${draftHTML}${visualHTML}${rulesHTML}${deliveryHTML}`;
 }
 
 function escape(s) {
-  if (typeof s !== "string") return s;
+  if (typeof s !== "string") return s ?? "";
   return s.replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
 </script>
