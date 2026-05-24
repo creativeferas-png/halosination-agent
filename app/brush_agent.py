@@ -1,16 +1,15 @@
 """
 HALOsination — Brush Agent
 
-Role: Takes a structured BRIEF from the Intake agent and drafts the actual
-asset content — copy (headline, body, CTA) and a visual spec (description,
-mood, palette). Output is structured JSON so the Validator agent can score
-each dimension.
+Role: Takes a structured BRIEF from Intake plus retrieved brand rules from
+Search, and drafts the actual asset content — copy (headline, body, CTA)
+and a visual spec.
 
-Pattern: This is the "Proposer" half of the Propose <-> Critic pairing
-that Sam introduced on the May 21 check-in. The Validator (Phase 4) is
-the Critic that scores this output and may trigger one revision.
+Pattern: This is the "Proposer" half of the Propose <-> Critic pairing.
+Phase 5: Now accepts retrieved_rules from Search so drafts are grounded
+in actual brand rules, not just GPT priors.
 
-Model: GPT-5.1 via Compass (stronger creative reasoning).
+Model: GPT-5.1 via Compass.
 """
 import json
 import logging
@@ -27,8 +26,13 @@ _client = OpenAI(
 BRUSH_SYSTEM_PROMPT = """You are the Brush agent for HALOsination, an internal G42 brand
 and creative agent. You draft on-brand assets for G42 employees.
 
-You receive a structured BRIEF (JSON) from the Intake agent. Your output is a structured
-DRAFT (JSON) that downstream agents (Validator, Route) can work with.
+You receive:
+1. A structured BRIEF (JSON) from the Intake agent.
+2. RETRIEVED BRAND RULES — the top-K most relevant brand rules pulled by the
+   Search agent from the G42 brand guidelines. These are authoritative.
+   Treat them as hard constraints, not suggestions.
+
+Your output is a structured DRAFT (JSON) for downstream agents.
 
 Output STRICT JSON ONLY (no markdown, no commentary, no code fences). Schema:
 
@@ -47,37 +51,61 @@ Output STRICT JSON ONLY (no markdown, no commentary, no code fences). Schema:
     "must_include": ["array of mandatory visual elements (logos, icons, etc.) inferred from the brief, or empty array"],
     "must_avoid": ["array of visual choices to avoid given the audience or brand, or empty array"]
   },
-  "rationale": "2-3 sentences explaining why these creative choices serve the brief's audience, opco_context, and key_message"
+  "rationale": "2-3 sentences explaining why these creative choices serve the brief AND cite which RETRIEVED RULES (by rule_id) most informed each major decision."
 }
 
-Rules:
-- Stay strictly inside the BRIEF. Do not invent products, claims, or facts not present.
-- If the BRIEF has open_questions, work around them with safe defaults and flag any forced assumptions in the rationale.
-- Tone must match the BRIEF's tone_hints exactly.
-- For healthcare audiences: avoid sensationalism, avoid imagery of patients in distress, use professional and trustworthy language.
-- For G42 / M42 / Core42 / Inception: respect the parent G42 visual language (modern, technology-forward, restrained).
+Rules of engagement:
+- The RETRIEVED RULES are authoritative. If the BRIEF asks for something the
+  retrieved rules forbid, you MUST follow the rules — and note the conflict
+  in the rationale. Do NOT comply with off-brand requests.
+- Stay strictly inside the BRIEF. Do not invent products, claims, or facts.
+- If the BRIEF has open_questions, work around them with safe defaults and
+  flag forced assumptions in the rationale.
+- For healthcare audiences: extra care. See retrieved rules.
 - Output ONLY the JSON. No prose before or after."""
 
 
-def run_brush(brief: dict) -> dict:
+def _format_rules_for_prompt(retrieved_rules: list[dict]) -> str:
+    """Format retrieved rules into a readable block for the LLM."""
+    if not retrieved_rules:
+        return "(no rules retrieved — proceed using your priors but flag in rationale)"
+    lines = []
+    for r in retrieved_rules:
+        sim = r.get("similarity")
+        sim_str = f" (similarity: {sim:.3f})" if sim is not None else ""
+        lines.append(f"### Rule {r['rule_id']} — {r['title']}{sim_str}\n{r['text']}")
+    return "\n\n".join(lines)
+
+
+def run_brush(brief: dict, retrieved_rules: list[dict] | None = None) -> dict:
     """
-    Run the Brush agent on a structured BRIEF from the Intake agent.
+    Run the Brush agent on a structured BRIEF, grounded in retrieved brand rules.
 
     Args:
         brief: The structured BRIEF dict from run_intake().
+        retrieved_rules: The top-K rules from run_search(). Optional but recommended.
 
     Returns:
-        A structured DRAFT dict matching the schema in BRUSH_SYSTEM_PROMPT.
-        On parse failure, returns a dict with "error" populated.
+        A structured DRAFT dict matching the schema. On parse failure,
+        returns a dict with "error" populated.
     """
+    retrieved_rules = retrieved_rules or []
     asset_type = brief.get("asset_type", "unknown")
     audience = brief.get("audience", "unknown")
-    logger.info(f"BRUSH_START | asset_type={asset_type} | audience={audience!r}")
+    logger.info(
+        f"BRUSH_START | asset_type={asset_type} | audience={audience!r} | "
+        f"rules_provided={len(retrieved_rules)}"
+    )
+
+    rules_block = _format_rules_for_prompt(retrieved_rules)
 
     user_message = (
-        "Here is the structured BRIEF from the Intake agent. "
-        "Produce the DRAFT JSON per the schema you were given.\n\n"
-        f"BRIEF:\n{json.dumps(brief, indent=2)}"
+        "RETRIEVED BRAND RULES (authoritative — treat as hard constraints):\n"
+        f"{rules_block}\n\n"
+        "BRIEF from Intake agent:\n"
+        f"{json.dumps(brief, indent=2)}\n\n"
+        "Produce the DRAFT JSON per the schema. In your rationale, cite the "
+        "rule_id of every retrieved rule that materially shaped a decision."
     )
 
     try:

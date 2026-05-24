@@ -1,21 +1,21 @@
 """
 HALOsination — Validator Agent (the Critic)
 
-Role: Scores a DRAFT from the Brush agent against the brand rubric.
-Returns a verdict + specific fix recommendation if the draft fails.
+Role: Scores a DRAFT from Brush against the brand rubric, with access to
+the same retrieved brand rules that Brush saw. This means the Critic can
+cite specific rules when it flags a problem.
 
-Rubric (each dimension 0-3, max 9 total):
-  - brand_voice: tone, vocabulary, no forbidden words
-  - visual_spec: colors, typography, layout per brand guidelines
-  - audience_fit: right register for stated stakeholder
+Rubric (each 0-3, max 9):
+  - brand_voice
+  - visual_spec
+  - audience_fit
 
-Pass threshold: 7/9. Below that, returns one concrete fix for Brush to revise.
+Pass: 7+. Below: returns one fix for Brush to revise once.
 
-Pattern: This is the "Critic" half of the Proposer <-> Critic pairing
-from Sam's May 21 check-in. After one revision attempt, the system
-escalates to a human (per "human-in-the-loop + light autonomy" principle).
+Pattern: Critic half of Proposer <-> Critic pairing.
+After 1 revision, escalates to human review.
 
-Model: GPT-4.1 via Compass (good structured-judgment reasoning, cheap).
+Model: GPT-4.1 via Compass.
 """
 import json
 import logging
@@ -29,14 +29,16 @@ _client = OpenAI(
     base_url=os.getenv("OPENAI_BASE_URL"),
 )
 
-PASS_THRESHOLD = 7  # out of 9
+PASS_THRESHOLD = 7
 
 VALIDATOR_SYSTEM_PROMPT = """You are the Validator agent for HALOsination, an internal G42
-brand and creative agent. You score a DRAFT asset against three brand-quality dimensions.
+brand and creative agent. You score a DRAFT asset against three brand-quality dimensions,
+WITH ACCESS to the same retrieved brand rules that Brush used.
 
 You receive:
 - The original BRIEF (what the asset is supposed to do)
-- The DRAFT produced by the Brush agent (copy + visual_spec + rationale)
+- RETRIEVED BRAND RULES (authoritative — Brush saw these too)
+- The DRAFT produced by Brush
 
 You return STRICT JSON ONLY (no markdown, no code fences, no commentary). Schema:
 
@@ -49,69 +51,78 @@ You return STRICT JSON ONLY (no markdown, no code fences, no commentary). Schema
   "total": <integer 0-9>,
   "verdict": "pass" | "revise" | "escalate",
   "reasoning": {
-    "brand_voice": "one sentence explaining the brand_voice score",
-    "visual_spec": "one sentence explaining the visual_spec score",
-    "audience_fit": "one sentence explaining the audience_fit score"
+    "brand_voice": "one sentence explaining the brand_voice score; CITE rule_ids when applicable",
+    "visual_spec": "one sentence explaining the visual_spec score; CITE rule_ids when applicable",
+    "audience_fit": "one sentence explaining the audience_fit score; CITE rule_ids when applicable"
   },
-  "fix": "if total < 7, ONE concrete, specific fix for Brush to apply. Empty string if total >= 7."
+  "rules_cited": [array of rule_ids you actually referenced in your reasoning],
+  "fix": "if total < 7, ONE concrete, specific fix for Brush to apply (cite a rule_id if relevant). Empty string if total >= 7."
 }
 
-Scoring guide for each dimension (0-3):
+Scoring guide (0-3):
   0 = fails entirely; would harm the brand or audience if shipped
   1 = significant issues; multiple fixes needed
   2 = minor issues; close to acceptable
   3 = on-target; no changes needed
 
-Rubric dimensions in detail:
+Rubric dimensions:
 
 brand_voice (0-3):
   - Does the copy tone match the BRIEF's tone_hints?
-  - Is vocabulary appropriate for the opco_context (G42 / M42 / Core42 / Inception)?
-  - Any forbidden words (sensationalism, jargon misuse, over-promising)?
-  - Is the headline concise and memorable?
+  - Does the copy comply with the retrieved voice rules?
+  - Any forbidden words from the retrieved forbidden-words rule?
+  - Concise, memorable headline?
 
 visual_spec (0-3):
-  - Is the visual concept aligned with G42's modern, technology-forward visual language?
-  - Is the palette appropriate (no gimmicky or off-brand colors)?
-  - Is the composition clean and readable?
-  - For healthcare audiences: zero tolerance for distress imagery, needles, blood, etc.
+  - Does the visual concept comply with retrieved visual identity rules (palette, composition, imagery)?
+  - For healthcare audiences: zero tolerance for distress imagery; check retrieved healthcare-imagery rule.
+  - Clean and readable composition?
 
 audience_fit (0-3):
-  - Does the register match the stated audience?
+  - Does the register match the retrieved audience-register rule?
   - For healthcare professionals: trustworthy, evidence-aware, non-sensational?
-  - For executives: confident, concise, outcome-oriented?
-  - For the public: clear, accessible, non-jargony?
+  - Right CTA style per retrieved CTA rule?
 
 Rules:
 - The "total" field MUST equal the sum of the three scores.
-- The "verdict" field MUST be:
-    "pass" if total >= 7,
-    "revise" if total < 7 (first attempt allowed),
-    "escalate" only if explicitly told this is a re-scoring after a prior revision (in which case still mark "revise" technically wrong — see below)
-- The "fix" field MUST be empty if total >= 7. If total < 7, provide ONE specific, actionable fix targeting the lowest-scoring dimension.
+- The "verdict" field: "pass" if total >= 7, otherwise "revise".
+- The "fix" field MUST be empty if total >= 7. If total < 7, provide ONE specific, actionable fix
+  targeting the lowest-scoring dimension, citing the rule_id when applicable.
 - Output ONLY the JSON."""
 
 
-def run_validator(brief: dict, draft: dict, is_revision: bool = False) -> dict:
-    """
-    Run the Validator (Critic) on a draft from the Brush agent.
+def _format_rules_for_prompt(retrieved_rules: list[dict]) -> str:
+    if not retrieved_rules:
+        return "(no rules retrieved)"
+    lines = []
+    for r in retrieved_rules:
+        lines.append(f"### Rule {r['rule_id']} — {r['title']}\n{r['text']}")
+    return "\n\n".join(lines)
 
-    Args:
-        brief: The structured BRIEF from the Intake agent.
-        draft: The DRAFT from the Brush agent.
-        is_revision: True if this is the re-score after one revision attempt.
 
-    Returns:
-        A verdict dict matching the schema in VALIDATOR_SYSTEM_PROMPT.
-        On parse failure, returns a dict with "error" populated.
+def run_validator(
+    brief: dict,
+    draft: dict,
+    is_revision: bool = False,
+    retrieved_rules: list[dict] | None = None,
+) -> dict:
     """
-    logger.info(f"VALIDATOR_START | is_revision={is_revision} | threshold={PASS_THRESHOLD}/9")
+    Score a draft against the brand rubric, citing retrieved rules.
+    """
+    retrieved_rules = retrieved_rules or []
+    logger.info(
+        f"VALIDATOR_START | is_revision={is_revision} | "
+        f"threshold={PASS_THRESHOLD}/9 | rules_provided={len(retrieved_rules)}"
+    )
+
+    rules_block = _format_rules_for_prompt(retrieved_rules)
 
     user_message = (
+        f"RETRIEVED BRAND RULES (authoritative):\n{rules_block}\n\n"
         f"Original BRIEF:\n{json.dumps(brief, indent=2)}\n\n"
         f"DRAFT to evaluate:\n{json.dumps(draft, indent=2)}\n\n"
         f"Is this a re-score after revision? {is_revision}\n\n"
-        "Score this DRAFT against the rubric and return the JSON verdict."
+        "Score this DRAFT against the rubric. Cite rule_ids in your reasoning when relevant."
     )
 
     try:
@@ -121,14 +132,14 @@ def run_validator(brief: dict, draft: dict, is_revision: bool = False) -> dict:
                 {"role": "system", "content": VALIDATOR_SYSTEM_PROMPT},
                 {"role": "user", "content": user_message},
             ],
-            temperature=0.1,  # low temp for consistent scoring
+            temperature=0.1,
             response_format={"type": "json_object"},
         )
         raw_output = response.choices[0].message.content
         verdict = json.loads(raw_output)
         tokens_used = response.usage.total_tokens if response.usage else None
 
-        # Enforce verdict logic locally (don't trust the model to do its own arithmetic)
+        # Enforce verdict logic locally
         scores = verdict.get("scores", {})
         computed_total = (
             scores.get("brand_voice", 0)
@@ -141,7 +152,6 @@ def run_validator(brief: dict, draft: dict, is_revision: bool = False) -> dict:
             verdict["verdict"] = "pass"
             verdict["fix"] = ""
         elif is_revision:
-            # Already revised once and still failing -> escalate to human
             verdict["verdict"] = "escalate"
         else:
             verdict["verdict"] = "revise"
@@ -149,7 +159,8 @@ def run_validator(brief: dict, draft: dict, is_revision: bool = False) -> dict:
         logger.info(
             f"VALIDATOR_DONE | tokens={tokens_used} | "
             f"total={computed_total}/9 | verdict={verdict['verdict']} | "
-            f"scores=voice:{scores.get('brand_voice')},visual:{scores.get('visual_spec')},audience:{scores.get('audience_fit')}"
+            f"scores=voice:{scores.get('brand_voice')},visual:{scores.get('visual_spec')},audience:{scores.get('audience_fit')} | "
+            f"rules_cited={verdict.get('rules_cited', [])}"
         )
         return verdict
 
@@ -161,22 +172,28 @@ def run_validator(brief: dict, draft: dict, is_revision: bool = False) -> dict:
         return {"error": "validator_api_failure", "detail": str(exc)}
 
 
-def run_brush_revision(brief: dict, original_draft: dict, fix_instruction: str) -> dict:
+def run_brush_revision(
+    brief: dict,
+    original_draft: dict,
+    fix_instruction: str,
+    retrieved_rules: list[dict] | None = None,
+) -> dict:
     """
-    Ask the Brush agent to revise its draft based on the Validator's specific fix.
-
-    This is a thin wrapper around Brush that injects the fix instruction into the
-    user message. We keep it here (rather than in brush_agent.py) because the
-    revision behaviour is a Validator-driven pattern, not a Brush primitive.
+    Ask Brush to revise its draft based on the Validator's specific fix.
+    The retrieved rules go with the revision so Brush stays grounded.
     """
-    from app.brush_agent import run_brush, BRUSH_SYSTEM_PROMPT, _client as brush_client
+    from app.brush_agent import BRUSH_SYSTEM_PROMPT, _client as brush_client, _format_rules_for_prompt
 
-    logger.info(f"REVISION_START | fix_preview={fix_instruction[:100]!r}")
+    retrieved_rules = retrieved_rules or []
+    logger.info(f"REVISION_START | fix_preview={fix_instruction[:100]!r} | rules_provided={len(retrieved_rules)}")
+
+    rules_block = _format_rules_for_prompt(retrieved_rules)
 
     user_message = (
-        "Here is a previous DRAFT you produced, the original BRIEF, and the Validator's "
-        "specific fix instruction. Produce a REVISED DRAFT JSON (same schema as before) "
-        "that addresses the fix while preserving everything else that was working.\n\n"
+        f"RETRIEVED BRAND RULES (authoritative — same rules from the original draft):\n{rules_block}\n\n"
+        "Here is the previous DRAFT, the original BRIEF, and the Validator's specific fix. "
+        "Produce a REVISED DRAFT (same JSON schema) that addresses the fix while preserving "
+        "everything that was working.\n\n"
         f"BRIEF:\n{json.dumps(brief, indent=2)}\n\n"
         f"PREVIOUS DRAFT:\n{json.dumps(original_draft, indent=2)}\n\n"
         f"VALIDATOR FIX (apply this):\n{fix_instruction}"
@@ -189,7 +206,7 @@ def run_brush_revision(brief: dict, original_draft: dict, fix_instruction: str) 
                 {"role": "system", "content": BRUSH_SYSTEM_PROMPT},
                 {"role": "user", "content": user_message},
             ],
-            temperature=0.5,  # slightly lower than initial draft, for more targeted change
+            temperature=0.5,
             response_format={"type": "json_object"},
         )
         raw_output = response.choices[0].message.content

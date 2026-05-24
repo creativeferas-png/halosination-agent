@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from app.intake_agent import run_intake
+from app.search_agent import run_search
 from app.brush_agent import run_brush
 from app.validator_agent import run_validator, run_brush_revision, PASS_THRESHOLD
 
@@ -32,7 +33,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("halo")
 
-app = FastAPI(title="HALOsination Brand & Brief Agent", version="0.4.0")
+app = FastAPI(title="HALOsination Brand & Brief Agent", version="0.5.0")
 
 
 class RunRequest(BaseModel):
@@ -55,16 +56,17 @@ def health():
 @app.post("/run", response_model=RunResponse)
 def run(payload: RunRequest):
     """
-    HALOsination multi-agent pipeline with iterative revision loop.
+    HALOsination multi-agent pipeline with retrieval-grounded drafting.
 
     Pipeline:
-      Intake -> Brush -> Validator
-        if Validator.verdict == "pass"   -> deliver
+      Intake -> Search -> Brush -> Validator
+        if Validator.verdict == "pass"   -> Route -> deliver
         if Validator.verdict == "revise" -> Brush revises ONCE -> Validator re-scores
           if still failing               -> escalate to human (route + CC Marcom)
 
-    Implements Sam's Proposer <-> Critic pairing pattern with a clear
-    termination criterion (max 1 revision attempt).
+    Phase 5: Search agent grounds Brush in retrieved brand rules via
+    text-embedding-3-large. The retrieved rules also accompany the draft
+    into Validator, giving the Critic concrete brand evidence to score against.
     """
     logger.info(f"RUN_START | request={payload.request[:100]!r}")
     trace = []
@@ -87,13 +89,32 @@ def run(payload: RunRequest):
             agent_trace=trace,
         )
 
-    # ----- Agent 2: Brush (initial draft) -----
-    logger.info(f"AGENT_HANDOFF | from=Intake | to=Brush | asset_type={brief.get('asset_type')}")
+    # ----- Agent 2: Search (NEW: retrieve brand rules) -----
+    logger.info(f"AGENT_HANDOFF | from=Intake | to=Search | asset_type={brief.get('asset_type')}")
+    logger.info("AGENT_STEP | agent=Search | action=retrieve_brand_rules")
+    search_result = run_search(brief, top_k=3)
+    trace.append({
+        "agent": "Search",
+        "action": "retrieve_brand_rules",
+        "output": search_result,
+        "status": "error" if "error" in search_result else "ok",
+    })
+    if "error" in search_result:
+        # Search failure is non-fatal — Brush can still produce output without retrieved rules.
+        # We log it as a degradation but continue with empty rules.
+        logger.warning(f"SEARCH_DEGRADED | continuing without retrieved rules | {search_result.get('error')}")
+        retrieved_rules = []
+    else:
+        retrieved_rules = search_result.get("retrieved_rules", [])
+
+    # ----- Agent 3: Brush (initial draft, now grounded in retrieved rules) -----
+    logger.info(f"AGENT_HANDOFF | from=Search | to=Brush | rules_retrieved={len(retrieved_rules)}")
     logger.info("AGENT_STEP | agent=Brush | action=invoke")
-    draft = run_brush(brief)
+    draft = run_brush(brief, retrieved_rules=retrieved_rules)
     trace.append({
         "agent": "Brush",
         "action": "draft_asset",
+        "rules_used": [r["rule_id"] for r in retrieved_rules],
         "output": draft,
         "status": "error" if "error" in draft else "ok",
     })
@@ -105,10 +126,10 @@ def run(payload: RunRequest):
             agent_trace=trace,
         )
 
-    # ----- Agent 3: Validator (first scoring) -----
+    # ----- Agent 4: Validator (first scoring, sees the same retrieved rules) -----
     logger.info(f"AGENT_HANDOFF | from=Brush | to=Validator | round=1")
     logger.info("AGENT_STEP | agent=Validator | action=score_initial")
-    verdict_v1 = run_validator(brief, draft, is_revision=False)
+    verdict_v1 = run_validator(brief, draft, is_revision=False, retrieved_rules=retrieved_rules)
     trace.append({
         "agent": "Validator",
         "action": "score_initial",
@@ -134,7 +155,7 @@ def run(payload: RunRequest):
         logger.info(f"REVISION_TRIGGERED | total={verdict_v1.get('total')}/9 | fix={fix[:80]!r}")
         logger.info(f"AGENT_HANDOFF | from=Validator | to=Brush | action=revise")
         logger.info("AGENT_STEP | agent=Brush | action=revise")
-        revised_draft = run_brush_revision(brief, draft, fix)
+        revised_draft = run_brush_revision(brief, draft, fix, retrieved_rules=retrieved_rules)
         trace.append({
             "agent": "Brush",
             "action": "revise",
@@ -144,10 +165,9 @@ def run(payload: RunRequest):
         })
 
         if "error" not in revised_draft:
-            # ----- Validator re-scores after revision -----
             logger.info(f"AGENT_HANDOFF | from=Brush | to=Validator | round=2")
             logger.info("AGENT_STEP | agent=Validator | action=score_revised")
-            verdict_v2 = run_validator(brief, revised_draft, is_revision=True)
+            verdict_v2 = run_validator(brief, revised_draft, is_revision=True, retrieved_rules=retrieved_rules)
             trace.append({
                 "agent": "Validator",
                 "action": "score_revised",
@@ -158,7 +178,6 @@ def run(payload: RunRequest):
                 final_draft = revised_draft
                 final_verdict = verdict_v2
             else:
-                # re-score failed; keep original draft + original verdict
                 logger.warning("RUN_PARTIAL | rescore_failed | falling back to original draft")
 
     # ----- Determine delivery path -----
@@ -173,18 +192,19 @@ def run(payload: RunRequest):
         delivery_path = "deliver_to_requester_cc_marcom"
         message = f"Verdict: {verdict_label}. Routing with human review."
 
-    # ----- Agent 4: Route (placeholder, but driven by Validator's verdict) -----
+    # ----- Agent 5: Route (placeholder, driven by Validator's verdict) -----
     trace.append({
         "agent": "Route",
         "action": "decide_delivery_path",
         "delivery_path": delivery_path,
         "driven_by_verdict": verdict_label,
-        "note": "Phase 5 will wire actual delivery (email/Slack/Marcom asset library).",
+        "note": "Phase 6 will wire actual delivery (email/Slack/Marcom asset library).",
     })
 
     logger.info(
         f"RUN_DONE | status=success | verdict={verdict_label} | "
-        f"revision_attempted={revision_attempted} | trace_steps={len(trace)}"
+        f"revision_attempted={revision_attempted} | rules_retrieved={len(retrieved_rules)} | "
+        f"trace_steps={len(trace)}"
     )
 
     return RunResponse(
@@ -192,6 +212,7 @@ def run(payload: RunRequest):
         use_case_id="13",
         output={
             "brief": brief,
+            "retrieved_rules": retrieved_rules,
             "final_draft": final_draft,
             "verdict": final_verdict,
             "revision_attempted": revision_attempted,
