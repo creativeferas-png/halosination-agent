@@ -1,14 +1,18 @@
 """
-HALOsination — Search Agent
+HALO — Search Agent (generalized)
 
-Role: Retrieves the top-K most relevant brand rules for a given BRIEF.
-The retrieved rules ground Brush's drafting and give Validator concrete
-evidence to score against (rather than relying on GPT's priors alone).
+Role: Retrieves the top-K most relevant policy rules for a given structured
+brief, against a per-agent policy index.
 
-Pattern: Retrieval-augmented generation, OpenAI-protocol via Compass.
-The brand index is pre-built (scripts/build_brand_index.py); at runtime
-this agent makes ONE embedding call per BRIEF and does in-memory cosine
-similarity against the indexed rules.
+Pattern: Retrieval-augmented generation. OpenAI-protocol via Compass.
+The index is pre-built (scripts/build_policy_index.py); at runtime this agent
+makes ONE embedding call per brief and does in-memory cosine similarity
+against the pre-indexed rules.
+
+Used by:
+  - Agent 01 (Brand & Brief)   -> default index: data/brand_index.json
+  - Agent 02 (Productivity)    -> index: data/meeting_policy_index.json
+  - Agents 03-05               -> their own policy indexes
 
 Model: text-embedding-3-large via Compass.
 """
@@ -17,7 +21,6 @@ import logging
 import math
 import os
 from pathlib import Path
-from typing import Any
 
 from openai import OpenAI
 
@@ -30,27 +33,32 @@ _client = OpenAI(
 
 EMBED_MODEL = "text-embedding-3-large"
 TOP_K = 3
+
+# Default index for Agent 01 (backwards compatibility)
 DEFAULT_INDEX_PATH = Path(__file__).resolve().parent.parent / "data" / "brand_index.json"
 
-# Lazy-loaded index (loaded once per process, cached in memory)
-_brand_index: list[dict] | None = None
+# Lazy-loaded index cache, keyed by path so each agent's index is loaded once
+_index_cache: dict = {}
 
 
-def _load_index() -> list[dict]:
-    """Load the brand index from disk on first use, cache for subsequent calls."""
-    global _brand_index
-    if _brand_index is None:
-        if not DEFAULT_INDEX_PATH.exists():
+def _load_index(index_path: Path) -> list:
+    """Load a policy index from disk on first use, cache by path."""
+    path_str = str(index_path)
+    if path_str not in _index_cache:
+        if not index_path.exists():
             raise FileNotFoundError(
-                f"Brand index not found at {DEFAULT_INDEX_PATH}. "
-                "Run `python scripts/build_brand_index.py` first."
+                f"Policy index not found at {index_path}. "
+                "Run `python scripts/build_policy_index.py <md_file> <json_path>` first."
             )
-        _brand_index = json.loads(DEFAULT_INDEX_PATH.read_text(encoding="utf-8"))
-        logger.info(f"SEARCH_INDEX_LOADED | rules={len(_brand_index)} | path={DEFAULT_INDEX_PATH.name}")
-    return _brand_index
+        _index_cache[path_str] = json.loads(index_path.read_text(encoding="utf-8"))
+        logger.info(
+            f"SEARCH_INDEX_LOADED | rules={len(_index_cache[path_str])} | "
+            f"path={index_path.name}"
+        )
+    return _index_cache[path_str]
 
 
-def _cosine_similarity(a: list[float], b: list[float]) -> float:
+def _cosine_similarity(a: list, b: list) -> float:
     """Cosine similarity between two vectors. Returns a value in [-1, 1]."""
     dot = sum(x * y for x, y in zip(a, b))
     norm_a = math.sqrt(sum(x * x for x in a))
@@ -60,20 +68,18 @@ def _cosine_similarity(a: list[float], b: list[float]) -> float:
     return dot / (norm_a * norm_b)
 
 
-def _embed(text: str) -> list[float]:
-    """Single embedding call to Compass."""
-    response = _client.embeddings.create(
-        model=EMBED_MODEL,
-        input=text,
-    )
+def _embed(text: str) -> list:
+    """Single embedding call via Compass."""
+    response = _client.embeddings.create(model=EMBED_MODEL, input=text)
     return response.data[0].embedding
 
 
-def _brief_to_query_text(brief: dict) -> str:
+def _default_brief_to_query(brief: dict) -> str:
     """
-    Construct the query string from the most retrieval-relevant BRIEF fields.
-    We deliberately concatenate the high-signal fields so the embedding
-    captures asset type, audience, OpCo context, tone, and the key message.
+    Default query-builder for Agent 01 (Brand & Brief).
+
+    Concatenates the high-signal BRIEF fields so the embedding captures
+    asset type, audience, OpCo context, tone, and the key message.
     """
     parts = [
         f"Asset type: {brief.get('asset_type', 'unknown')}",
@@ -85,34 +91,46 @@ def _brief_to_query_text(brief: dict) -> str:
     return " | ".join(parts)
 
 
-def run_search(brief: dict, top_k: int = TOP_K) -> dict:
+def run_search(
+    brief: dict,
+    top_k: int = TOP_K,
+    index_path: Path = None,
+    query_builder = None,
+) -> dict:
     """
-    Retrieve the top-K most relevant brand rules for the given BRIEF.
+    Retrieve the top-K most relevant policy rules for the given structured brief.
 
     Args:
-        brief: The structured BRIEF from the Intake agent.
+        brief: The structured brief from an Intake agent (Agent 01 BRIEF,
+               Agent 02 MEETING, etc.)
         top_k: How many rules to return (default 3).
+        index_path: Path to the policy index JSON. Defaults to brand_index.json
+                    (Agent 01). Pass a different path for other agents.
+        query_builder: Optional callable taking a brief dict and returning a
+                       query string. Defaults to the Agent 01 brand query.
 
     Returns:
         {
-          "retrieved_rules": [
-            {"rule_id": int, "title": str, "text": str, "similarity": float},
-            ...
-          ],
-          "query_text": str,            # what was actually embedded
-          "tokens_used": int | None,    # embedding tokens
+          "retrieved_rules": [{"rule_id", "title", "text", "similarity"}, ...],
+          "query_text": str,
         }
         On failure, returns a dict with "error" populated.
     """
-    query_text = _brief_to_query_text(brief)
-    logger.info(f"SEARCH_START | query_preview={query_text[:100]!r} | top_k={top_k}")
+    if index_path is None:
+        index_path = DEFAULT_INDEX_PATH
+    if query_builder is None:
+        query_builder = _default_brief_to_query
+
+    query_text = query_builder(brief)
+    logger.info(
+        f"SEARCH_START | query_preview={query_text[:100]!r} | "
+        f"top_k={top_k} | index={Path(index_path).name}"
+    )
 
     try:
-        index = _load_index()
-        # ONE embedding call for the BRIEF
+        index = _load_index(Path(index_path))
         query_embedding = _embed(query_text)
 
-        # Score every rule by cosine similarity
         scored = []
         for rule in index:
             sim = _cosine_similarity(query_embedding, rule["embedding"])
@@ -126,9 +144,7 @@ def run_search(brief: dict, top_k: int = TOP_K) -> dict:
         scored.sort(key=lambda r: r["similarity"], reverse=True)
         top = scored[:top_k]
 
-        top_summary = ", ".join(
-            f"#{r['rule_id']}({r['similarity']:.3f})" for r in top
-        )
+        top_summary = ", ".join(f"#{r['rule_id']}({r['similarity']:.3f})" for r in top)
         logger.info(f"SEARCH_DONE | top_k_rules=[{top_summary}]")
 
         return {
