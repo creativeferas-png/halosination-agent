@@ -1,0 +1,197 @@
+{
+  "status": "success",
+  "use_case_id": "13",
+  "agent": "Agent 02 \u2014 Productivity (Meeting Summariser)",
+  "output": {
+    "meeting": {
+      "title": "Project Atlas Weekly Sync",
+      "date": "2026-05-25",
+      "attendees": [
+        "Feras",
+        "Sara",
+        "Mohammed",
+        "Lina"
+      ],
+      "purpose": "Weekly sync to discuss the Q3 roadmap and module shipping priorities for Project Atlas.",
+      "raw_discussion": "Sara opened with the Q3 roadmap. The team discussed whether to ship the radiology module ahead of pathology, with Lina arguing that pathology is further along technically. After discussion, the group decided to ship pathology first, then radiology in Q4. There was also a brief mention of a difficult HR situation with a contractor, to be discussed separately.",
+      "raw_decisions": [
+        {
+          "decision": "Ship pathology module first, then radiology in Q4.",
+          "rationale": "Pathology is more validated clinically and has earlier commercial demand from M42 customers."
+        }
+      ],
+      "raw_action_items": [
+        {
+          "description": "Mohammed will draft the customer comms by Friday.",
+          "owner_mentioned": "Mohammed",
+          "deadline_mentioned": "by Friday"
+        },
+        {
+          "description": "Sara to update the roadmap deck.",
+          "owner_mentioned": "Sara",
+          "deadline_mentioned": null
+        },
+        {
+          "description": "Someone needs to talk to the regulatory team about pathology approval timelines.",
+          "owner_mentioned": null,
+          "deadline_mentioned": null
+        }
+      ],
+      "raw_open_questions": [
+        "Should we delay the official Q3 announcement until pathology is in beta?",
+        "Whether the radiology folks would feel sidelined by the pivot."
+      ],
+      "raw_risks_or_blockers": [],
+      "follow_ups_mentioned": [
+        "We will follow up on the regulatory question in two weeks."
+      ],
+      "sensitive_topics_flagged": true,
+      "sensitive_reason": "HR situation with a contractor discussed.",
+      "open_questions": []
+    },
+    "retrieved_rules": [
+      {
+        "rule_id": 2,
+        "title": "Action items require named owners and deadlines",
+        "text": "Every action item must have (a) a specific named owner and (b) an explicit\ndeadline. Vague phrasing like \"the team will look into this\" or \"we'll get\nback to it soon\" is forbidden. If the meeting did not assign an owner, the\nnote must surface this as an open question rather than leaving it ambiguous.",
+        "similarity": 0.4332
+      },
+      {
+        "rule_id": 3,
+        "title": "Distinguish discussed vs. decided vs. deferred",
+        "text": "Meeting summaries must clearly separate three categories: topics that were\ndiscussed but not concluded, topics that resulted in concrete decisions, and\ntopics that were deferred to a future meeting. Conflating these creates\nfalse consensus and leads to surprised stakeholders later.",
+        "similarity": 0.4169
+      },
+      {
+        "rule_id": 5,
+        "title": "Open questions are first-class outputs",
+        "text": "If an important question arose in the meeting and was not answered, it must\nappear in the notes as an open question \u2014 never silently dropped. Each open\nquestion should be tagged with who is best placed to answer it.",
+        "similarity": 0.3878
+      }
+    ],
+    "final_notes": {
+      "summary_90s": "The team confirmed that the pathology module will ship first, with radiology targeted for Q4, based on stronger clinical validation and earlier commercial demand. Mohammed will draft customer communications by Friday, and Sara will update the roadmap deck, though her deadline is still to be set. A regulatory outreach task for pathology approval timelines remains without a named owner or due date. Key open questions include whether to delay the Q3 announcement until pathology is in beta and how the pivot will affect the radiology group. Due to mention of a sensitive HR situation with a contractor, these notes should be shared on a restricted basis.",
+      "metadata": {
+        "title": "Project Atlas Weekly Sync",
+        "date": "2026-05-25",
+        "attendees": [
+          "Feras",
+          "Sara",
+          "Mohammed",
+          "Lina"
+        ],
+        "purpose": "Weekly sync to discuss the Q3 roadmap and module shipping priorities for Project Atlas."
+      },
+      "decisions": [
+        {
+          "decision": "Ship the pathology module first, then target the radiology module for Q4.",
+          "rationale": "Pathology is more validated clinically and has earlier commercial demand from M42 customers."
+        }
+      ],
+      "action_items": [
+        {
+          "description": "Draft the customer communications for the module sequencing decision.",
+          "owner": "Mohammed",
+          "deadline": "by Friday"
+        },
+        {
+          "description": "Update the Q3 roadmap deck to reflect shipping pathology first and radiology in Q4.",
+          "owner": "Sara",
+          "deadline": "NO DEADLINE \u2014 see open questions"
+        },
+        {
+          "description": "Talk to the regulatory team about pathology approval timelines.",
+          "owner": "UNOWNED \u2014 see open questions",
+          "deadline": "NO DEADLINE \u2014 see open questions"
+        }
+      ],
+      "open_questions": [
+        {
+          "question": "Should we delay the official Q3 announcement until the pathology module is in beta?",
+          "best_placed_to_answer": "Product leadership (e.g., Sara and Feras)"
+        },
+        {
+          "question": "Will the radiology stakeholders feel sidelined by prioritizing pathology first?",
+          "best_placed_to_answer": "Radiology product and customer success leads"
+        },
+        {
+          "question": "Who will own the outreach to the regulatory team about pathology approval timelines?",
+          "best_placed_to_answer": "Product or regulatory lead"
+        },
+        {
+          "question": "By when does Sara need to complete the roadmap deck update?",
+          "best_placed_to_answer": "Sara"
+        }
+      ],
+      "risks_or_blockers": [],
+      "follow_ups": [
+        {
+          "topic": "Regulatory question about pathology approval timelines.",
+          "when": "In two weeks"
+        }
+      ],
+      "distribution": "restricted",
+      "distribution_reason": "HR situation with a contractor discussed.",
+      "rationale": "Action items were normalized to ensure each has an explicit owner and deadline field, using placeholders where missing, to comply with Rule 2; corresponding gaps (missing owner/deadline) were surfaced as open questions. The decision about module sequencing was separated from open questions about announcement timing and stakeholder reactions to respect the distinction between decided and still-discussed topics per Rule 3. All unresolved questions raised in the meeting, plus those implied by missing action-item details, were captured explicitly with suggested roles best placed to answer them in line with Rule 5."
+    },
+    "verdict": {
+      "scores": {
+        "completeness": 3,
+        "actionability": 3,
+        "clarity": 3
+      },
+      "total": 9,
+      "verdict": "pass",
+      "reasoning": {
+        "completeness": "All decisions are captured with rationale, action items have explicit owners and deadlines or are surfaced as open questions, and all open questions from the meeting are included, fully satisfying Rule 2, Rule 3, and Rule 5.",
+        "actionability": "Action items are specific, missing owners/deadlines are surfaced as open questions, and follow-ups are timestamped, making next steps clear and actionable per Rule 2 and Rule 9.",
+        "clarity": "The summary is concise and leadership-ready, language is plain and specific, discussed/decided/deferred topics are clearly separated, and metadata is complete, in line with Rule 3, Rule 6, Rule 7, and Rule 10."
+      },
+      "rules_cited": [
+        "2",
+        "3",
+        "5",
+        "6",
+        "7",
+        "9",
+        "10"
+      ],
+      "fix": ""
+    },
+    "revision_attempted": false,
+    "delivery": {
+      "path": "deliver_to_requester",
+      "message": "Notes passed rubric. Ready to deliver."
+    }
+  },
+  "agent_trace": [
+    {
+      "agent": "Intake",
+      "status": "ok"
+    },
+    {
+      "agent": "Search",
+      "status": "ok",
+      "rules_retrieved": [
+        2,
+        3,
+        5
+      ]
+    },
+    {
+      "agent": "Brush",
+      "status": "ok"
+    },
+    {
+      "agent": "Validator",
+      "status": "ok",
+      "total": 9,
+      "verdict": "pass"
+    },
+    {
+      "agent": "Route",
+      "delivery_path": "deliver_to_requester"
+    }
+  ],
+  "wall_clock_seconds": 10.24
+}

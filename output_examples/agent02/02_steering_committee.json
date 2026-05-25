@@ -1,0 +1,197 @@
+{
+  "status": "success",
+  "use_case_id": "13",
+  "agent": "Agent 02 \u2014 Productivity (Meeting Summariser)",
+  "output": {
+    "meeting": {
+      "title": "Quarterly Steering Committee Meeting",
+      "date": "2026-05-22",
+      "attendees": [
+        "Dr. Khalid",
+        "Maria",
+        "Tariq",
+        "Yuki",
+        "Olivia"
+      ],
+      "purpose": "Quarterly steering committee to review financials, investments, and talent pipeline.",
+      "raw_discussion": "Maria walked through Q1 financials, noting revenue is 12% ahead of plan and gross margin is in line with forecast. The committee discussed releasing Q1 results externally, data infrastructure investment, and the talent pipeline. The brand refresh decision was deferred, and next meeting date was set.",
+      "raw_decisions": [
+        {
+          "decision": "Release Q1 results externally on June 8.",
+          "rationale": "The audit is finalising and our investor relations window opens that week."
+        },
+        {
+          "decision": "Approve the $4.2M cloud migration budget.",
+          "rationale": "Existing on-prem capacity will be exceeded in Q3 based on current growth, and migration is cheaper than expanding on-prem."
+        },
+        {
+          "decision": "Approve two senior hires \u2014 one for the platform team and one for clinical safety.",
+          "rationale": null
+        }
+      ],
+      "raw_action_items": [
+        {
+          "description": "Tariq will share more vendor proposals before the next meeting.",
+          "owner_mentioned": "Tariq",
+          "deadline_mentioned": "before the next meeting"
+        },
+        {
+          "description": "Olivia will follow up with the board on the cloud migration approval.",
+          "owner_mentioned": "Olivia",
+          "deadline_mentioned": "before June 1"
+        }
+      ],
+      "raw_open_questions": [],
+      "raw_risks_or_blockers": [],
+      "follow_ups_mentioned": [
+        "Olivia will follow up with the board on the cloud migration approval \u2014 she'll do this before June 1."
+      ],
+      "sensitive_topics_flagged": false,
+      "sensitive_reason": null,
+      "open_questions": []
+    },
+    "retrieved_rules": [
+      {
+        "rule_id": 3,
+        "title": "Distinguish discussed vs. decided vs. deferred",
+        "text": "Meeting summaries must clearly separate three categories: topics that were\ndiscussed but not concluded, topics that resulted in concrete decisions, and\ntopics that were deferred to a future meeting. Conflating these creates\nfalse consensus and leads to surprised stakeholders later.",
+        "similarity": 0.4266
+      },
+      {
+        "rule_id": 2,
+        "title": "Action items require named owners and deadlines",
+        "text": "Every action item must have (a) a specific named owner and (b) an explicit\ndeadline. Vague phrasing like \"the team will look into this\" or \"we'll get\nback to it soon\" is forbidden. If the meeting did not assign an owner, the\nnote must surface this as an open question rather than leaving it ambiguous.",
+        "similarity": 0.4137
+      },
+      {
+        "rule_id": 8,
+        "title": "Sensitive topics get flagged",
+        "text": "If the meeting touched on confidential, regulatory, HR, legal, or otherwise\nsensitive matters, the notes must flag this and recommend a restricted\ndistribution. Default to wide circulation only when no sensitive flag is\npresent.",
+        "similarity": 0.3646
+      }
+    ],
+    "final_notes": {
+      "summary_90s": "The steering committee confirmed three key decisions: to release Q1 results externally on June 8, to approve a $4.2M cloud migration budget, and to approve two senior hires (platform and clinical safety). Tariq will circulate additional vendor proposals before the next meeting, and Olivia will follow up with the board on the cloud migration approval by June 1. The brand refresh decision was explicitly deferred to a future meeting. No major risks or blockers were recorded, and no additional open questions were captured.",
+      "metadata": {
+        "title": "Quarterly Steering Committee Meeting",
+        "date": "2026-05-22",
+        "attendees": [
+          "Dr. Khalid",
+          "Maria",
+          "Tariq",
+          "Yuki",
+          "Olivia"
+        ],
+        "purpose": "Quarterly steering committee to review financials, investments, and talent pipeline."
+      },
+      "decisions": [
+        {
+          "decision": "Release Q1 results externally on June 8.",
+          "rationale": "The audit is finalising and our investor relations window opens that week."
+        },
+        {
+          "decision": "Approve the $4.2M cloud migration budget.",
+          "rationale": "Existing on-prem capacity will be exceeded in Q3 based on current growth, and migration is cheaper than expanding on-prem."
+        },
+        {
+          "decision": "Approve two senior hires \u2014 one for the platform team and one for clinical safety.",
+          "rationale": "rationale to be confirmed"
+        }
+      ],
+      "action_items": [
+        {
+          "description": "Share additional cloud migration vendor proposals with the committee before the next meeting.",
+          "owner": "Tariq",
+          "deadline": "before the next meeting"
+        },
+        {
+          "description": "Follow up with the board on the cloud migration approval.",
+          "owner": "Olivia",
+          "deadline": "before June 1"
+        }
+      ],
+      "open_questions": [
+        {
+          "question": "What is the rationale for approving the two senior hires (platform and clinical safety)?",
+          "best_placed_to_answer": "Steering committee"
+        }
+      ],
+      "risks_or_blockers": [],
+      "follow_ups": [
+        {
+          "topic": "Brand refresh decision that was deferred.",
+          "when": "next meeting"
+        },
+        {
+          "topic": "Board response on the cloud migration approval.",
+          "when": "after Olivia\u2019s follow-up before June 1"
+        },
+        {
+          "topic": "Review of additional cloud migration vendor proposals.",
+          "when": "next meeting"
+        }
+      ],
+      "distribution": "wide",
+      "distribution_reason": null,
+      "rationale": "I kept decisions separate from discussed and deferred items, explicitly calling out the brand refresh as deferred and not listing it as a decision, in line with Rule 3. For action items, I preserved the named owners and explicit deadlines from the meeting object and did not add any new ones, as required by Rule 2. Because no sensitive topics were flagged in the meeting object, I set distribution to \"wide\" and left the distribution_reason null, following Rule 8."
+    },
+    "verdict": {
+      "scores": {
+        "completeness": 3,
+        "actionability": 3,
+        "clarity": 3
+      },
+      "total": 9,
+      "verdict": "pass",
+      "reasoning": {
+        "completeness": "All decisions are captured with rationale or a 'rationale to be confirmed' marker, action items have explicit owners and deadlines, open questions are surfaced, and deferred topics are clearly logged (Rule 2, Rule 3).",
+        "actionability": "Action items are specific, have named owners and deadlines, and missing rationale is surfaced as an open question; follow-ups are timestamped (Rule 2, Rule 9).",
+        "clarity": "The summary is concise and leadership-ready, language is plain and specific, and discussed, decided, and deferred items are clearly separated; metadata is complete (Rule 3, Rule 6, Rule 7, Rule 10)."
+      },
+      "rules_cited": [
+        "2",
+        "3",
+        "6",
+        "7",
+        "9",
+        "10"
+      ],
+      "fix": ""
+    },
+    "revision_attempted": false,
+    "delivery": {
+      "path": "deliver_to_requester",
+      "message": "Notes passed rubric. Ready to deliver."
+    }
+  },
+  "agent_trace": [
+    {
+      "agent": "Intake",
+      "status": "ok"
+    },
+    {
+      "agent": "Search",
+      "status": "ok",
+      "rules_retrieved": [
+        3,
+        2,
+        8
+      ]
+    },
+    {
+      "agent": "Brush",
+      "status": "ok"
+    },
+    {
+      "agent": "Validator",
+      "status": "ok",
+      "total": 9,
+      "verdict": "pass"
+    },
+    {
+      "agent": "Route",
+      "delivery_path": "deliver_to_requester"
+    }
+  ],
+  "wall_clock_seconds": 8.54
+}

@@ -1,0 +1,235 @@
+{
+  "status": "success",
+  "use_case_id": "13",
+  "agent": "Agent 02 \u2014 Productivity (Meeting Summariser)",
+  "output": {
+    "meeting": {
+      "title": "AI Assistant Concept Sync",
+      "date": null,
+      "attendees": [
+        "Khalifa",
+        "Reem"
+      ],
+      "purpose": "To discuss ideas and next steps for the new AI assistant concept.",
+      "raw_discussion": "The team discussed the new AI assistant concept, focusing on whether to make it voice-first and the implications of that decision. There was debate about making voice optional, and the default user experience is still to be determined. Pricing models such as freemium and team-based were mentioned but not decided. Integration with the existing platform was discussed, with differing opinions on the level of integration.",
+      "raw_decisions": [
+        {
+          "decision": "Voice should be optional but the default UX is still TBD.",
+          "rationale": null
+        }
+      ],
+      "raw_action_items": [
+        {
+          "description": "Put together a vision deck soon.",
+          "owner_mentioned": "Khalifa",
+          "deadline_mentioned": "soon"
+        },
+        {
+          "description": "Mock something up by end of next week, possibly the week after if they're slammed.",
+          "owner_mentioned": "design folks",
+          "deadline_mentioned": "by end of next week, possibly the week after if they're slammed"
+        },
+        {
+          "description": "Set up the next meeting.",
+          "owner_mentioned": "me",
+          "deadline_mentioned": null
+        }
+      ],
+      "raw_open_questions": [
+        "If we go voice-first, do we need to worry about accent recognition for our regional users?",
+        "Should the AI assistant be tightly integrated with the existing platform or feel like a separate product?",
+        "What should the pricing model be?"
+      ],
+      "raw_risks_or_blockers": [
+        "Concern about accent recognition for regional users if voice-first is pursued."
+      ],
+      "follow_ups_mentioned": [
+        "I should follow up on Khalifa putting together a vision deck.",
+        "We'll loop back on integration approach.",
+        "We'll meet again soon to keep this moving."
+      ],
+      "sensitive_topics_flagged": false,
+      "sensitive_reason": null,
+      "open_questions": [
+        "No date given.",
+        "Attendee names not fully clear (design folks, 'me', maybe Reem, maybe Hassan).",
+        "Owner of 'set up the next meeting' is 'me', but not specified.",
+        "Unclear if Khalifa is definitely the owner of the vision deck."
+      ]
+    },
+    "retrieved_rules": [
+      {
+        "rule_id": 2,
+        "title": "Action items require named owners and deadlines",
+        "text": "Every action item must have (a) a specific named owner and (b) an explicit\ndeadline. Vague phrasing like \"the team will look into this\" or \"we'll get\nback to it soon\" is forbidden. If the meeting did not assign an owner, the\nnote must surface this as an open question rather than leaving it ambiguous.",
+        "similarity": 0.4755
+      },
+      {
+        "rule_id": 3,
+        "title": "Distinguish discussed vs. decided vs. deferred",
+        "text": "Meeting summaries must clearly separate three categories: topics that were\ndiscussed but not concluded, topics that resulted in concrete decisions, and\ntopics that were deferred to a future meeting. Conflating these creates\nfalse consensus and leads to surprised stakeholders later.",
+        "similarity": 0.4272
+      },
+      {
+        "rule_id": 6,
+        "title": "Attendees, date, and meeting purpose are mandatory metadata",
+        "text": "Every set of meeting notes must record: the meeting date, the attendees\npresent (named, not roles), and a one-sentence statement of why the meeting\nwas held. Notes without this context are unusable for anyone who did not\nattend.",
+        "similarity": 0.3996
+      }
+    ],
+    "final_notes": {
+      "summary_90s": "The team aligned that voice will be optional for the new AI assistant, while the default user experience remains undecided. No meeting date was captured, and several owner and deadline details for follow-up work remain unclear. Key next steps include creating a vision deck, mocking up an experience concept, and scheduling the next sync, but owners and timelines need confirmation. Open questions remain around voice/accent handling, integration depth with the existing platform, and pricing model, which will be revisited in a future meeting.",
+      "metadata": {
+        "title": "AI Assistant Concept Sync",
+        "date": null,
+        "attendees": [
+          "Khalifa",
+          "Reem"
+        ],
+        "purpose": "To discuss ideas and next steps for the new AI assistant concept."
+      },
+      "decisions": [
+        {
+          "decision": "Voice should be optional for the new AI assistant, but the default user experience is still to be determined.",
+          "rationale": "rationale to be confirmed"
+        }
+      ],
+      "action_items": [
+        {
+          "description": "Put together a vision deck for the new AI assistant concept.",
+          "owner": "UNOWNED \u2014 see open questions",
+          "deadline": "NO DEADLINE \u2014 see open questions"
+        },
+        {
+          "description": "Create a mock-up of the AI assistant experience.",
+          "owner": "UNOWNED \u2014 see open questions",
+          "deadline": "NO DEADLINE \u2014 see open questions"
+        },
+        {
+          "description": "Set up the next AI assistant concept sync meeting.",
+          "owner": "UNOWNED \u2014 see open questions",
+          "deadline": "NO DEADLINE \u2014 see open questions"
+        }
+      ],
+      "open_questions": [
+        {
+          "question": "If the assistant moves toward a voice-first experience, do they need to address accent recognition for regional users?",
+          "best_placed_to_answer": null
+        },
+        {
+          "question": "Should the AI assistant be tightly integrated with the existing platform or feel like a separate product?",
+          "best_placed_to_answer": null
+        },
+        {
+          "question": "What should the pricing model be (e.g., freemium, team-based, or other)?",
+          "best_placed_to_answer": null
+        },
+        {
+          "question": "What is the exact date of this meeting?",
+          "best_placed_to_answer": null
+        },
+        {
+          "question": "Who exactly attended the meeting beyond the named attendees (e.g., which 'design folks', who is 'me', and whether Hassan or others were present)?",
+          "best_placed_to_answer": null
+        },
+        {
+          "question": "Who is the confirmed owner for putting together the vision deck?",
+          "best_placed_to_answer": null
+        },
+        {
+          "question": "Who is the confirmed owner for creating the mock-up of the AI assistant experience?",
+          "best_placed_to_answer": null
+        },
+        {
+          "question": "Who is the confirmed owner for setting up the next meeting, and what is the specific deadline for scheduling it?",
+          "best_placed_to_answer": null
+        },
+        {
+          "question": "What are the specific deadlines for completing the vision deck and the mock-up?",
+          "best_placed_to_answer": null
+        }
+      ],
+      "risks_or_blockers": [
+        {
+          "risk": "Accent recognition may not work well for regional users if a voice-first or heavily voice-oriented experience is pursued.",
+          "affects": "Regional users of the AI assistant and overall user experience quality",
+          "owner": null
+        }
+      ],
+      "follow_ups": [
+        {
+          "topic": "Confirm ownership and timeline for Khalifa (or another owner) to put together the vision deck.",
+          "when": "next meeting"
+        },
+        {
+          "topic": "Revisit and decide on the integration approach with the existing platform.",
+          "when": "next meeting"
+        },
+        {
+          "topic": "Clarify pricing model options and move toward a decision.",
+          "when": "next meeting"
+        }
+      ],
+      "distribution": "wide",
+      "distribution_reason": null,
+      "rationale": "I treated the single explicit decision about voice being optional as a confirmed decision and left its rationale as 'rationale to be confirmed' because none was provided, in line with the requirement not to invent rationale (implicit in Rule 3\u2019s emphasis on clarity between discussed vs. decided). For action items, I did not assign or infer owners or precise deadlines where the Meeting object was ambiguous (e.g., 'Khalifa', 'design folks', 'me', 'soon'); instead, I marked them as UNOWNED and with NO DEADLINE and surfaced the missing details as explicit open questions, as required by Rule 2. I preserved and expanded the metadata fields for title, attendees, and purpose, and highlighted the missing date as an open question to comply with Rule 6\u2019s requirement that these elements be present or explicitly called out as missing. I also kept decisions clearly separated from open questions and deferred topics (integration approach, pricing, accent handling) to respect the distinction between discussed and decided items mandated by Rule 3."
+    },
+    "verdict": {
+      "scores": {
+        "completeness": 3,
+        "actionability": 3,
+        "clarity": 3
+      },
+      "total": 9,
+      "verdict": "pass",
+      "reasoning": {
+        "completeness": "All decisions, action items (with explicit owner/deadline gaps surfaced as open questions), open questions, and risks are captured and clearly separated, with missing metadata (date) also surfaced as an open question, fully meeting Rule 2, Rule 3, and Rule 6.",
+        "actionability": "Action items are specific, missing owners/deadlines are not hidden but surfaced as open questions, and risks are logged with affected parties; follow-ups are timestamped, satisfying Rule 2 and Rule 9.",
+        "clarity": "The summary is concise and leadership-ready, language is plain and specific, and discussed/decided/deferred topics are clearly separated; metadata is complete or explicitly flagged as missing, in line with Rule 3, Rule 6, and Rule 7."
+      },
+      "rules_cited": [
+        "2",
+        "3",
+        "6",
+        "7",
+        "9"
+      ],
+      "fix": ""
+    },
+    "revision_attempted": false,
+    "delivery": {
+      "path": "deliver_to_requester",
+      "message": "Notes passed rubric. Ready to deliver."
+    }
+  },
+  "agent_trace": [
+    {
+      "agent": "Intake",
+      "status": "ok"
+    },
+    {
+      "agent": "Search",
+      "status": "ok",
+      "rules_retrieved": [
+        2,
+        3,
+        6
+      ]
+    },
+    {
+      "agent": "Brush",
+      "status": "ok"
+    },
+    {
+      "agent": "Validator",
+      "status": "ok",
+      "total": 9,
+      "verdict": "pass"
+    },
+    {
+      "agent": "Route",
+      "delivery_path": "deliver_to_requester"
+    }
+  ],
+  "wall_clock_seconds": 13.82
+}
