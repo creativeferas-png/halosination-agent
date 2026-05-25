@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>HALOsination — Brand & Brief Agent</title>
+<title>HALO — M42 Employee Platform</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -30,7 +30,7 @@
   .container { max-width: 1300px; margin: 0 auto; padding: 32px 24px; }
   header {
     display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border);
+    margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
   }
   .logo { display: flex; align-items: center; gap: 12px; }
   .logo-mark {
@@ -42,6 +42,26 @@
   .logo-text h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
   .logo-text p { font-size: 12px; color: var(--text-dim); }
   .meta { font-size: 12px; color: var(--text-dim); font-family: var(--mono); }
+
+  .tab-bar {
+    display: flex; gap: 4px; margin-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab {
+    padding: 10px 18px; cursor: pointer; font-size: 13px; font-weight: 500;
+    color: var(--text-dim); border-bottom: 2px solid transparent;
+    transition: all 0.15s; font-family: inherit; background: transparent; border-top: none; border-left: none; border-right: none;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab .agent-num { font-family: var(--mono); font-size: 10px; opacity: 0.7; }
+  .tab .tab-status { font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+  .tab .tab-status.live { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+  .tab .tab-status.soon { background: rgba(139, 149, 179, 0.1); color: var(--text-dim); }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
 
   .grid { display: grid; grid-template-columns: 380px 1fr; gap: 24px; align-items: start; }
   @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
@@ -60,6 +80,7 @@
     border: 1px solid var(--border); border-radius: 8px; padding: 12px;
     color: var(--text); font-family: inherit; font-size: 14px; resize: vertical;
   }
+  textarea.tall { min-height: 200px; font-family: var(--mono); font-size: 12px; }
   textarea:focus { outline: none; border-color: var(--accent); }
   button.primary {
     margin-top: 12px; width: 100%; padding: 12px 16px;
@@ -87,7 +108,6 @@
     text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px;
   }
 
-  /* Agent Activity Panel - all 5 stages always visible */
   .activity { font-family: var(--mono); font-size: 12px; }
   .stage {
     padding: 9px 12px; margin: 5px 0; border-left: 3px solid var(--border);
@@ -98,24 +118,15 @@
   .stage.active { border-left-color: var(--accent); background: #1a2545; }
   .stage.done { border-left-color: var(--success); }
   .stage.fail { border-left-color: var(--danger); }
-  .stage-icon {
-    width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim);
-    flex-shrink: 0;
-  }
-  .stage.active .stage-icon {
-    background: var(--accent); box-shadow: 0 0 0 4px rgba(0, 168, 232, 0.2);
-    animation: pulse 1.5s infinite;
-  }
+  .stage-icon { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); flex-shrink: 0; }
+  .stage.active .stage-icon { background: var(--accent); box-shadow: 0 0 0 4px rgba(0, 168, 232, 0.2); animation: pulse 1.5s infinite; }
   .stage.done .stage-icon { background: var(--success); }
   .stage.fail .stage-icon { background: var(--danger); }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; } 50% { opacity: 0.5; }
-  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
   .stage-text { flex: 1; min-width: 0; }
   .stage-name { font-weight: 600; }
   .stage-detail { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
 
-  /* Sections in the right panel */
   .section { margin-bottom: 22px; }
   .section:last-child { margin-bottom: 0; }
   .section-label {
@@ -129,118 +140,76 @@
     font-size: 10px; letter-spacing: 0.02em;
   }
 
-  /* Verdict scorecard - now at the TOP */
   .verdict-card {
     background: linear-gradient(180deg, var(--bg-elev-2) 0%, var(--bg-elev) 100%);
     border: 1px solid var(--border); border-radius: 10px; padding: 18px;
   }
-  .verdict-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 14px;
-  }
+  .verdict-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
   .verdict-badge {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 6px 14px; border-radius: 20px;
-    font-size: 12px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.06em;
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
   }
   .verdict-badge.pass { background: rgba(34, 197, 94, 0.15); color: var(--success); }
   .verdict-badge.revise { background: rgba(245, 158, 11, 0.15); color: var(--warn); }
   .verdict-badge.escalate { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
-  .verdict-badge::before {
-    content: ""; width: 6px; height: 6px; border-radius: 50%;
-    background: currentColor;
-  }
+  .verdict-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
   .verdict-meta { font-size: 11px; color: var(--text-dim); font-family: var(--mono); }
-
   .score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
   .score-cell { text-align: center; padding: 12px 8px; background: var(--bg); border-radius: 8px; }
   .score-num { font-size: 26px; font-weight: 700; color: var(--accent); line-height: 1; }
   .score-num .denom { font-size: 13px; color: var(--text-dim); margin-left: 1px; }
-  .score-label {
-    font-size: 10px; text-transform: uppercase; color: var(--text-dim);
-    letter-spacing: 0.06em; margin-top: 6px;
-  }
+  .score-label { font-size: 10px; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.06em; margin-top: 6px; }
   .reasoning { font-size: 12px; line-height: 1.55; color: var(--text-dim); }
   .reasoning p { margin: 4px 0; }
   .reasoning strong { color: var(--text); }
 
-  /* Drafted asset */
-  .headline {
-    font-size: 24px; font-weight: 700; letter-spacing: -0.02em;
-    margin-bottom: 6px; color: var(--text); line-height: 1.25;
-  }
+  .headline { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px; color: var(--text); line-height: 1.25; }
   .subhead { font-size: 15px; color: var(--text-dim); margin-bottom: 12px; }
   .body-text { font-size: 14px; line-height: 1.6; margin-bottom: 12px; }
-  .cta {
-    display: inline-block; padding: 8px 16px;
-    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
-    color: white; border-radius: 6px; font-size: 13px; font-weight: 600;
-  }
-
-  .visual-spec {
-    background: var(--bg-elev-2); border-radius: 8px; padding: 14px;
-    font-size: 13px; line-height: 1.6;
-  }
+  .cta { display: inline-block; padding: 8px 16px; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%); color: white; border-radius: 6px; font-size: 13px; font-weight: 600; }
+  .visual-spec { background: var(--bg-elev-2); border-radius: 8px; padding: 14px; font-size: 13px; line-height: 1.6; }
   .visual-spec p { margin: 4px 0; }
   .palette { display: flex; gap: 8px; margin-top: 12px; padding-bottom: 22px; }
-  .swatch {
-    width: 40px; height: 40px; border-radius: 6px; border: 1px solid var(--border);
-    position: relative;
-  }
-  .swatch::after {
-    content: attr(data-color); position: absolute; bottom: -18px; left: 50%;
-    transform: translateX(-50%); font-family: var(--mono); font-size: 9px;
-    color: var(--text-dim); white-space: nowrap;
-  }
+  .swatch { width: 40px; height: 40px; border-radius: 6px; border: 1px solid var(--border); position: relative; }
+  .swatch::after { content: attr(data-color); position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-family: var(--mono); font-size: 9px; color: var(--text-dim); white-space: nowrap; }
 
-  /* Retrieved rules */
   .rules-list { display: flex; flex-direction: column; gap: 8px; }
-  .rule-card {
-    background: var(--bg-elev-2); border: 1px solid var(--border);
-    border-radius: 8px; padding: 10px 12px; font-size: 12px;
-  }
-  .rule-header {
-    display: flex; justify-content: space-between; align-items: center; gap: 12px;
-  }
-  .rule-id {
-    font-family: var(--mono); font-size: 11px; color: var(--accent);
-    background: rgba(0, 168, 232, 0.1); padding: 2px 8px; border-radius: 4px;
-    flex-shrink: 0;
-  }
+  .rule-card { background: var(--bg-elev-2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 12px; }
+  .rule-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .rule-id { font-family: var(--mono); font-size: 11px; color: var(--accent); background: rgba(0, 168, 232, 0.1); padding: 2px 8px; border-radius: 4px; flex-shrink: 0; }
   .rule-title { font-weight: 600; color: var(--text); flex-shrink: 0; }
-  .similarity-bar {
-    flex: 1; height: 4px; background: var(--bg); border-radius: 2px;
-    overflow: hidden; min-width: 60px;
-  }
-  .similarity-fill {
-    height: 100%; background: linear-gradient(90deg, var(--accent-deep), var(--accent));
-    transition: width 0.6s;
-  }
-  .similarity-pct {
-    font-family: var(--mono); font-size: 11px; color: var(--text-dim);
-    flex-shrink: 0; min-width: 42px; text-align: right;
-  }
+  .similarity-bar { flex: 1; height: 4px; background: var(--bg); border-radius: 2px; overflow: hidden; min-width: 60px; }
+  .similarity-fill { height: 100%; background: linear-gradient(90deg, var(--accent-deep), var(--accent)); transition: width 0.6s; }
+  .similarity-pct { font-family: var(--mono); font-size: 11px; color: var(--text-dim); flex-shrink: 0; min-width: 42px; text-align: right; }
 
-  /* Delivery */
-  .delivery-card {
-    background: var(--bg-elev-2); border-radius: 8px; padding: 12px 14px;
-    font-size: 13px;
-  }
-  .delivery-path {
-    font-family: var(--mono); color: var(--accent); font-size: 12px;
-    margin-bottom: 4px;
-  }
+  .delivery-card { background: var(--bg-elev-2); border-radius: 8px; padding: 12px 14px; font-size: 13px; }
+  .delivery-path { font-family: var(--mono); color: var(--accent); font-size: 12px; margin-bottom: 4px; }
   .delivery-msg { color: var(--text-dim); }
 
-  /* Empty state */
-  .empty {
-    text-align: center; color: var(--text-dim); font-size: 13px;
-    padding: 50px 20px;
-  }
+  /* Productivity-specific styles */
+  .meeting-meta { background: var(--bg-elev-2); border-radius: 8px; padding: 12px 14px; font-size: 12px; line-height: 1.6; color: var(--text-dim); }
+  .meeting-meta strong { color: var(--text); }
+  .summary-card { background: var(--bg-elev-2); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 14px 16px; font-size: 14px; line-height: 1.6; }
+  .item-card { background: var(--bg-elev-2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin: 8px 0; font-size: 13px; }
+  .item-card .item-title { font-weight: 600; margin-bottom: 4px; }
+  .item-card .item-meta { font-size: 11px; color: var(--text-dim); font-family: var(--mono); display: flex; gap: 16px; flex-wrap: wrap; }
+  .item-card.gap { border-left: 3px solid var(--warn); }
+  .gap-tag { color: var(--warn); font-weight: 600; }
+  .open-q-card { background: var(--bg-elev-2); border-radius: 6px; padding: 10px 12px; margin: 6px 0; font-size: 12px; }
+  .open-q-card .answerer { color: var(--text-dim); font-style: italic; margin-top: 4px; font-size: 11px; }
+  .distribution-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .distribution-badge.wide { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+  .distribution-badge.restricted { background: rgba(245, 158, 11, 0.15); color: var(--warn); }
+
+  .empty { text-align: center; color: var(--text-dim); font-size: 13px; padding: 50px 20px; }
   .empty-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.35; }
-  .error { color: var(--danger); padding: 12px; background: rgba(239, 68, 68, 0.1);
-           border-radius: 6px; font-size: 13px; }
+  .error { color: var(--danger); padding: 12px; background: rgba(239, 68, 68, 0.1); border-radius: 6px; font-size: 13px; }
+
+  .coming-soon { padding: 80px 20px; text-align: center; color: var(--text-dim); }
+  .coming-soon .icon { font-size: 48px; opacity: 0.3; margin-bottom: 16px; }
+  .coming-soon h3 { font-size: 18px; color: var(--text); margin-bottom: 6px; }
+  .coming-soon p { font-size: 13px; max-width: 460px; margin: 0 auto; line-height: 1.6; }
 </style>
 </head>
 <body>
@@ -249,182 +218,260 @@
     <div class="logo">
       <div class="logo-mark">H</div>
       <div class="logo-text">
-        <h1>HALOsination</h1>
-        <p>Brand &amp; Brief Agent — G42 Agentathon</p>
+        <h1>HALO</h1>
+        <p>One AI platform. Every employee. Work smarter, connect deeper, live better.</p>
       </div>
     </div>
-    <div class="meta">Use Case #13 · Media Content Generation</div>
+    <div class="meta">M42 employee platform · Agentathon submission</div>
   </header>
 
-  <div class="grid">
-    <!-- LEFT: input + activity -->
-    <div>
-      <div class="panel">
-        <h2>Employee Request</h2>
-        <textarea id="request" placeholder="e.g. 'Need a launch banner for Project Atlas, going out to healthcare audiences next week...'"></textarea>
-        <button class="primary" id="submit">Generate on-brand asset →</button>
+  <div class="tab-bar">
+    <button class="tab active" data-tab="agent01">
+      <span class="agent-num">01</span>
+      <span>Brand &amp; Brief</span>
+      <span class="tab-status live">LIVE</span>
+    </button>
+    <button class="tab" data-tab="agent02">
+      <span class="agent-num">02</span>
+      <span>Productivity</span>
+      <span class="tab-status live">LIVE</span>
+    </button>
+    <button class="tab" data-tab="agent03">
+      <span class="agent-num">03</span>
+      <span>Task &amp; KPI</span>
+      <span class="tab-status soon">SOON</span>
+    </button>
+    <button class="tab" data-tab="agent04">
+      <span class="agent-num">04</span>
+      <span>Social</span>
+      <span class="tab-status soon">SOON</span>
+    </button>
+    <button class="tab" data-tab="agent05">
+      <span class="agent-num">05</span>
+      <span>Wellness</span>
+      <span class="tab-status soon">SOON</span>
+    </button>
+  </div>
 
-        <div class="examples">
-          <h3>Try a sample request</h3>
-          <button class="example-btn" data-example="01">
-            <span class="label">Launch banner</span>
-            Project Atlas launch banner — healthcare audience, M42
-          </button>
-          <button class="example-btn" data-example="02">
-            <span class="label">Tone stress test</span>
-            "Punchy / disruptive" clinical AI social post for hospital CIOs
-          </button>
-          <button class="example-btn" data-example="03">
-            <span class="label">Sensitive context</span>
-            Pediatric oncology imaging service banner
-          </button>
-          <button class="example-btn" data-example="04">
-            <span class="label">Forbidden-words test</span>
-            "Revolutionary / crush / dominate" AI platform pitch
-          </button>
+  <!-- AGENT 01 — BRAND & BRIEF -->
+  <div class="tab-panel active" id="agent01">
+    <div class="grid">
+      <div>
+        <div class="panel">
+          <h2>Employee Request</h2>
+          <textarea id="a1-request" placeholder="e.g. 'Need a launch banner for Project Atlas, going out to healthcare audiences next week...'"></textarea>
+          <button class="primary" id="a1-submit">Generate on-brand asset →</button>
+          <div class="examples">
+            <h3>Try a sample request</h3>
+            <button class="example-btn" data-a1-example="01"><span class="label">Launch banner</span>Project Atlas launch banner — healthcare audience, M42</button>
+            <button class="example-btn" data-a1-example="02"><span class="label">Tone stress test</span>"Punchy / disruptive" clinical AI social post for hospital CIOs</button>
+            <button class="example-btn" data-a1-example="03"><span class="label">Sensitive context</span>Pediatric oncology imaging service banner</button>
+            <button class="example-btn" data-a1-example="04"><span class="label">Forbidden-words test</span>"Revolutionary / crush / dominate" AI platform pitch</button>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Agent Activity</h2>
+          <div id="a1-activity" class="activity"></div>
         </div>
       </div>
-
-      <div class="panel">
-        <h2>Agent Activity</h2>
-        <div id="activity" class="activity"></div>
+      <div>
+        <div id="a1-results" class="panel">
+          <h2>Generated Asset</h2>
+          <div class="empty">
+            <div class="empty-icon">✦</div>
+            Submit a request to see the 5 agents collaborate, then the verdict and the asset they produced
+          </div>
+        </div>
       </div>
     </div>
+  </div>
 
-    <!-- RIGHT: results -->
-    <div>
-      <div id="results" class="panel">
-        <h2>Generated Asset</h2>
-        <div class="empty">
-          <div class="empty-icon">✦</div>
-          Submit a request to see the 5 agents collaborate, then the verdict and the asset they produced
+  <!-- AGENT 02 — PRODUCTIVITY -->
+  <div class="tab-panel" id="agent02">
+    <div class="grid">
+      <div>
+        <div class="panel">
+          <h2>Meeting Transcript</h2>
+          <textarea id="a2-transcript" class="tall" placeholder="Paste a meeting transcript or notes here. The agents will extract decisions, action items, open questions, risks, and follow-ups — and score the result against meeting-hygiene policy."></textarea>
+          <button class="primary" id="a2-submit">Summarise this meeting →</button>
+          <div class="examples">
+            <h3>Try a sample transcript</h3>
+            <button class="example-btn" data-a2-example="01"><span class="label">Product roadmap</span>Q3 roadmap sync with decisions, owners, and an HR-sensitive flag</button>
+            <button class="example-btn" data-a2-example="02"><span class="label">Steering committee</span>Quarterly steering with rationale-heavy decisions</button>
+            <button class="example-btn" data-a2-example="03"><span class="label">Messy brainstorm</span>Vague brainstorm with ambiguous owners and unclear decisions</button>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Agent Activity</h2>
+          <div id="a2-activity" class="activity"></div>
         </div>
       </div>
+      <div>
+        <div id="a2-results" class="panel">
+          <h2>Meeting Notes</h2>
+          <div class="empty">
+            <div class="empty-icon">📋</div>
+            Paste a meeting transcript and submit. Agent 02 uses the same Intake → Search → Brush → Validator pattern as Agent 01 — different domain, same architecture.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AGENTS 03 / 04 / 05 — COMING SOON -->
+  <div class="tab-panel" id="agent03">
+    <div class="coming-soon">
+      <div class="icon">✅</div>
+      <h3>Agent 03 — Task &amp; KPI</h3>
+      <p>Paste a status update or weekly report → structured tasks + KPI deltas + risks. Same Intake → Search → Brush → Validator spine, scored against SMART-goal and measurability rubric. Building in the current sprint.</p>
+    </div>
+  </div>
+  <div class="tab-panel" id="agent04">
+    <div class="coming-soon">
+      <div class="icon">🤝</div>
+      <h3>Agent 04 — Social</h3>
+      <p>Employee profile → connection suggestions + group recommendations. Embedding-similarity at its most natural fit. Scored for relevance, diversity, and privacy-respect. Building in the current sprint.</p>
+    </div>
+  </div>
+  <div class="tab-panel" id="agent05">
+    <div class="coming-soon">
+      <div class="icon">💚</div>
+      <h3>Agent 05 — Wellness</h3>
+      <p>Self check-in → care-appropriate response + suggested resources + (anonymised) organisational signals. Validator emphasises care language, no diagnosis, sensitivity to severity escalation. Building in the current sprint.</p>
     </div>
   </div>
 </div>
 
 <script>
-const API = "http://localhost:8000/run";
+const API_AGENT01 = "http://localhost:8000/run";
+const API_AGENT02 = "http://localhost:8000/run_meeting";
 
-const SAMPLES = {
+const AGENT01_SAMPLES = {
   "01": "hey can you make me a launch banner for Project Atlas? going out to healthcare audiences next week, needs to feel modern and trustworthy. M42 is the lead OpCo",
   "02": "need a punchy social post hyping our new clinical AI tool — make it bold and disruptive, like we're going to revolutionize healthcare and crush the competition. M42 audience is hospital CIOs.",
   "03": "Make me a banner for our new pediatric oncology imaging service. Make it super uplifting and joyful, lots of warm orange and yellow, kids smiling with their families, like a celebration. Audience is referring physicians, want it eye-catching.",
   "04": "Need a social post for our revolutionary new AI platform - make it bold and disruptive, we are going to crush the competition and dominate the healthcare AI market. Best-in-class technology that will revolutionize patient care. Audience is hospital CIOs and chief medical officers. Make it punchy."
 };
 
-document.querySelectorAll(".example-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.getElementById("request").value = SAMPLES[btn.dataset.example];
+const AGENT02_SAMPLES = {
+  "01": "Meeting on May 25, 2026. Project Atlas weekly sync.\nAttendees: Feras, Sara, Mohammed, Lina.\n\nSara opened with the Q3 roadmap. We discussed shipping the radiology module ahead of pathology — Lina pushed back on this because the pathology team is further along technically. After 20 minutes of back and forth, we decided to ship pathology first, then radiology in Q4. Rationale: pathology is more validated clinically and has earlier commercial demand from M42 customers.\n\nAction items:\n- Mohammed will draft the customer comms by Friday.\n- Sara to update the roadmap deck.\n- Someone needs to talk to the regulatory team about pathology approval timelines — we didn't decide who.\n\nWe also briefly touched on a difficult HR situation with one of the contractors — we agreed to discuss this in a separate restricted session next week.\n\nOpen questions:\n- Should we delay the official Q3 announcement until pathology is in beta? No conclusion.\n- Lina raised whether the radiology folks would feel sidelined by the pivot — to be revisited.\n\nWe will follow up on the regulatory question in two weeks.",
+  "02": "Quarterly steering committee, May 22 2026. Present: Dr. Khalid (chair), Maria, Tariq, Yuki, Olivia.\n\nMaria walked through Q1 financials. Revenue tracking 12% ahead of plan, gross margin in line with forecast. We decided to release Q1 results externally on June 8 — rationale: the audit is finalising and our investor relations window opens that week.\n\nTariq raised the data infrastructure investment. After significant debate, the committee decided to APPROVE the $4.2M cloud migration budget. Rationale: existing on-prem capacity will be exceeded in Q3 based on current growth, and migration is cheaper than expanding on-prem. Yuki noted dissent on the timeline being aggressive but did not block.\n\nOlivia presented the talent pipeline. Two senior hires were approved — one for the platform team and one for clinical safety. Rationale not discussed in the meeting (HR will document separately).\n\nWe deferred the brand refresh decision to the next meeting. Tariq will share more vendor proposals before then.\n\nOlivia will follow up with the board on the cloud migration approval — she'll do this before June 1.\n\nNext steering committee is June 12. No risks raised in this session.",
+  "03": "Quick sync today (didn't catch the date). Bunch of us in the call - me, Khalifa, two of the design folks I think, maybe Reem? Not sure if Hassan joined.\n\nSo we kicked around the new AI assistant concept. Lots of ideas thrown around. Khalifa really likes the voice-first angle, but Reem thinks people will hate that. The design folks were torn. We sort of agreed voice should be optional but the default UX is still TBD.\n\nWe talked about pricing too. Maybe freemium? Or maybe team-based pricing? We'll figure it out later.\n\nSomeone (Khalifa I think?) said they'd put together a vision deck \"soon\" - I should follow up on that. And the design folks are going to mock something up by end of next week, possibly the week after if they're slammed.\n\nWe discussed integrating with the existing platform but didn't reach a clear conclusion. Reem wants tight integration, Khalifa wants it to feel like a separate product. We'll loop back.\n\nOne concern raised - if we go voice-first, do we need to worry about accent recognition for our regional users? Nobody really had an answer. Tabled it.\n\nAction items? Honestly hard to say. Khalifa for the deck. Design for the mocks. Me to set up the next meeting.\n\nWe'll meet again soon to keep this moving."
+};
+
+const STAGES = [
+  { id: "intake",    name: "Intake",    detail: "Parsing into structured form" },
+  { id: "search",    name: "Search",    detail: "Retrieving top-3 policy rules" },
+  { id: "brush",     name: "Brush",     detail: "Drafting, grounded in rules" },
+  { id: "validator", name: "Validator", detail: "Scoring against the rubric" },
+  { id: "route",     name: "Route",     detail: "Deciding delivery path" }
+];
+
+// Tab switching
+document.querySelectorAll(".tab").forEach(t => {
+  t.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(x => x.classList.remove("active"));
+    t.classList.add("active");
+    document.getElementById(t.dataset.tab).classList.add("active");
   });
 });
 
-// All 5 agents in the pipeline
-const STAGES = [
-  { id: "intake",    name: "Intake",    detail: "Parsing request into structured brief" },
-  { id: "search",    name: "Search",    detail: "Retrieving top-3 brand rules via embeddings" },
-  { id: "brush",     name: "Brush",     detail: "Drafting copy + visual spec, grounded in rules" },
-  { id: "validator", name: "Validator", detail: "Scoring against the 3×3 brand rubric" },
-  { id: "route",     name: "Route",     detail: "Deciding delivery path from the verdict" }
-];
+// Sample button handlers
+document.querySelectorAll("[data-a1-example]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.getElementById("a1-request").value = AGENT01_SAMPLES[btn.dataset.a1Example];
+  });
+});
+document.querySelectorAll("[data-a2-example]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.getElementById("a2-transcript").value = AGENT02_SAMPLES[btn.dataset.a2Example];
+  });
+});
 
-function renderStages(currentIdx, mode = "active") {
+function renderStagesInitial(elementId) {
+  const html = STAGES.map(s =>
+    `<div class="stage"><div class="stage-icon"></div><div class="stage-text"><div class="stage-name">${s.name}</div><div class="stage-detail">queued</div></div></div>`
+  ).join("");
+  document.getElementById(elementId).innerHTML = html;
+}
+
+function renderStages(elementId, currentIdx) {
   const html = STAGES.map((s, i) => {
     let cls = "stage";
-    let detailText = "queued";
-    if (i < currentIdx) { cls += " done"; detailText = "✓ complete"; }
-    else if (i === currentIdx && mode === "active") { cls += " active"; detailText = s.detail; }
-    else if (mode === "done" && i === STAGES.length) { /* all done case */ }
-    return `<div class="${cls}">
-      <div class="stage-icon"></div>
-      <div class="stage-text">
-        <div class="stage-name">${s.name}</div>
-        <div class="stage-detail">${detailText}</div>
-      </div>
-    </div>`;
+    let detail = "queued";
+    if (i < currentIdx) { cls += " done"; detail = "✓ complete"; }
+    else if (i === currentIdx) { cls += " active"; detail = s.detail; }
+    return `<div class="${cls}"><div class="stage-icon"></div><div class="stage-text"><div class="stage-name">${s.name}</div><div class="stage-detail">${detail}</div></div></div>`;
   }).join("");
-  document.getElementById("activity").innerHTML = html;
+  document.getElementById(elementId).innerHTML = html;
 }
 
-function renderStagesAllDone() {
+function renderStagesAllDone(elementId) {
   const html = STAGES.map(s =>
-    `<div class="stage done">
-       <div class="stage-icon"></div>
-       <div class="stage-text">
-         <div class="stage-name">${s.name}</div>
-         <div class="stage-detail">✓ complete</div>
-       </div>
-     </div>`
+    `<div class="stage done"><div class="stage-icon"></div><div class="stage-text"><div class="stage-name">${s.name}</div><div class="stage-detail">✓ complete</div></div></div>`
   ).join("");
-  document.getElementById("activity").innerHTML = html;
+  document.getElementById(elementId).innerHTML = html;
 }
 
-function renderStagesInitial() {
-  const html = STAGES.map(s =>
-    `<div class="stage">
-       <div class="stage-icon"></div>
-       <div class="stage-text">
-         <div class="stage-name">${s.name}</div>
-         <div class="stage-detail">queued</div>
-       </div>
-     </div>`
-  ).join("");
-  document.getElementById("activity").innerHTML = html;
-}
-
-async function animateStages() {
+async function animateStages(elementId) {
   for (let i = 0; i < STAGES.length; i++) {
-    renderStages(i);
+    renderStages(elementId, i);
     await new Promise(r => setTimeout(r, 850));
   }
 }
 
-// Show all 5 stages on initial load so a viewer sees the architecture
-renderStagesInitial();
+renderStagesInitial("a1-activity");
+renderStagesInitial("a2-activity");
 
-document.getElementById("submit").addEventListener("click", async () => {
-  const request = document.getElementById("request").value.trim();
+// AGENT 01 SUBMIT
+document.getElementById("a1-submit").addEventListener("click", async () => {
+  const request = document.getElementById("a1-request").value.trim();
   if (!request) { alert("Type a request first."); return; }
-
-  const submitBtn = document.getElementById("submit");
-  submitBtn.disabled = true;
-  submitBtn.textContent = "Agents working...";
-
-  document.getElementById("results").innerHTML =
-    '<h2>Generated Asset</h2><div class="empty"><div class="empty-icon">◐</div>Agents are working — watch the activity panel below</div>';
-
-  const animation = animateStages();
+  const btn = document.getElementById("a1-submit");
+  btn.disabled = true; btn.textContent = "Agents working...";
+  document.getElementById("a1-results").innerHTML = '<h2>Generated Asset</h2><div class="empty"><div class="empty-icon">◐</div>Agents are working — watch the activity panel</div>';
+  const animation = animateStages("a1-activity");
   let response;
   try {
-    const r = await fetch(API, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ request })
-    });
+    const r = await fetch(API_AGENT01, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ request }) });
     response = await r.json();
   } catch (e) {
-    document.getElementById("activity").innerHTML =
-      `<div class="error">Failed to reach API at ${API}. Is the server running on port 8000?</div>`;
-    submitBtn.disabled = false;
-    submitBtn.textContent = "Generate on-brand asset →";
+    document.getElementById("a1-activity").innerHTML = `<div class="error">Failed to reach API at ${API_AGENT01}. Is the server running on port 8000?</div>`;
+    btn.disabled = false; btn.textContent = "Generate on-brand asset →";
     return;
   }
   await animation;
-  renderStagesAllDone();
-
-  renderResults(response);
-  submitBtn.disabled = false;
-  submitBtn.textContent = "Generate on-brand asset →";
+  renderStagesAllDone("a1-activity");
+  renderAgent01Results(response);
+  btn.disabled = false; btn.textContent = "Generate on-brand asset →";
 });
 
-function renderResults(resp) {
-  const out = resp.output;
-  if (!out) {
-    document.getElementById("results").innerHTML =
-      `<h2>Generated Asset</h2><div class="error">Unexpected response shape.</div>`;
+// AGENT 02 SUBMIT
+document.getElementById("a2-submit").addEventListener("click", async () => {
+  const transcript = document.getElementById("a2-transcript").value.trim();
+  if (!transcript) { alert("Paste a meeting transcript first."); return; }
+  const btn = document.getElementById("a2-submit");
+  btn.disabled = true; btn.textContent = "Agents working...";
+  document.getElementById("a2-results").innerHTML = '<h2>Meeting Notes</h2><div class="empty"><div class="empty-icon">◐</div>Agents are working — watch the activity panel</div>';
+  const animation = animateStages("a2-activity");
+  let response;
+  try {
+    const r = await fetch(API_AGENT02, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ transcript }) });
+    response = await r.json();
+  } catch (e) {
+    document.getElementById("a2-activity").innerHTML = `<div class="error">Failed to reach API at ${API_AGENT02}. Is the server running on port 8000?</div>`;
+    btn.disabled = false; btn.textContent = "Summarise this meeting →";
     return;
   }
+  await animation;
+  renderStagesAllDone("a2-activity");
+  renderAgent02Results(response);
+  btn.disabled = false; btn.textContent = "Summarise this meeting →";
+});
+
+function renderAgent01Results(resp) {
+  const out = resp.output || {};
   const draft = out.final_draft || {};
   const copy = draft.copy || {};
   const vs = draft.visual_spec || {};
@@ -432,110 +479,60 @@ function renderResults(resp) {
   const scores = verdict.scores || {};
   const rules = out.retrieved_rules || [];
   const delivery = out.delivery || {};
-  const verdictClass = verdict.verdict || "pass";
-
-  // 1. VERDICT (now at the top)
-  const verdictHTML = `
-    <div class="section">
-      <div class="section-label">
-        Validator verdict <span class="agent-tag">VALIDATOR</span>
-      </div>
-      <div class="verdict-card">
-        <div class="verdict-header">
-          <span class="verdict-badge ${verdictClass}">${verdictClass} · ${verdict.total ?? "?"}/9</span>
-          <span class="verdict-meta">${out.revision_attempted ? "after 1 revision" : "first pass"}</span>
-        </div>
-        <div class="score-grid">
-          <div class="score-cell">
-            <div class="score-num">${scores.brand_voice ?? "—"}<span class="denom">/3</span></div>
-            <div class="score-label">Brand voice</div>
-          </div>
-          <div class="score-cell">
-            <div class="score-num">${scores.visual_spec ?? "—"}<span class="denom">/3</span></div>
-            <div class="score-label">Visual spec</div>
-          </div>
-          <div class="score-cell">
-            <div class="score-num">${scores.audience_fit ?? "—"}<span class="denom">/3</span></div>
-            <div class="score-label">Audience fit</div>
-          </div>
-        </div>
-        ${verdict.reasoning ? `
-          <div class="reasoning">
-            <p><strong>Voice:</strong> ${escape(verdict.reasoning.brand_voice || "")}</p>
-            <p><strong>Visual:</strong> ${escape(verdict.reasoning.visual_spec || "")}</p>
-            <p><strong>Audience:</strong> ${escape(verdict.reasoning.audience_fit || "")}</p>
-          </div>` : ""}
-      </div>
-    </div>`;
-
-  // 2. DRAFTED ASSET (Brush)
-  const draftHTML = `
-    <div class="section">
-      <div class="section-label">
-        Drafted asset <span class="agent-tag">BRUSH</span>
-      </div>
-      <div class="headline">${escape(copy.headline || "—")}</div>
-      ${copy.subhead ? `<div class="subhead">${escape(copy.subhead)}</div>` : ""}
-      ${copy.body ? `<div class="body-text">${escape(copy.body)}</div>` : ""}
-      ${copy.cta ? `<div class="cta">${escape(copy.cta)}</div>` : ""}
-    </div>`;
-
-  // 3. VISUAL DIRECTION (Brush)
-  const swatches = (vs.palette || []).map(c =>
-    `<div class="swatch" style="background:${c};" data-color="${c}"></div>`
-  ).join("");
-  const visualHTML = `
-    <div class="section">
-      <div class="section-label">
-        Visual direction <span class="agent-tag">BRUSH</span>
-      </div>
-      <div class="visual-spec">
-        <p><strong>Concept:</strong> ${escape(vs.concept || "—")}</p>
-        <p><strong>Mood:</strong> ${(vs.mood || []).join(" · ")}</p>
-        <p><strong>Composition:</strong> ${escape(vs.composition || "—")}</p>
-        <div class="palette">${swatches}</div>
-      </div>
-    </div>`;
-
-  // 4. RETRIEVED RULES (Search)
-  const rulesHTML = rules.length ? `
-    <div class="section">
-      <div class="section-label">
-        Retrieved brand rules <span class="agent-tag">SEARCH</span>
-      </div>
-      <div class="rules-list">
-        ${rules.map(r => `
-          <div class="rule-card">
-            <div class="rule-header">
-              <span class="rule-id">Rule ${r.rule_id}</span>
-              <span class="rule-title">${escape(r.title)}</span>
-              <div class="similarity-bar">
-                <div class="similarity-fill" style="width:${(r.similarity * 100).toFixed(0)}%"></div>
-              </div>
-              <span class="similarity-pct">${(r.similarity * 100).toFixed(1)}%</span>
-            </div>
-          </div>
-        `).join("")}
-      </div>
-    </div>` : "";
-
-  // 5. DELIVERY (Route)
-  const deliveryHTML = `
-    <div class="section">
-      <div class="section-label">
-        Delivery decision <span class="agent-tag">ROUTE</span>
-      </div>
-      <div class="delivery-card">
-        <div class="delivery-path">→ ${escape(delivery.path || "deliver_to_requester")}</div>
-        <div class="delivery-msg">${escape(delivery.message || "Ready to deliver.")}</div>
-      </div>
-    </div>`;
-
-  document.getElementById("results").innerHTML =
-    `<h2>Generated Asset</h2>${verdictHTML}${draftHTML}${visualHTML}${rulesHTML}${deliveryHTML}`;
+  const vClass = verdict.verdict || "pass";
+  const swatches = (vs.palette || []).map(c => `<div class="swatch" style="background:${c};" data-color="${c}"></div>`).join("");
+  const verdictHTML = `<div class="section"><div class="section-label">Validator verdict <span class="agent-tag">VALIDATOR</span></div><div class="verdict-card"><div class="verdict-header"><span class="verdict-badge ${vClass}">${vClass} · ${verdict.total ?? "?"}/9</span><span class="verdict-meta">${out.revision_attempted ? "after 1 revision" : "first pass"}</span></div><div class="score-grid"><div class="score-cell"><div class="score-num">${scores.brand_voice ?? "—"}<span class="denom">/3</span></div><div class="score-label">Brand voice</div></div><div class="score-cell"><div class="score-num">${scores.visual_spec ?? "—"}<span class="denom">/3</span></div><div class="score-label">Visual spec</div></div><div class="score-cell"><div class="score-num">${scores.audience_fit ?? "—"}<span class="denom">/3</span></div><div class="score-label">Audience fit</div></div></div>${verdict.reasoning ? `<div class="reasoning"><p><strong>Voice:</strong> ${esc(verdict.reasoning.brand_voice||"")}</p><p><strong>Visual:</strong> ${esc(verdict.reasoning.visual_spec||"")}</p><p><strong>Audience:</strong> ${esc(verdict.reasoning.audience_fit||"")}</p></div>` : ""}</div></div>`;
+  const draftHTML = `<div class="section"><div class="section-label">Drafted asset <span class="agent-tag">BRUSH</span></div><div class="headline">${esc(copy.headline||"—")}</div>${copy.subhead?`<div class="subhead">${esc(copy.subhead)}</div>`:""}${copy.body?`<div class="body-text">${esc(copy.body)}</div>`:""}${copy.cta?`<div class="cta">${esc(copy.cta)}</div>`:""}</div>`;
+  const visualHTML = `<div class="section"><div class="section-label">Visual direction <span class="agent-tag">BRUSH</span></div><div class="visual-spec"><p><strong>Concept:</strong> ${esc(vs.concept||"—")}</p><p><strong>Mood:</strong> ${(vs.mood||[]).join(" · ")}</p><p><strong>Composition:</strong> ${esc(vs.composition||"—")}</p><div class="palette">${swatches}</div></div></div>`;
+  const rulesHTML = rules.length ? `<div class="section"><div class="section-label">Retrieved brand rules <span class="agent-tag">SEARCH</span></div><div class="rules-list">${rules.map(r => `<div class="rule-card"><div class="rule-header"><span class="rule-id">Rule ${r.rule_id}</span><span class="rule-title">${esc(r.title)}</span><div class="similarity-bar"><div class="similarity-fill" style="width:${(r.similarity*100).toFixed(0)}%"></div></div><span class="similarity-pct">${(r.similarity*100).toFixed(1)}%</span></div></div>`).join("")}</div></div>` : "";
+  const deliveryHTML = `<div class="section"><div class="section-label">Delivery decision <span class="agent-tag">ROUTE</span></div><div class="delivery-card"><div class="delivery-path">→ ${esc(delivery.path||"deliver_to_requester")}</div><div class="delivery-msg">${esc(delivery.message||"Ready to deliver.")}</div></div></div>`;
+  document.getElementById("a1-results").innerHTML = `<h2>Generated Asset</h2>${verdictHTML}${draftHTML}${visualHTML}${rulesHTML}${deliveryHTML}`;
 }
 
-function escape(s) {
+function renderAgent02Results(resp) {
+  const out = resp.output || {};
+  const meeting = out.meeting || {};
+  const notes = out.final_notes || {};
+  const verdict = out.verdict || {};
+  const scores = verdict.scores || {};
+  const rules = out.retrieved_rules || [];
+  const delivery = out.delivery || {};
+  const vClass = verdict.verdict || "pass";
+  const distribution = notes.distribution || "wide";
+
+  const verdictHTML = `<div class="section"><div class="section-label">Validator verdict <span class="agent-tag">VALIDATOR</span></div><div class="verdict-card"><div class="verdict-header"><span class="verdict-badge ${vClass}">${vClass} · ${verdict.total ?? "?"}/9</span><span class="verdict-meta">${out.revision_attempted ? "after 1 revision" : "first pass"}</span></div><div class="score-grid"><div class="score-cell"><div class="score-num">${scores.completeness ?? "—"}<span class="denom">/3</span></div><div class="score-label">Completeness</div></div><div class="score-cell"><div class="score-num">${scores.actionability ?? "—"}<span class="denom">/3</span></div><div class="score-label">Actionability</div></div><div class="score-cell"><div class="score-num">${scores.clarity ?? "—"}<span class="denom">/3</span></div><div class="score-label">Clarity</div></div></div>${verdict.reasoning ? `<div class="reasoning"><p><strong>Completeness:</strong> ${esc(verdict.reasoning.completeness||"")}</p><p><strong>Actionability:</strong> ${esc(verdict.reasoning.actionability||"")}</p><p><strong>Clarity:</strong> ${esc(verdict.reasoning.clarity||"")}</p></div>` : ""}</div></div>`;
+
+  const meta = notes.metadata || {};
+  const metaHTML = `<div class="section"><div class="section-label">Meeting metadata <span class="agent-tag">BRUSH</span></div><div class="meeting-meta"><p><strong>Title:</strong> ${esc(meta.title||"—")}</p><p><strong>Date:</strong> ${esc(meta.date||"—")}</p><p><strong>Attendees:</strong> ${(meta.attendees||[]).join(", ")||"—"}</p><p><strong>Purpose:</strong> ${esc(meta.purpose||"—")}</p><p><strong>Distribution:</strong> <span class="distribution-badge ${distribution}">${distribution}</span>${notes.distribution_reason?` <span style="color:var(--text-dim);font-size:11px;margin-left:6px">— ${esc(notes.distribution_reason)}</span>`:""}</p></div></div>`;
+
+  const summaryHTML = `<div class="section"><div class="section-label">90-second summary <span class="agent-tag">BRUSH</span></div><div class="summary-card">${esc(notes.summary_90s||"—")}</div></div>`;
+
+  const decisions = notes.decisions || [];
+  const decisionsHTML = decisions.length ? `<div class="section"><div class="section-label">Decisions (${decisions.length}) <span class="agent-tag">BRUSH</span></div>${decisions.map(d => `<div class="item-card"><div class="item-title">${esc(d.decision)}</div><div class="item-meta"><span><strong>Rationale:</strong> ${esc(d.rationale||"—")}</span></div></div>`).join("")}</div>` : "";
+
+  const actions = notes.action_items || [];
+  const actionsHTML = actions.length ? `<div class="section"><div class="section-label">Action items (${actions.length}) <span class="agent-tag">BRUSH</span></div>${actions.map(a => {
+    const isGap = (a.owner||"").includes("UNOWNED") || (a.deadline||"").includes("NO DEADLINE");
+    return `<div class="item-card ${isGap?"gap":""}"><div class="item-title">${esc(a.description)}</div><div class="item-meta"><span>Owner: <span class="${(a.owner||"").includes("UNOWNED")?"gap-tag":""}">${esc(a.owner||"—")}</span></span><span>Deadline: <span class="${(a.deadline||"").includes("NO DEADLINE")?"gap-tag":""}">${esc(a.deadline||"—")}</span></span></div></div>`;
+  }).join("")}</div>` : "";
+
+  const openQs = notes.open_questions || [];
+  const openQsHTML = openQs.length ? `<div class="section"><div class="section-label">Open questions (${openQs.length}) <span class="agent-tag">BRUSH</span></div>${openQs.map(q => `<div class="open-q-card">${esc(q.question||"")}${q.best_placed_to_answer?`<div class="answerer">Best placed to answer: ${esc(q.best_placed_to_answer)}</div>`:""}</div>`).join("")}</div>` : "";
+
+  const risks = notes.risks_or_blockers || [];
+  const risksHTML = risks.length ? `<div class="section"><div class="section-label">Risks &amp; blockers (${risks.length}) <span class="agent-tag">BRUSH</span></div>${risks.map(r => `<div class="item-card"><div class="item-title">${esc(r.risk||"")}</div><div class="item-meta"><span><strong>Affects:</strong> ${esc(r.affects||"—")}</span><span><strong>Monitor:</strong> ${esc(r.owner||"unassigned")}</span></div></div>`).join("")}</div>` : "";
+
+  const followUps = notes.follow_ups || [];
+  const followUpsHTML = followUps.length ? `<div class="section"><div class="section-label">Follow-ups (${followUps.length}) <span class="agent-tag">BRUSH</span></div>${followUps.map(f => `<div class="item-card"><div class="item-title">${esc(f.topic||"")}</div><div class="item-meta"><span><strong>When:</strong> ${esc(f.when||"—")}</span></div></div>`).join("")}</div>` : "";
+
+  const rulesHTML = rules.length ? `<div class="section"><div class="section-label">Retrieved meeting policy rules <span class="agent-tag">SEARCH</span></div><div class="rules-list">${rules.map(r => `<div class="rule-card"><div class="rule-header"><span class="rule-id">Rule ${r.rule_id}</span><span class="rule-title">${esc(r.title)}</span><div class="similarity-bar"><div class="similarity-fill" style="width:${(r.similarity*100).toFixed(0)}%"></div></div><span class="similarity-pct">${(r.similarity*100).toFixed(1)}%</span></div></div>`).join("")}</div></div>` : "";
+
+  const deliveryHTML = `<div class="section"><div class="section-label">Delivery decision <span class="agent-tag">ROUTE</span></div><div class="delivery-card"><div class="delivery-path">→ ${esc(delivery.path||"deliver_to_requester")}</div><div class="delivery-msg">${esc(delivery.message||"Ready to deliver.")}</div></div></div>`;
+
+  document.getElementById("a2-results").innerHTML = `<h2>Meeting Notes</h2>${verdictHTML}${metaHTML}${summaryHTML}${decisionsHTML}${actionsHTML}${openQsHTML}${risksHTML}${followUpsHTML}${rulesHTML}${deliveryHTML}`;
+}
+
+function esc(s) {
   if (typeof s !== "string") return s ?? "";
   return s.replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
