@@ -1,0 +1,275 @@
+{
+  "status": "success",
+  "use_case_id": "13",
+  "agent": "Agent 03 \u2014 Task & KPI (Status Structurer)",
+  "output": {
+    "status_obj": {
+      "project_or_team": "M42 Data Platform",
+      "reporter": "Maria Hernandez",
+      "period": "week ending May 23, 2026",
+      "raw_tasks": [
+        {
+          "description": "Olivia deployed the v2.3 optimizer to production on May 21 (DONE).",
+          "owner_mentioned": "Olivia",
+          "deadline_mentioned": "May 21",
+          "status_mentioned": "done",
+          "progress_mentioned": null,
+          "blocked_by_mentioned": null
+        },
+        {
+          "description": "Tariq published the migration guide and ran 3 office hours sessions (DONE).",
+          "owner_mentioned": "Tariq",
+          "deadline_mentioned": null,
+          "status_mentioned": "done",
+          "progress_mentioned": null,
+          "blocked_by_mentioned": null
+        },
+        {
+          "description": "Jin will complete the audit log refactor by June 4. Currently 70% done based on PR review status \u2014 on track.",
+          "owner_mentioned": "Jin",
+          "deadline_mentioned": "by June 4",
+          "status_mentioned": "on-track",
+          "progress_mentioned": "Currently 70% done based on PR review status",
+          "blocked_by_mentioned": null
+        },
+        {
+          "description": "Aisha is leading the SSO integration with M42 Auth, blocked on receiving the OAuth client config from the M42 Auth team. Expected unblocked by May 28; if not, we'll escalate to Dr. Khalid.",
+          "owner_mentioned": "Aisha",
+          "deadline_mentioned": "Expected unblocked by May 28",
+          "status_mentioned": "blocked",
+          "progress_mentioned": null,
+          "blocked_by_mentioned": "receiving the OAuth client config from the M42 Auth team"
+        }
+      ],
+      "raw_kpis": [
+        {
+          "name": "Query latency p95",
+          "direction_mentioned": "down",
+          "magnitude_mentioned": "18%",
+          "timeframe_mentioned": "week-over-week"
+        },
+        {
+          "name": "Internal team adoption",
+          "direction_mentioned": "up",
+          "magnitude_mentioned": "78% (47/60), up from 65%",
+          "timeframe_mentioned": "last week"
+        },
+        {
+          "name": "Open P1 bugs",
+          "direction_mentioned": null,
+          "magnitude_mentioned": "0",
+          "timeframe_mentioned": null
+        },
+        {
+          "name": "Customer satisfaction (internal NPS)",
+          "direction_mentioned": "up",
+          "magnitude_mentioned": "62, up 8 points",
+          "timeframe_mentioned": "vs Q1 baseline"
+        }
+      ],
+      "raw_risks": [
+        {
+          "risk_as_stated": "the SSO dependency on M42 Auth. If we slip past May 28, we'd defer the v2.4 release from June 15 to June 22, potential impact ~$80K in deferred internal-team productivity.",
+          "impact_mentioned": "potential impact ~$80K in deferred internal-team productivity",
+          "trigger_mentioned": "slip past May 28 on SSO dependency on M42 Auth"
+        }
+      ],
+      "performance_signals_flagged": false,
+      "performance_reason": null,
+      "open_questions": []
+    },
+    "retrieved_rules": [
+      {
+        "rule_id": 5,
+        "title": "Distinguish blocked / at-risk / on-track",
+        "text": "Every task must be classified into exactly one of three states: blocked\n(work cannot proceed without external action), at-risk (work proceeding but\nunlikely to meet deadline), or on-track (work proceeding on plan). Conflating\nthese creates false confidence and hides escalations.",
+        "similarity": 0.492
+      },
+      {
+        "rule_id": 1,
+        "title": "Tasks must be SMART",
+        "text": "Every task captured from a status update must be: Specific (concrete deliverable,\nnot a theme), Measurable (a way to know it's done), Achievable (within scope),\nRelevant (tied to a stated goal or KPI), and Time-bound (explicit deadline).\nA task that fails any of these dimensions must be flagged as 'task draft \u2014\nneeds SMART-ing' rather than silently passed through as if complete.",
+        "similarity": 0.4238
+      },
+      {
+        "rule_id": 7,
+        "title": "Dependencies must be surfaced",
+        "text": "If a task depends on another team, decision, or external event, the dependency\nmust be surfaced as a structured field on the task ('blocked_by' or\n'waiting_on'). Hidden dependencies are the most common cause of missed\ndeadlines.",
+        "similarity": 0.4129
+      }
+    ],
+    "final_notes": {
+      "digest_90s": "This week the M42 Data Platform team shipped the v2.3 optimizer to production and completed the migration guide plus office hours, while the audit log refactor is 70% complete and on track for June 4. SSO integration remains blocked on OAuth client config from the M42 Auth team, with an expectation to unblock by May 28. Query latency p95 improved 18% week-over-week, internal adoption rose to 78%, and internal NPS increased by 8 points versus the Q1 baseline, while open P1 bugs are at zero. The main risk is that if SSO is not unblocked by May 28, the v2.4 release would slip from June 15 to June 22 with an estimated $80K internal productivity impact. The single most important next decision is whether to escalate to Dr. Khalid if the M42 Auth dependency is not cleared by May 28.",
+      "metadata": {
+        "project_or_team": "M42 Data Platform",
+        "reporter": "Maria Hernandez",
+        "period": "week ending May 23, 2026"
+      },
+      "tasks": [
+        {
+          "description": "Deploy v2.3 optimizer to production.",
+          "owner": "Olivia",
+          "deadline": "May 21, 2026",
+          "status": "done",
+          "progress": "100% complete, self-reported, unverified",
+          "blocked_by": null,
+          "smart_flag": "ok"
+        },
+        {
+          "description": "Publish the migration guide and run 3 office hours sessions.",
+          "owner": "Tariq",
+          "deadline": "NO DEADLINE \u2014 see open questions",
+          "status": "done",
+          "progress": "100% complete, self-reported, unverified",
+          "blocked_by": null,
+          "smart_flag": "needs SMART-ing \u2014 Time-bound deadline not specified"
+        },
+        {
+          "description": "Complete the audit log refactor.",
+          "owner": "Jin",
+          "deadline": "June 4, 2026",
+          "status": "on-track",
+          "progress": "70% complete based on PR review status, self-reported, unverified",
+          "blocked_by": null,
+          "smart_flag": "ok"
+        },
+        {
+          "description": "Deliver SSO integration with M42 Auth.",
+          "owner": "Aisha",
+          "deadline": "Expected unblocked by May 28, 2026 (overall delivery date not specified)",
+          "status": "blocked",
+          "progress": null,
+          "blocked_by": "Waiting on OAuth client config from the M42 Auth team",
+          "smart_flag": "needs SMART-ing \u2014 Time-bound completion date for the integration not fully specified"
+        }
+      ],
+      "kpis": [
+        {
+          "name": "Query latency p95",
+          "direction": "down",
+          "magnitude": "18% improvement",
+          "timeframe": "week-over-week",
+          "completeness_flag": "ok"
+        },
+        {
+          "name": "Internal team adoption",
+          "direction": "up",
+          "magnitude": "78% (47/60), up from 65%",
+          "timeframe": "last week",
+          "completeness_flag": "ok"
+        },
+        {
+          "name": "Open P1 bugs",
+          "direction": "unclear",
+          "magnitude": "0",
+          "timeframe": "timeframe unspecified \u2014 see open questions",
+          "completeness_flag": "needs direction/magnitude/timeframe"
+        },
+        {
+          "name": "Customer satisfaction (internal NPS)",
+          "direction": "up",
+          "magnitude": "62, up 8 points",
+          "timeframe": "vs Q1 baseline",
+          "completeness_flag": "ok"
+        }
+      ],
+      "risks": [
+        {
+          "risk": "the SSO dependency on M42 Auth. If we slip past May 28, we'd defer the v2.4 release from June 15 to June 22, potential impact ~$80K in deferred internal-team productivity.",
+          "what_is_at_risk": "On-time v2.4 release and associated internal-team productivity",
+          "business_impact": "potential impact ~$80K in deferred internal-team productivity",
+          "trigger_or_cause": "slip past May 28 on SSO dependency on M42 Auth"
+        }
+      ],
+      "open_questions": [
+        {
+          "question": "What was the original committed deadline for publishing the migration guide and running the 3 office hours sessions, so we can fully time-bound this task?",
+          "best_placed_to_answer": "Tariq"
+        },
+        {
+          "question": "What is the target completion date for the full SSO integration delivery (not just unblocking), so we can make the task fully time-bound?",
+          "best_placed_to_answer": "Aisha"
+        },
+        {
+          "question": "Over what timeframe is the '0 open P1 bugs' metric being reported (e.g., current snapshot, week-to-date, month-to-date)?",
+          "best_placed_to_answer": "Maria Hernandez"
+        },
+        {
+          "question": "For the 'Open P1 bugs' KPI, is the direction versus the prior period up, down, or flat?",
+          "best_placed_to_answer": "Maria Hernandez"
+        }
+      ],
+      "recommendations": [
+        {
+          "recommendation": "hold review",
+          "target": "SSO integration timeline and dependency on M42 Auth",
+          "rationale": "Given the stated risk that slipping past May 28 on the SSO dependency would delay the v2.4 release and cost ~$80K in productivity, a focused review is needed to confirm timelines and escalation paths (ties to stated risk on SSO dependency and Rule 7 about surfacing dependencies)."
+        }
+      ],
+      "distribution": "wide",
+      "distribution_reason": null,
+      "rationale": "Tasks were forced into the blocked/at-risk/on-track/done states per Rule 5, using the source 'status_mentioned' and the presence of external dependencies (e.g., SSO blocked on M42 Auth) to distinguish blocked from on-track. Task SMART-ness was evaluated per Rule 1: tasks missing explicit completion dates (migration guide, full SSO delivery) were flagged as 'needs SMART-ing' and corresponding open questions were added. Dependencies for the SSO integration were explicitly surfaced in 'blocked_by' per Rule 7 to avoid hidden blockers. Progress statements like '70% done' and 'DONE' were treated as self-reported and marked 'self-reported, unverified' in line with the requirement to qualify unverified progress (aligned with Rule 1\u2019s measurability intent)."
+    },
+    "verdict": {
+      "scores": {
+        "specificity": 3,
+        "measurability": 3,
+        "risk_awareness": 3
+      },
+      "total": 9,
+      "verdict": "pass",
+      "reasoning": {
+        "specificity": "All tasks are rewritten as specific deliverables with explicit owners and deadlines or surfaced gaps, SMART-flagged where incomplete, and dependencies are clearly surfaced (Rule 1, Rule 4, Rule 7).",
+        "measurability": "KPIs have direction, magnitude, and timeframe or are flagged for missing elements, progress is quantified and flagged as self-reported, and risks have explicit business impact (Rule 2, Rule 3, Rule 6).",
+        "risk_awareness": "Tasks are correctly classified into blocked/on-track/done, recommendations are tied to specific risks and rules, and no sensitive performance signals require restricted distribution (Rule 5, Rule 8, Rule 9)."
+      },
+      "rules_cited": [
+        "Rule 1",
+        "Rule 2",
+        "Rule 3",
+        "Rule 4",
+        "Rule 5",
+        "Rule 6",
+        "Rule 7",
+        "Rule 8",
+        "Rule 9"
+      ],
+      "fix": ""
+    },
+    "revision_attempted": false,
+    "delivery": {
+      "path": "deliver_to_requester",
+      "message": "Notes passed rubric. Ready to deliver."
+    }
+  },
+  "agent_trace": [
+    {
+      "agent": "Intake",
+      "status": "ok"
+    },
+    {
+      "agent": "Search",
+      "status": "ok",
+      "rules_retrieved": [
+        5,
+        1,
+        7
+      ]
+    },
+    {
+      "agent": "Brush",
+      "status": "ok"
+    },
+    {
+      "agent": "Validator",
+      "status": "ok",
+      "total": 9,
+      "verdict": "pass"
+    },
+    {
+      "agent": "Route",
+      "delivery_path": "deliver_to_requester"
+    }
+  ],
+  "wall_clock_seconds": 13.88
+}

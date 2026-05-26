@@ -239,7 +239,7 @@
     <button class="tab" data-tab="agent03">
       <span class="agent-num">03</span>
       <span>Task &amp; KPI</span>
-      <span class="tab-status soon">SOON</span>
+      <span class="tab-status live">LIVE</span>
     </button>
     <button class="tab" data-tab="agent04">
       <span class="agent-num">04</span>
@@ -320,10 +320,33 @@
 
   <!-- AGENTS 03 / 04 / 05 — COMING SOON -->
   <div class="tab-panel" id="agent03">
-    <div class="coming-soon">
-      <div class="icon">✅</div>
-      <h3>Agent 03 — Task &amp; KPI</h3>
-      <p>Paste a status update or weekly report → structured tasks + KPI deltas + risks. Same Intake → Search → Brush → Validator spine, scored against SMART-goal and measurability rubric. Building in the current sprint.</p>
+    <div class="grid">
+      <div>
+        <div class="panel">
+          <h2>Status Update</h2>
+          <textarea id="a3-status" class="tall" placeholder="Paste a weekly status, stand-up dump, or project report. The agents will structure tasks, score them SMART, capture KPI deltas, surface risks with impact gaps, and recommend escalations — all scored against task-policy rubric."></textarea>
+          <button class="primary" id="a3-submit">Structure this status →</button>
+          <div class="examples">
+            <h3>Try a sample status</h3>
+            <button class="example-btn" data-a3-example="01"><span class="label">Project Phoenix</span>Mid-project weekly with mixed tasks, blocked dependency, and a performance signal</button>
+            <button class="example-btn" data-a3-example="02"><span class="label">Clean data platform</span>Production-quality weekly with quantified KPIs and clear ownership</button>
+            <button class="example-btn" data-a3-example="03"><span class="label">Messy stand-up</span>Unstructured "morning dump" with vague KPIs and buried HR signals</button>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Agent Activity</h2>
+          <div id="a3-activity" class="activity"></div>
+        </div>
+      </div>
+      <div>
+        <div id="a3-results" class="panel">
+          <h2>Structured Status</h2>
+          <div class="empty">
+            <div class="empty-icon">✅</div>
+            Paste a status update and submit. Agent 03 uses the same Intake → Search → Brush → Validator pattern as Agents 01 and 02 — different domain, same architecture.
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <div class="tab-panel" id="agent04">
@@ -345,6 +368,7 @@
 <script>
 const API_AGENT01 = "http://localhost:8000/run";
 const API_AGENT02 = "http://localhost:8000/run_meeting";
+const API_AGENT03 = "http://localhost:8000/run_status";
 
 const AGENT01_SAMPLES = {
   "01": "hey can you make me a launch banner for Project Atlas? going out to healthcare audiences next week, needs to feel modern and trustworthy. M42 is the lead OpCo",
@@ -357,6 +381,12 @@ const AGENT02_SAMPLES = {
   "01": "Meeting on May 25, 2026. Project Atlas weekly sync.\nAttendees: Feras, Sara, Mohammed, Lina.\n\nSara opened with the Q3 roadmap. We discussed shipping the radiology module ahead of pathology — Lina pushed back on this because the pathology team is further along technically. After 20 minutes of back and forth, we decided to ship pathology first, then radiology in Q4. Rationale: pathology is more validated clinically and has earlier commercial demand from M42 customers.\n\nAction items:\n- Mohammed will draft the customer comms by Friday.\n- Sara to update the roadmap deck.\n- Someone needs to talk to the regulatory team about pathology approval timelines — we didn't decide who.\n\nWe also briefly touched on a difficult HR situation with one of the contractors — we agreed to discuss this in a separate restricted session next week.\n\nOpen questions:\n- Should we delay the official Q3 announcement until pathology is in beta? No conclusion.\n- Lina raised whether the radiology folks would feel sidelined by the pivot — to be revisited.\n\nWe will follow up on the regulatory question in two weeks.",
   "02": "Quarterly steering committee, May 22 2026. Present: Dr. Khalid (chair), Maria, Tariq, Yuki, Olivia.\n\nMaria walked through Q1 financials. Revenue tracking 12% ahead of plan, gross margin in line with forecast. We decided to release Q1 results externally on June 8 — rationale: the audit is finalising and our investor relations window opens that week.\n\nTariq raised the data infrastructure investment. After significant debate, the committee decided to APPROVE the $4.2M cloud migration budget. Rationale: existing on-prem capacity will be exceeded in Q3 based on current growth, and migration is cheaper than expanding on-prem. Yuki noted dissent on the timeline being aggressive but did not block.\n\nOlivia presented the talent pipeline. Two senior hires were approved — one for the platform team and one for clinical safety. Rationale not discussed in the meeting (HR will document separately).\n\nWe deferred the brand refresh decision to the next meeting. Tariq will share more vendor proposals before then.\n\nOlivia will follow up with the board on the cloud migration approval — she'll do this before June 1.\n\nNext steering committee is June 12. No risks raised in this session.",
   "03": "Quick sync today (didn't catch the date). Bunch of us in the call - me, Khalifa, two of the design folks I think, maybe Reem? Not sure if Hassan joined.\n\nSo we kicked around the new AI assistant concept. Lots of ideas thrown around. Khalifa really likes the voice-first angle, but Reem thinks people will hate that. The design folks were torn. We sort of agreed voice should be optional but the default UX is still TBD.\n\nWe talked about pricing too. Maybe freemium? Or maybe team-based pricing? We'll figure it out later.\n\nSomeone (Khalifa I think?) said they'd put together a vision deck \"soon\" - I should follow up on that. And the design folks are going to mock something up by end of next week, possibly the week after if they're slammed.\n\nWe discussed integrating with the existing platform but didn't reach a clear conclusion. Reem wants tight integration, Khalifa wants it to feel like a separate product. We'll loop back.\n\nOne concern raised - if we go voice-first, do we need to worry about accent recognition for our regional users? Nobody really had an answer. Tabled it.\n\nAction items? Honestly hard to say. Khalifa for the deck. Design for the mocks. Me to set up the next meeting.\n\nWe'll meet again soon to keep this moving."
+};
+
+const AGENT03_SAMPLES = {
+  "01": "Project Phoenix weekly status, week of May 19-25, from Feras.\n\nWe're running pretty behind. The team did about 60% of what we planned last week — the data migration is taking longer than expected because of those schema mismatches. NPS is up by a few points though, which is good.\n\nTasks:\n- Sara needs to follow up with Legal about the contract thing.\n- Mohammed is working on the API redesign, should be done by end of next week.\n- The migration scripts are blocked on getting access to the staging database from the infra team.\n- Someone needs to update the customer-facing changelog — we keep forgetting.\n\nKPIs:\n- NPS up a few points vs last month.\n- Velocity at 60% of plan.\n- Two customer escalations this week, both about the migration delays.\n\nRisks: Q3 deadline is at risk. The infra team is also slow on tickets generally — Hassan in particular has missed three deadlines in a row, we need to think about whether he's overloaded or if there's a bigger issue.\n\nWe'll meet again next week to figure out the migration plan.",
+  "02": "M42 Data Platform — weekly status, week ending May 23, 2026. Reporter: Maria Hernandez.\n\nThis week we shipped the v2.3 query optimizer release on schedule (May 21). Initial production metrics show query latency p95 down 18% week-over-week, exceeding our 12% target. Adoption: 47 of 60 internal teams have migrated, on track for 100% by June 6.\n\nTasks completed:\n- Olivia deployed the v2.3 optimizer to production on May 21 (DONE).\n- Tariq published the migration guide and ran 3 office hours sessions (DONE).\n\nTasks in flight:\n- Jin will complete the audit log refactor by June 4. Currently 70% done based on PR review status — on track.\n- Aisha is leading the SSO integration with M42 Auth, blocked on receiving the OAuth client config from the M42 Auth team. Expected unblocked by May 28; if not, we'll escalate to Dr. Khalid.\n\nKPIs:\n- Query latency p95: 142ms, down 18% vs week ending May 16.\n- Internal team adoption: 78% (47/60), up from 65% last week.\n- Open P1 bugs: 0.\n- Customer satisfaction (internal NPS): 62, up 8 points vs Q1 baseline.\n\nRisks: One risk worth flagging — the SSO dependency on M42 Auth. If we slip past May 28, we'd defer the v2.4 release from June 15 to June 22, potential impact ~$80K in deferred internal-team productivity.\n\nDecisions next week: whether to expand the v2.3 query optimizer to external customers (currently internal-only). Tariq is preparing a recommendation.",
+  "03": "ok so um morning, this is my dump for the week. not gonna be polished sorry.\n\nstuff that happened:\n- the design review went ok i think. some pushback on the color scheme but nothing major. we'll revisit\n- shipped the bugfix release tuesday i think? or wednesday. anyway it's out\n- we're behind on the dashboard rebuild. like really behind. nobody's actually owning it and i think we keep dropping it. someone needs to grab this\n- onboarding flow is mostly done, just need to write the e2e tests\n- we have a meeting friday about the q3 OKRs\n\nnumbers?\n- bug count down (didn't check exactly)\n- DAU flat-ish\n- something weird with retention — i think it's down but the dashboard is broken so hard to tell, gonna ask the analytics folks\n\nworries:\n- the dashboard rebuild thing is a real problem\n- couple of the new joiners seem to be struggling with the codebase, not naming names but might need a buddy system or something\n- we're hiring too slowly and i think it's affecting things\n\nwhat i need from leadership:\n- decision on the q3 priorities\n- maybe more headcount approval?\n\nthat's it i think"
 };
 
 const STAGES = [
@@ -386,6 +416,11 @@ document.querySelectorAll("[data-a1-example]").forEach(btn => {
 document.querySelectorAll("[data-a2-example]").forEach(btn => {
   btn.addEventListener("click", () => {
     document.getElementById("a2-transcript").value = AGENT02_SAMPLES[btn.dataset.a2Example];
+  });
+});
+document.querySelectorAll("[data-a3-example]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.getElementById("a3-status").value = AGENT03_SAMPLES[btn.dataset.a3Example];
   });
 });
 
@@ -423,6 +458,7 @@ async function animateStages(elementId) {
 
 renderStagesInitial("a1-activity");
 renderStagesInitial("a2-activity");
+renderStagesInitial("a3-activity");
 
 // AGENT 01 SUBMIT
 document.getElementById("a1-submit").addEventListener("click", async () => {
@@ -530,6 +566,82 @@ function renderAgent02Results(resp) {
   const deliveryHTML = `<div class="section"><div class="section-label">Delivery decision <span class="agent-tag">ROUTE</span></div><div class="delivery-card"><div class="delivery-path">→ ${esc(delivery.path||"deliver_to_requester")}</div><div class="delivery-msg">${esc(delivery.message||"Ready to deliver.")}</div></div></div>`;
 
   document.getElementById("a2-results").innerHTML = `<h2>Meeting Notes</h2>${verdictHTML}${metaHTML}${summaryHTML}${decisionsHTML}${actionsHTML}${openQsHTML}${risksHTML}${followUpsHTML}${rulesHTML}${deliveryHTML}`;
+}
+
+
+
+
+
+document.getElementById("a3-submit").addEventListener("click", async () => {
+  const statusText = document.getElementById("a3-status").value.trim();
+  if (!statusText) { alert("Paste a status update first."); return; }
+  const btn = document.getElementById("a3-submit");
+  btn.disabled = true; btn.textContent = "Agents working...";
+  document.getElementById("a3-results").innerHTML = '<h2>Structured Status</h2><div class="empty"><div class="empty-icon">◐</div>Agents are working — watch the activity panel</div>';
+  const animation = animateStages("a3-activity");
+  let response;
+  try {
+    const r = await fetch(API_AGENT03, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status_text: statusText }) });
+    response = await r.json();
+  } catch (e) {
+    document.getElementById("a3-activity").innerHTML = `<div class="error">Failed to reach API at ${API_AGENT03}. Is the server running on port 8000?</div>`;
+    btn.disabled = false; btn.textContent = "Structure this status →";
+    return;
+  }
+  await animation;
+  renderStagesAllDone("a3-activity");
+  renderAgent03Results(response);
+  btn.disabled = false; btn.textContent = "Structure this status →";
+});
+
+function renderAgent03Results(resp) {
+  const out = resp.output || {};
+  const status_obj = out.status_obj || {};
+  const notes = out.final_notes || {};
+  const verdict = out.verdict || {};
+  const scores = verdict.scores || {};
+  const rules = out.retrieved_rules || [];
+  const delivery = out.delivery || {};
+  const vClass = verdict.verdict || "pass";
+  const distribution = notes.distribution || "wide";
+
+  const verdictHTML = `<div class="section"><div class="section-label">Validator verdict <span class="agent-tag">VALIDATOR</span></div><div class="verdict-card"><div class="verdict-header"><span class="verdict-badge ${vClass}">${vClass} · ${verdict.total ?? "?"}/9</span><span class="verdict-meta">${out.revision_attempted ? "after 1 revision" : "first pass"}</span></div><div class="score-grid"><div class="score-cell"><div class="score-num">${scores.specificity ?? "—"}<span class="denom">/3</span></div><div class="score-label">Specificity</div></div><div class="score-cell"><div class="score-num">${scores.measurability ?? "—"}<span class="denom">/3</span></div><div class="score-label">Measurability</div></div><div class="score-cell"><div class="score-num">${scores.risk_awareness ?? "—"}<span class="denom">/3</span></div><div class="score-label">Risk awareness</div></div></div>${verdict.reasoning ? `<div class="reasoning"><p><strong>Specificity:</strong> ${esc(verdict.reasoning.specificity||"")}</p><p><strong>Measurability:</strong> ${esc(verdict.reasoning.measurability||"")}</p><p><strong>Risk awareness:</strong> ${esc(verdict.reasoning.risk_awareness||"")}</p></div>` : ""}</div></div>`;
+
+  const meta = notes.metadata || {};
+  const metaHTML = `<div class="section"><div class="section-label">Status metadata <span class="agent-tag">BRUSH</span></div><div class="meeting-meta"><p><strong>Project / Team:</strong> ${esc(meta.project_or_team||"—")}</p><p><strong>Reporter:</strong> ${esc(meta.reporter||"—")}</p><p><strong>Period:</strong> ${esc(meta.period||"—")}</p><p><strong>Distribution:</strong> <span class="distribution-badge ${distribution}">${distribution}</span>${notes.distribution_reason?` <span style="color:var(--text-dim);font-size:11px;margin-left:6px">— ${esc(notes.distribution_reason)}</span>`:""}</p></div></div>`;
+
+  const digestHTML = `<div class="section"><div class="section-label">90-second digest <span class="agent-tag">BRUSH</span></div><div class="summary-card">${esc(notes.digest_90s||"—")}</div></div>`;
+
+  const tasks = notes.tasks || [];
+  const tasksHTML = tasks.length ? `<div class="section"><div class="section-label">Tasks (${tasks.length}) <span class="agent-tag">BRUSH</span></div>${tasks.map(t => {
+    const isGap = (t.owner||"").includes("UNOWNED") || (t.deadline||"").includes("NO DEADLINE") || (t.smart_flag||"").includes("needs SMART");
+    const statusClass = t.status === "blocked" ? "gap-tag" : (t.status === "at-risk" ? "gap-tag" : "");
+    return `<div class="item-card ${isGap?"gap":""}"><div class="item-title">${esc(t.description||"")}</div><div class="item-meta"><span>Owner: <span class="${(t.owner||"").includes("UNOWNED")?"gap-tag":""}">${esc(t.owner||"—")}</span></span><span>Deadline: <span class="${(t.deadline||"").includes("NO DEADLINE")?"gap-tag":""}">${esc(t.deadline||"—")}</span></span><span>Status: <span class="${statusClass}">${esc(t.status||"—")}</span></span></div>${t.smart_flag && t.smart_flag !== "ok" ? `<div class="item-meta" style="margin-top:6px"><span class="gap-tag">⚠ ${esc(t.smart_flag)}</span></div>` : ""}${t.blocked_by ? `<div class="item-meta" style="margin-top:4px"><span><strong>Blocked by:</strong> ${esc(t.blocked_by)}</span></div>` : ""}</div>`;
+  }).join("")}</div>` : "";
+
+  const kpis = notes.kpis || [];
+  const kpisHTML = kpis.length ? `<div class="section"><div class="section-label">KPIs (${kpis.length}) <span class="agent-tag">BRUSH</span></div>${kpis.map(k => {
+    const isGap = (k.completeness_flag||"").includes("needs") || (k.magnitude||"").includes("unspecified") || (k.timeframe||"").includes("unspecified");
+    return `<div class="item-card ${isGap?"gap":""}"><div class="item-title">${esc(k.name||"")} <span style="color:var(--text-dim);font-size:11px;margin-left:6px">(${esc(k.direction||"—")})</span></div><div class="item-meta"><span>Magnitude: <span class="${(k.magnitude||"").includes("unspecified")?"gap-tag":""}">${esc(k.magnitude||"—")}</span></span><span>Timeframe: <span class="${(k.timeframe||"").includes("unspecified")?"gap-tag":""}">${esc(k.timeframe||"—")}</span></span></div>${k.completeness_flag && k.completeness_flag !== "ok" ? `<div class="item-meta" style="margin-top:6px"><span class="gap-tag">⚠ ${esc(k.completeness_flag)}</span></div>` : ""}</div>`;
+  }).join("")}</div>` : "";
+
+  const risks = notes.risks || [];
+  const risksHTML = risks.length ? `<div class="section"><div class="section-label">Risks (${risks.length}) <span class="agent-tag">BRUSH</span></div>${risks.map(r => {
+    const impactGap = (r.business_impact||"").includes("IMPACT NOT STATED");
+    return `<div class="item-card ${impactGap?"gap":""}"><div class="item-title">${esc(r.risk||"")}</div><div class="item-meta"><span><strong>At risk:</strong> ${esc(r.what_is_at_risk||"—")}</span><span><strong>Impact:</strong> <span class="${impactGap?"gap-tag":""}">${esc(r.business_impact||"—")}</span></span>${r.trigger_or_cause?`<span><strong>Trigger:</strong> ${esc(r.trigger_or_cause)}</span>`:""}</div></div>`;
+  }).join("")}</div>` : "";
+
+  const openQs = notes.open_questions || [];
+  const openQsHTML = openQs.length ? `<div class="section"><div class="section-label">Open questions (${openQs.length}) <span class="agent-tag">BRUSH</span></div>${openQs.map(q => `<div class="open-q-card">${esc(q.question||"")}${q.best_placed_to_answer?`<div class="answerer">Best placed to answer: ${esc(q.best_placed_to_answer)}</div>`:""}</div>`).join("")}</div>` : "";
+
+  const recs = notes.recommendations || [];
+  const recsHTML = recs.length ? `<div class="section"><div class="section-label">Recommendations (${recs.length}) <span class="agent-tag">BRUSH</span></div>${recs.map(r => `<div class="item-card"><div class="item-title">[${esc(r.recommendation||"")}] ${esc(r.target||"")}</div><div class="item-meta" style="font-family:inherit;font-size:12px;line-height:1.5"><span><strong>Rationale:</strong> ${esc(r.rationale||"—")}</span></div></div>`).join("")}</div>` : "";
+
+  const rulesHTML = rules.length ? `<div class="section"><div class="section-label">Retrieved task policy rules <span class="agent-tag">SEARCH</span></div><div class="rules-list">${rules.map(r => `<div class="rule-card"><div class="rule-header"><span class="rule-id">Rule ${r.rule_id}</span><span class="rule-title">${esc(r.title)}</span><div class="similarity-bar"><div class="similarity-fill" style="width:${(r.similarity*100).toFixed(0)}%"></div></div><span class="similarity-pct">${(r.similarity*100).toFixed(1)}%</span></div></div>`).join("")}</div></div>` : "";
+
+  const deliveryHTML = `<div class="section"><div class="section-label">Delivery decision <span class="agent-tag">ROUTE</span></div><div class="delivery-card"><div class="delivery-path">→ ${esc(delivery.path||"deliver_to_requester")}</div><div class="delivery-msg">${esc(delivery.message||"Ready to deliver.")}</div></div></div>`;
+
+  document.getElementById("a3-results").innerHTML = `<h2>Structured Status</h2>${verdictHTML}${metaHTML}${digestHTML}${tasksHTML}${kpisHTML}${risksHTML}${openQsHTML}${recsHTML}${rulesHTML}${deliveryHTML}`;
 }
 
 function esc(s) {

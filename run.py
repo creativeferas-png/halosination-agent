@@ -30,6 +30,16 @@ from app.agent02.validator import (
     PASS_THRESHOLD as MEETING_PASS_THRESHOLD,
 )
 
+# Agent 03 (Task & KPI) imports
+from app.agent03.intake import run_intake as run_status_intake
+from app.agent03.search import run_search as run_status_search
+from app.agent03.brush import run_brush as run_status_brush
+from app.agent03.validator import (
+    run_validator as run_status_validator,
+    run_brush_revision as run_status_brush_revision,
+    PASS_THRESHOLD as STATUS_PASS_THRESHOLD,
+)
+
 LOG_DIR = Path("logs")
 LOG_DIR.mkdir(exist_ok=True)
 log_file = LOG_DIR / f"run_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
@@ -66,6 +76,19 @@ class MeetingRequest(BaseModel):
 
 
 class MeetingResponse(BaseModel):
+    status: str
+    use_case_id: str
+    agent: str
+    output: dict
+    agent_trace: list
+
+
+class StatusRequest(BaseModel):
+    status_text: str
+    context: dict | None = None
+
+
+class StatusResponse(BaseModel):
     status: str
     use_case_id: str
     agent: str
@@ -420,6 +443,183 @@ def run_meeting(payload: MeetingRequest):
         agent="Agent 02 - Productivity (Meeting Summariser)",
         output={
             "meeting": meeting,
+            "retrieved_rules": retrieved_rules,
+            "final_notes": final_draft,
+            "verdict": final_verdict,
+            "revision_attempted": revision_attempted,
+            "delivery": {
+                "path": delivery_path,
+                "message": message,
+            },
+        },
+        agent_trace=trace,
+    )
+
+
+
+
+@app.post("/run_status", response_model=StatusResponse)
+def run_status(payload: StatusRequest):
+    """
+    HALO Agent 03 (Task & KPI) — Status Update Structurer pipeline.
+
+    Same architectural spine as Agents 01/02:
+      Intake -> Search -> Brush -> Validator
+        if Validator.verdict == "pass"   -> Route -> deliver
+        if Validator.verdict == "revise" -> Brush revises ONCE -> Validator re-scores
+          if still failing               -> escalate to human review
+
+    Endpoint is on the same port (8000) as /run and /run_meeting.
+    Different path, different agent.
+    """
+    text_preview = payload.status_text[:100]
+    logger.info(f"STATUS_RUN_START | preview={text_preview!r}")
+    trace = []
+
+    # ----- Agent 1: Intake -----
+    logger.info("AGENT_STEP | agent=Agent03.Intake | action=parse_status")
+    status_obj = run_status_intake(payload.status_text)
+    trace.append({
+        "agent": "Agent03.Intake",
+        "action": "parse_status",
+        "input_preview": payload.status_text[:120],
+        "output": status_obj,
+        "status": "error" if "error" in status_obj else "ok",
+    })
+    if "error" in status_obj:
+        logger.warning("STATUS_RUN_DEGRADED | intake_failed")
+        return StatusResponse(
+            status="degraded", use_case_id="13",
+            agent="Agent 03 - Task & KPI",
+            output={"message": "Intake agent failed.", "detail": status_obj},
+            agent_trace=trace,
+        )
+
+    # ----- Agent 2: Search -----
+    logger.info("AGENT_HANDOFF | from=Agent03.Intake | to=Agent03.Search")
+    logger.info("AGENT_STEP | agent=Agent03.Search | action=retrieve_task_rules")
+    search_result = run_status_search(status_obj, top_k=3)
+    if "error" in search_result:
+        logger.warning("STATUS_SEARCH_DEGRADED | continuing with empty rules")
+        retrieved_rules = []
+    else:
+        retrieved_rules = search_result.get("retrieved_rules", [])
+    trace.append({
+        "agent": "Agent03.Search",
+        "action": "retrieve_task_rules",
+        "rules_retrieved": [r["rule_id"] for r in retrieved_rules],
+        "output": search_result,
+        "status": "error" if "error" in search_result else "ok",
+    })
+
+    # ----- Agent 3: Brush -----
+    rules_count = len(retrieved_rules)
+    logger.info(f"AGENT_HANDOFF | from=Agent03.Search | to=Agent03.Brush | rules_retrieved={rules_count}")
+    logger.info("AGENT_STEP | agent=Agent03.Brush | action=draft_notes")
+    draft = run_status_brush(status_obj, retrieved_rules=retrieved_rules)
+    trace.append({
+        "agent": "Agent03.Brush",
+        "action": "draft_notes",
+        "rules_used": [r["rule_id"] for r in retrieved_rules],
+        "output": draft,
+        "status": "error" if "error" in draft else "ok",
+    })
+    if "error" in draft:
+        logger.warning("STATUS_RUN_DEGRADED | brush_failed")
+        return StatusResponse(
+            status="degraded", use_case_id="13",
+            agent="Agent 03 - Task & KPI",
+            output={"message": "Brush agent failed.", "status_obj": status_obj, "detail": draft},
+            agent_trace=trace,
+        )
+
+    # ----- Agent 4: Validator -----
+    logger.info("AGENT_HANDOFF | from=Agent03.Brush | to=Agent03.Validator | round=1")
+    logger.info("AGENT_STEP | agent=Agent03.Validator | action=score_initial")
+    verdict_v1 = run_status_validator(status_obj, draft, is_revision=False, retrieved_rules=retrieved_rules)
+    trace.append({
+        "agent": "Agent03.Validator",
+        "action": "score_initial",
+        "output": verdict_v1,
+        "status": "error" if "error" in verdict_v1 else "ok",
+    })
+    if "error" in verdict_v1:
+        logger.warning("STATUS_RUN_DEGRADED | validator_failed")
+        return StatusResponse(
+            status="degraded", use_case_id="13",
+            agent="Agent 03 - Task & KPI",
+            output={"message": "Validator failed.", "status_obj": status_obj, "draft": draft, "detail": verdict_v1},
+            agent_trace=trace,
+        )
+
+    final_draft = draft
+    final_verdict = verdict_v1
+    revision_attempted = False
+
+    # ----- Revision loop -----
+    if verdict_v1.get("verdict") == "revise":
+        revision_attempted = True
+        fix = verdict_v1.get("fix", "")
+        v1_total = verdict_v1.get('total')
+        fix_preview = fix[:80]
+        logger.info(f"STATUS_REVISION_TRIGGERED | total={v1_total}/9 | fix={fix_preview!r}")
+        logger.info("AGENT_HANDOFF | from=Agent03.Validator | to=Agent03.Brush | action=revise")
+        logger.info("AGENT_STEP | agent=Agent03.Brush | action=revise")
+        revised_draft = run_status_brush_revision(status_obj, draft, fix, retrieved_rules=retrieved_rules)
+        trace.append({
+            "agent": "Agent03.Brush",
+            "action": "revise",
+            "fix_applied": fix,
+            "output": revised_draft,
+            "status": "error" if "error" in revised_draft else "ok",
+        })
+
+        if "error" not in revised_draft:
+            logger.info("AGENT_HANDOFF | from=Agent03.Brush | to=Agent03.Validator | round=2")
+            logger.info("AGENT_STEP | agent=Agent03.Validator | action=score_revised")
+            verdict_v2 = run_status_validator(status_obj, revised_draft, is_revision=True, retrieved_rules=retrieved_rules)
+            trace.append({
+                "agent": "Agent03.Validator",
+                "action": "score_revised",
+                "output": verdict_v2,
+                "status": "error" if "error" in verdict_v2 else "ok",
+            })
+            if "error" not in verdict_v2:
+                final_draft = revised_draft
+                final_verdict = verdict_v2
+
+    # ----- Route -----
+    verdict_label = final_verdict.get("verdict", "unknown")
+    if verdict_label == "pass":
+        delivery_path = "deliver_to_requester"
+        message = "Status notes passed rubric. Ready to deliver."
+    elif verdict_label == "escalate":
+        delivery_path = "deliver_to_requester_cc_chief_of_staff"
+        message = "Notes still below threshold after one revision. Escalating to human review."
+    else:
+        delivery_path = "deliver_to_requester_cc_chief_of_staff"
+        message = f"Verdict: {verdict_label}. Routing with human review."
+
+    trace.append({
+        "agent": "Agent03.Route",
+        "action": "decide_delivery_path",
+        "delivery_path": delivery_path,
+        "driven_by_verdict": verdict_label,
+    })
+
+    steps_count = len(trace)
+    logger.info(
+        f"STATUS_RUN_DONE | status=success | verdict={verdict_label} | "
+        f"revision_attempted={revision_attempted} | rules_retrieved={rules_count} | "
+        f"trace_steps={steps_count}"
+    )
+
+    return StatusResponse(
+        status="success",
+        use_case_id="13",
+        agent="Agent 03 - Task & KPI (Status Structurer)",
+        output={
+            "status_obj": status_obj,
             "retrieved_rules": retrieved_rules,
             "final_notes": final_draft,
             "verdict": final_verdict,
