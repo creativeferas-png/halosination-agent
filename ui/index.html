@@ -706,6 +706,45 @@ function renderAgent03Results(resp) {
   document.getElementById("a3-results").innerHTML = `<h2>Structured Status</h2>${verdictHTML}${metaHTML}${digestHTML}${tasksHTML}${kpisHTML}${risksHTML}${openQsHTML}${recsHTML}${rulesHTML}${deliveryHTML}`;
 }
 
+
+
+function renderAgent04Results(resp) {
+  const out = resp.output || {};
+  const profile = out.profile || {};
+  const suggestions = out.final_suggestions || {};
+  const verdict = out.verdict || {};
+  const scores = verdict.scores || {};
+  const rules = out.retrieved_rules || [];
+  const delivery = out.delivery || {};
+  const vClass = verdict.verdict || "pass";
+  const distribution = suggestions.distribution || "wide";
+  const meta = suggestions.metadata || {};
+
+  const verdictHTML = `<div class="section"><div class="section-label">Validator verdict <span class="agent-tag">VALIDATOR</span></div><div class="verdict-card"><div class="verdict-header"><span class="verdict-badge ${vClass}">${vClass} · ${verdict.total ?? "?"}/9</span><span class="verdict-meta">${out.revision_attempted ? "after 1 revision" : "first pass"}</span></div><div class="score-grid"><div class="score-cell"><div class="score-num">${scores.relevance ?? "—"}<span class="denom">/3</span></div><div class="score-label">Relevance</div></div><div class="score-cell"><div class="score-num">${scores.diversity ?? "—"}<span class="denom">/3</span></div><div class="score-label">Diversity</div></div><div class="score-cell"><div class="score-num">${scores.privacy_and_care ?? "—"}<span class="denom">/3</span></div><div class="score-label">Privacy &amp; Care</div></div></div>${verdict.reasoning ? `<div class="reasoning"><p><strong>Relevance:</strong> ${esc(verdict.reasoning.relevance||"")}</p><p><strong>Diversity:</strong> ${esc(verdict.reasoning.diversity||"")}</p><p><strong>Privacy &amp; Care:</strong> ${esc(verdict.reasoning.privacy_and_care||"")}</p></div>` : ""}</div></div>`;
+
+  const metaHTML = `<div class="section"><div class="section-label">Profile metadata <span class="agent-tag">BRUSH</span></div><div class="meeting-meta"><p><strong>Name:</strong> ${esc(meta.name||profile.name||"—")}</p><p><strong>Role:</strong> ${esc(meta.role||profile.role||"—")}</p><p><strong>Career stage:</strong> ${esc(meta.career_stage||profile.career_stage||"—")}</p><p><strong>For employee only:</strong> ${meta.for_employee_only ? "yes" : "no"}</p><p><strong>Distribution:</strong> <span class="distribution-badge ${distribution}">${distribution}</span>${suggestions.distribution_reason?` <span style="color:var(--text-dim);font-size:11px;margin-left:6px">— ${esc(suggestions.distribution_reason)}</span>`:""}</p></div></div>`;
+
+  const summaryHTML = `<div class="section"><div class="section-label">60-second summary <span class="agent-tag">BRUSH</span></div><div class="summary-card">${esc(suggestions.summary_60s||"—")}</div></div>`;
+
+  const wellbeingHTML = suggestions.wellbeing_note ? `<div class="section"><div class="section-label">Wellbeing note <span class="agent-tag">BRUSH</span></div><div class="item-card gap"><div class="item-title" style="color:var(--warn)">💚 ${esc(suggestions.wellbeing_note)}</div></div></div>` : "";
+
+  const conflictsHTML = (suggestions.conflicts_excluded && suggestions.conflicts_excluded.length) ? `<div class="section"><div class="section-label">Conflicts excluded (Rule 8) <span class="agent-tag">BRUSH</span></div>${suggestions.conflicts_excluded.map(c => `<div class="item-card gap"><div class="item-title">⊘ ${esc(c)}</div></div>`).join("")}</div>` : "";
+
+  const people = suggestions.people_suggestions || [];
+  const peopleHTML = people.length ? `<div class="section"><div class="section-label">People suggestions (${people.length}) <span class="agent-tag">BRUSH</span></div>${people.map(p => `<div class="item-card"><div class="item-title">[${esc(p.suggestion_type||"")}] ${esc(p.illustrative_name||"")}</div><div class="item-meta" style="font-family:inherit;font-size:12px;line-height:1.5"><span><strong>Role:</strong> ${esc(p.illustrative_role||"—")}</span></div><div class="item-meta" style="font-family:inherit;font-size:12px;line-height:1.5;margin-top:6px"><span><strong>Why:</strong> ${esc(p.relevance_rationale||"—")}</span></div>${p.why_now ? `<div class="item-meta" style="font-family:inherit;font-size:12px;line-height:1.5;margin-top:4px"><span><strong>Why now:</strong> ${esc(p.why_now)}</span></div>` : ""}${p.power_dynamics_note ? `<div class="item-meta" style="font-family:inherit;font-size:12px;line-height:1.5;margin-top:4px"><span><strong>Power dynamics:</strong> ${esc(p.power_dynamics_note)}</span></div>` : ""}<div class="item-meta" style="margin-top:6px"><span>Basis: <span class="${p.basis === 'personal' ? 'gap-tag' : ''}">${esc(p.basis||"—")}</span></span></div></div>`).join("")}</div>` : "";
+
+  const groups = suggestions.group_suggestions || [];
+  const groupsHTML = groups.length ? `<div class="section"><div class="section-label">Group suggestions (${groups.length}) <span class="agent-tag">BRUSH</span></div>${groups.map(g => `<div class="item-card"><div class="item-title">${esc(g.channel_or_group_name||"")}</div><div class="item-meta" style="font-family:inherit;font-size:12px;line-height:1.5"><span><strong>What:</strong> ${esc(g.what_it_does||"—")}</span></div><div class="item-meta" style="font-family:inherit;font-size:12px;line-height:1.5;margin-top:4px"><span><strong>Fit:</strong> ${esc(g.why_this_employee_fits||"—")}</span></div>${g.frequency_or_cadence ? `<div class="item-meta" style="margin-top:6px"><span><strong>Cadence:</strong> ${esc(g.frequency_or_cadence)}</span></div>` : ""}</div>`).join("")}</div>` : "";
+
+  const diversityHTML = suggestions.diversity_note ? `<div class="section"><div class="section-label">Diversity note (Rule 3) <span class="agent-tag">BRUSH</span></div><div class="item-card"><div class="item-title" style="font-weight:normal">${esc(suggestions.diversity_note)}</div></div></div>` : "";
+
+  const rulesHTML = rules.length ? `<div class="section"><div class="section-label">Retrieved social policy rules <span class="agent-tag">SEARCH</span></div><div class="rules-list">${rules.map(r => `<div class="rule-card"><div class="rule-header"><span class="rule-id">Rule ${r.rule_id}</span><span class="rule-title">${esc(r.title)}</span><div class="similarity-bar"><div class="similarity-fill" style="width:${(r.similarity*100).toFixed(0)}%"></div></div><span class="similarity-pct">${(r.similarity*100).toFixed(1)}%</span></div></div>`).join("")}</div></div>` : "";
+
+  const deliveryHTML = `<div class="section"><div class="section-label">Delivery decision <span class="agent-tag">ROUTE</span></div><div class="delivery-card"><div class="delivery-path">→ ${esc(delivery.path||"deliver_to_employee")}</div><div class="delivery-msg">${esc(delivery.message||"Ready to deliver.")}</div></div></div>`;
+
+  document.getElementById("a4-results").innerHTML = `<h2>Connection Suggestions</h2>${verdictHTML}${metaHTML}${summaryHTML}${wellbeingHTML}${conflictsHTML}${peopleHTML}${groupsHTML}${diversityHTML}${rulesHTML}${deliveryHTML}`;
+}
+
 function esc(s) {
   if (typeof s !== "string") return s ?? "";
   return s.replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
