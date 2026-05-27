@@ -244,7 +244,7 @@
     <button class="tab" data-tab="agent04">
       <span class="agent-num">04</span>
       <span>Social</span>
-      <span class="tab-status soon">SOON</span>
+      <span class="tab-status live">LIVE</span>
     </button>
     <button class="tab" data-tab="agent05">
       <span class="agent-num">05</span>
@@ -350,10 +350,33 @@
     </div>
   </div>
   <div class="tab-panel" id="agent04">
-    <div class="coming-soon">
-      <div class="icon">🤝</div>
-      <h3>Agent 04 — Social</h3>
-      <p>Employee profile → connection suggestions + group recommendations. Embedding-similarity at its most natural fit. Scored for relevance, diversity, and privacy-respect. Building in the current sprint.</p>
+    <div class="grid">
+      <div>
+        <div class="panel">
+          <h2>Employee Profile</h2>
+          <textarea id="a4-profile" class="tall" placeholder="Paste an employee's self-introduction, profile blurb, or about-me text. Agent 04 will produce policy-compliant connection suggestions — illustrative people, groups, mentors — with care-appropriate handling of sensitive social signals."></textarea>
+          <button class="primary" id="a4-submit">Suggest connections →</button>
+          <div class="examples">
+            <h3>Try a sample profile</h3>
+            <button class="example-btn" data-a4-example="01"><span class="label">New &amp; relocated</span>Mid-career data scientist with isolation signals — Rule 9 stress test</button>
+            <button class="example-btn" data-a4-example="02"><span class="label">Senior &amp; clean</span>Confident senior engineering leader looking to network</button>
+            <button class="example-btn" data-a4-example="03"><span class="label">Active conflict</span>PM in HR review explicitly excluding people in their reporting chain — Rule 8 stress test</button>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Agent Activity</h2>
+          <div id="a4-activity" class="activity"></div>
+        </div>
+      </div>
+      <div>
+        <div id="a4-results" class="panel">
+          <h2>Connection Suggestions</h2>
+          <div class="empty">
+            <div class="empty-icon">🤝</div>
+            Paste a profile and submit. Agent 04 uses the same Intake → Search → Brush → Validator pattern as the other HALO agents — fourth domain, same architecture.
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <div class="tab-panel" id="agent05">
@@ -369,6 +392,7 @@
 const API_AGENT01 = "http://localhost:8000/run";
 const API_AGENT02 = "http://localhost:8000/run_meeting";
 const API_AGENT03 = "http://localhost:8000/run_status";
+const API_AGENT04 = "http://localhost:8000/run_social";
 
 const AGENT01_SAMPLES = {
   "01": "hey can you make me a launch banner for Project Atlas? going out to healthcare audiences next week, needs to feel modern and trustworthy. M42 is the lead OpCo",
@@ -387,6 +411,14 @@ const AGENT03_SAMPLES = {
   "01": "Project Phoenix weekly status, week of May 19-25, from Feras.\n\nWe're running pretty behind. The team did about 60% of what we planned last week — the data migration is taking longer than expected because of those schema mismatches. NPS is up by a few points though, which is good.\n\nTasks:\n- Sara needs to follow up with Legal about the contract thing.\n- Mohammed is working on the API redesign, should be done by end of next week.\n- The migration scripts are blocked on getting access to the staging database from the infra team.\n- Someone needs to update the customer-facing changelog — we keep forgetting.\n\nKPIs:\n- NPS up a few points vs last month.\n- Velocity at 60% of plan.\n- Two customer escalations this week, both about the migration delays.\n\nRisks: Q3 deadline is at risk. The infra team is also slow on tickets generally — Hassan in particular has missed three deadlines in a row, we need to think about whether he's overloaded or if there's a bigger issue.\n\nWe'll meet again next week to figure out the migration plan.",
   "02": "M42 Data Platform — weekly status, week ending May 23, 2026. Reporter: Maria Hernandez.\n\nThis week we shipped the v2.3 query optimizer release on schedule (May 21). Initial production metrics show query latency p95 down 18% week-over-week, exceeding our 12% target. Adoption: 47 of 60 internal teams have migrated, on track for 100% by June 6.\n\nTasks completed:\n- Olivia deployed the v2.3 optimizer to production on May 21 (DONE).\n- Tariq published the migration guide and ran 3 office hours sessions (DONE).\n\nTasks in flight:\n- Jin will complete the audit log refactor by June 4. Currently 70% done based on PR review status — on track.\n- Aisha is leading the SSO integration with M42 Auth, blocked on receiving the OAuth client config from the M42 Auth team. Expected unblocked by May 28; if not, we'll escalate to Dr. Khalid.\n\nKPIs:\n- Query latency p95: 142ms, down 18% vs week ending May 16.\n- Internal team adoption: 78% (47/60), up from 65% last week.\n- Open P1 bugs: 0.\n- Customer satisfaction (internal NPS): 62, up 8 points vs Q1 baseline.\n\nRisks: One risk worth flagging — the SSO dependency on M42 Auth. If we slip past May 28, we'd defer the v2.4 release from June 15 to June 22, potential impact ~$80K in deferred internal-team productivity.\n\nDecisions next week: whether to expand the v2.3 query optimizer to external customers (currently internal-only). Tariq is preparing a recommendation.",
   "03": "ok so um morning, this is my dump for the week. not gonna be polished sorry.\n\nstuff that happened:\n- the design review went ok i think. some pushback on the color scheme but nothing major. we'll revisit\n- shipped the bugfix release tuesday i think? or wednesday. anyway it's out\n- we're behind on the dashboard rebuild. like really behind. nobody's actually owning it and i think we keep dropping it. someone needs to grab this\n- onboarding flow is mostly done, just need to write the e2e tests\n- we have a meeting friday about the q3 OKRs\n\nnumbers?\n- bug count down (didn't check exactly)\n- DAU flat-ish\n- something weird with retention — i think it's down but the dashboard is broken so hard to tell, gonna ask the analytics folks\n\nworries:\n- the dashboard rebuild thing is a real problem\n- couple of the new joiners seem to be struggling with the codebase, not naming names but might need a buddy system or something\n- we're hiring too slowly and i think it's affecting things\n\nwhat i need from leadership:\n- decision on the q3 priorities\n- maybe more headcount approval?\n\nthat's it i think"
+};
+
+
+
+const AGENT04_SAMPLES = {
+  "01": "Hi! I'm Layla Al-Mahmoud, recently joined M42 as a Senior Clinical Data Scientist about 3 months ago — I came from a public health background and spent 6 years at the WHO Geneva office before relocating to Abu Dhabi. I'm based in our HQ here and currently working on the predictive analytics pipeline for the cardiology programme. Really interested in clinical decision support, federated learning, and explainable AI for healthcare. Long-term I'd love to bridge clinical and AI work more deeply. Honestly, settling in has been harder than I expected — I'm still trying to find my footing socially in the office. Most of my old work circle is in Europe and the timezone gap makes it hard to stay close. Looking to meet people working on similar problems, ideally someone more experienced in regional healthcare regulation since I'm new to the GCC context. I speak English, French, and Arabic.",
+  "02": "Tariq Al-Sayed — Director of Engineering, Platform Group, M42. 12 years at M42 and predecessors, before that 8 years at Microsoft and Amazon. Based in Abu Dhabi, originally from Amman.\n\nCurrently leading the cloud migration programme and the platform standardisation initiative across our four OpCos. Have 3 direct reports (Senior Eng Managers) and ~40 engineers total in the group.\n\nInterests: large-scale distributed systems, cost optimisation at hyperscale, building strong engineering culture in regional context. I write occasionally about engineering leadership.\n\nLooking to expand my network in two directions: (1) other senior engineering leaders at G42 sister companies working on similar platform problems — I think we could share war stories and avoid reinventing wheels; (2) emerging engineering leaders inside M42 who want to think about scaling teams and platforms — I have things to share and also things I want to learn from the next generation.\n\nSpeak English and Arabic fluently.",
+  "03": "Hassan Mansour, Product Manager at M42's customer-facing apps team, 4 years here.\n\nHonestly the reason I'm filling this out is mixed. I'm in the middle of a difficult performance review process with my line manager Karim — there's a formal review on the table and HR is involved. I think it's been handled unfairly but I don't want to get into that here.\n\nWhat I'm actually interested in: I want to find peers and mentors outside my direct reporting chain. Specifically NOT Karim, NOT anyone on my current team, and NOT anyone in the chain above Karim (which goes up to Maya, the head of consumer products).\n\nMy actual work: I lead the loyalty programme product, with focus on retention mechanics, A/B testing, and customer segmentation. Interests are in growth product management, behavioural science, and pricing strategy. Looking for: (a) PMs in other M42 OpCos working on similar growth/retention problems; (b) senior product mentors outside the consumer apps org; (c) maybe a community or channel where I can keep learning even if my current role situation is unclear.\n\nI'm hoping this can be helpful without anything I say here ending up in the formal review thread."
 };
 
 const STAGES = [
@@ -421,6 +453,11 @@ document.querySelectorAll("[data-a2-example]").forEach(btn => {
 document.querySelectorAll("[data-a3-example]").forEach(btn => {
   btn.addEventListener("click", () => {
     document.getElementById("a3-status").value = AGENT03_SAMPLES[btn.dataset.a3Example];
+  });
+});
+document.querySelectorAll("[data-a4-example]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.getElementById("a4-profile").value = AGENT04_SAMPLES[btn.dataset.a4Example];
   });
 });
 
@@ -459,6 +496,7 @@ async function animateStages(elementId) {
 renderStagesInitial("a1-activity");
 renderStagesInitial("a2-activity");
 renderStagesInitial("a3-activity");
+renderStagesInitial("a4-activity");
 
 // AGENT 01 SUBMIT
 document.getElementById("a1-submit").addEventListener("click", async () => {
@@ -592,6 +630,30 @@ document.getElementById("a3-submit").addEventListener("click", async () => {
   renderStagesAllDone("a3-activity");
   renderAgent03Results(response);
   btn.disabled = false; btn.textContent = "Structure this status →";
+});
+
+
+
+document.getElementById("a4-submit").addEventListener("click", async () => {
+  const profileText = document.getElementById("a4-profile").value.trim();
+  if (!profileText) { alert("Paste a profile first."); return; }
+  const btn = document.getElementById("a4-submit");
+  btn.disabled = true; btn.textContent = "Agents working...";
+  document.getElementById("a4-results").innerHTML = '<h2>Connection Suggestions</h2><div class="empty"><div class="empty-icon">◐</div>Agents are working — watch the activity panel</div>';
+  const animation = animateStages("a4-activity");
+  let response;
+  try {
+    const r = await fetch(API_AGENT04, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ profile_text: profileText }) });
+    response = await r.json();
+  } catch (e) {
+    document.getElementById("a4-activity").innerHTML = `<div class="error">Failed to reach API at ${API_AGENT04}. Is the server running on port 8000?</div>`;
+    btn.disabled = false; btn.textContent = "Suggest connections →";
+    return;
+  }
+  await animation;
+  renderStagesAllDone("a4-activity");
+  renderAgent04Results(response);
+  btn.disabled = false; btn.textContent = "Suggest connections →";
 });
 
 function renderAgent03Results(resp) {

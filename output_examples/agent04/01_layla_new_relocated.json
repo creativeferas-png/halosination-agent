@@ -1,0 +1,214 @@
+{
+  "status": "success",
+  "use_case_id": "13",
+  "agent": "Agent 04 \u2014 Social (Employee Connection)",
+  "output": {
+    "profile": {
+      "name": "Layla Al-Mahmoud",
+      "role": "Senior Clinical Data Scientist",
+      "opco_or_team": "M42",
+      "location": "Abu Dhabi",
+      "tenure": "3 months",
+      "expertise_areas": [
+        "public health",
+        "clinical data science",
+        "predictive analytics",
+        "cardiology"
+      ],
+      "current_projects": [
+        "predictive analytics pipeline for the cardiology programme"
+      ],
+      "interests_professional": [
+        "clinical decision support",
+        "federated learning",
+        "explainable AI for healthcare",
+        "regional healthcare regulation"
+      ],
+      "interests_personal": [],
+      "goals_stated": [
+        "bridge clinical and AI work more deeply",
+        "meet people working on similar problems",
+        "find someone more experienced in regional healthcare regulation"
+      ],
+      "languages": [
+        "English",
+        "French",
+        "Arabic"
+      ],
+      "career_stage": "mid-career",
+      "social_context_signals": {
+        "new_to_company": true,
+        "recently_relocated": true,
+        "isolation_or_loneliness_signal": true,
+        "post_team_change": false,
+        "active_conflict_mentioned": false
+      },
+      "sensitive_attributes_detected": [],
+      "conflict_signals": [],
+      "open_questions": []
+    },
+    "retrieved_rules": [
+      {
+        "rule_id": 9,
+        "title": "Sensitive social-context signals get flagged",
+        "text": "If the employee's profile contains signals suggesting social difficulty\n(loneliness, isolation, conflict, post-departure of close colleagues,\nrelocation), the suggestions should be paired with a note recommending HR\nor manager check-in support, and the distribution of the suggestion notes\nshould be restricted to the employee themselves. People in a vulnerable\nsocial moment are not subjects for breezy networking advice.",
+        "similarity": 0.4834
+      },
+      {
+        "rule_id": 4,
+        "title": "Respect privacy and consent boundaries",
+        "text": "Never suggest connections based on sensitive attributes (medical conditions,\nmental health history, family situations, religious affiliation, sexual\norientation, immigration status, salary band). Suggestions based on\nprofessional attributes (role, project, expertise, stated interests) are\nappropriate; suggestions based on personal/sensitive attributes are not.",
+        "similarity": 0.3877
+      },
+      {
+        "rule_id": 6,
+        "title": "Group suggestions need explicit fit criteria",
+        "text": "Suggesting a group or channel must state what the group does and why this\nspecific employee would benefit. 'Join the #clinical-ai channel' is\ninsufficient. 'Join #clinical-ai \u2014 they share weekly papers on imaging\ndiagnostics, which matches your interest in radiology AI' is the standard.",
+        "similarity": 0.3338
+      }
+    ],
+    "final_suggestions": {
+      "summary_60s": "You\u2019re new to M42 and already working on cardiology predictive analytics, so it\u2019s a good moment to plug into nearby clinical-AI peers and a mentor on regional regulation. Below are illustrative examples of people and groups a real internal connector tool could match you with in the actual M42 directory, focused on clinical decision support, explainable AI, and GCC healthcare regulation. These are designed to help you bridge clinical and AI work more deeply while easing your transition after relocation.",
+      "metadata": {
+        "name": "Layla Al-Mahmoud",
+        "role": "Senior Clinical Data Scientist",
+        "career_stage": "mid-career",
+        "for_employee_only": true
+      },
+      "people_suggestions": [
+        {
+          "suggestion_type": "peer",
+          "illustrative_name": "Illustrative example: Dr. Rania Haddad",
+          "illustrative_role": "Illustrative example: Lead Clinical Data Scientist, Cardiology Programme at M42",
+          "relevance_rationale": "As a senior data scientist on the cardiology predictive analytics pipeline, you\u2019d benefit from connecting with a peer lead on the same programme to align on clinical decision support use cases.",
+          "why_now": "You are only three months in and actively building the cardiology pipeline, so early alignment with an established peer can shape your technical and clinical roadmap.",
+          "power_dynamics_note": null,
+          "basis": "professional"
+        },
+        {
+          "suggestion_type": "mentor",
+          "illustrative_name": "Illustrative example: Omar Al-Ketbi",
+          "illustrative_role": "Illustrative example: Director of Clinical AI & Regulatory Strategy, M42",
+          "relevance_rationale": "You explicitly want guidance on regional healthcare regulation, and a senior leader overseeing clinical AI and regulatory strategy can mentor you on compliant deployment of predictive models.",
+          "why_now": "As you design models that may influence cardiology clinical decisions, early mentorship on GCC regulatory expectations will prevent rework later.",
+          "power_dynamics_note": "This would be a classic senior-mentor to mid-career-mentee relationship, where you gain regulatory and stakeholder-navigation insight while they gain ground-level visibility into cardiology AI implementation challenges.",
+          "basis": "professional"
+        },
+        {
+          "suggestion_type": "cross_opco_collaborator",
+          "illustrative_name": "Illustrative example: Dr. Farah Benyoussef",
+          "illustrative_role": "Illustrative example: Consultant Cardiologist & Clinical Lead for Decision Support, Affiliated M42 Hospital",
+          "relevance_rationale": "Your goal to bridge clinical and AI work aligns with a cardiology clinician leading decision support, enabling you to co-design models that fit real-world workflows.",
+          "why_now": "While your pipeline is still evolving, input from a clinical lead can shape which risk scores and explanations are most actionable for cardiologists.",
+          "power_dynamics_note": null,
+          "basis": "professional"
+        },
+        {
+          "suggestion_type": "horizon_broadener",
+          "illustrative_name": "Illustrative example: Prof. Julien Moreau",
+          "illustrative_role": "Illustrative example: Principal Research Scientist in Federated & Explainable AI, M42 Research",
+          "relevance_rationale": "You list federated learning and explainable AI as interests, so connecting with a research lead in these areas can broaden your approach to privacy-preserving cardiology models.",
+          "why_now": "As you architect your predictive pipeline, it\u2019s timely to explore whether federated or XAI methods from research can be adapted before the design solidifies.",
+          "power_dynamics_note": null,
+          "basis": "professional"
+        },
+        {
+          "suggestion_type": "mentee",
+          "illustrative_name": "Illustrative example: Sara Al-Najjar",
+          "illustrative_role": "Illustrative example: Junior Clinical Data Analyst, Population Health Team at M42",
+          "relevance_rationale": "With your public health and clinical data science background, you could mentor a junior analyst interested in predictive analytics, reinforcing your own expertise while supporting talent growth.",
+          "why_now": "As you settle into M42, taking on one mentee can help you build internal networks while contributing to the data science community.",
+          "power_dynamics_note": "This would be a mid-career mentor to early-career mentee dynamic, where you provide technical and career guidance while gaining leadership experience and broader visibility.",
+          "basis": "professional"
+        }
+      ],
+      "group_suggestions": [
+        {
+          "channel_or_group_name": "Illustrative example: #clinical-decision-support-m42",
+          "what_it_does": "A cross-functional channel where clinicians, data scientists, and product managers discuss and review clinical decision support tools being developed across M42.",
+          "why_this_employee_fits": "You are building a cardiology predictive analytics pipeline and want to bridge clinical and AI work, so this space would expose you to patterns, pitfalls, and feedback from similar CDS initiatives.",
+          "frequency_or_cadence": "Active discussion several times per week, with monthly case-review threads."
+        },
+        {
+          "channel_or_group_name": "Illustrative example: GCC-Healthcare-Regulation-Forum",
+          "what_it_does": "An internal working group that tracks GCC healthcare AI regulations, shares summaries of new guidance, and hosts Q&A sessions with legal and compliance teams.",
+          "why_this_employee_fits": "You specifically want someone more experienced in regional healthcare regulation, and this group would give you direct access to curated updates and experts relevant to your cardiology models.",
+          "frequency_or_cadence": "Monthly briefing calls and a steady stream of regulatory update posts."
+        },
+        {
+          "channel_or_group_name": "Illustrative example: #federated-and-xai-lab",
+          "what_it_does": "A technical community of practice sharing experiments, code snippets, and papers on federated learning and explainable AI within M42 projects.",
+          "why_this_employee_fits": "Your interests in federated learning and explainable AI for healthcare mean you can both learn from and contribute to discussions on architectures suitable for cardiology and public health use cases.",
+          "frequency_or_cadence": "Weekly paper discussions and ad-hoc threads when members share experiments."
+        }
+      ],
+      "diversity_note": "These suggestions mix peers, mentors, mentees, cross-opco collaborators, and technical communities so you can build depth in cardiology AI, regulatory awareness, and broader clinical-AI networks from multiple angles.",
+      "wellbeing_note": "Because you\u2019re newly relocated and showing possible isolation signals, it may be helpful for your manager or HR partner to check in and ensure you have the support and time you need to build these connections at a comfortable pace.",
+      "conflicts_excluded": [],
+      "distribution": "restricted",
+      "distribution_reason": "Rule 9 applies due to signals of recent relocation and possible isolation, so this suggestion set should be visible only to you and used alongside supportive check-ins rather than broad circulation.",
+      "rationale": "Rule 4 guided basing all suggestions on your professional role, projects, and stated interests, avoiding any sensitive personal attributes. Rule 6 shaped the group suggestions by requiring a clear description of each group and a specific reason they fit your cardiology, clinical decision support, and regulatory goals. Rule 9 determined that, given your recent relocation and isolation signals, the distribution should be restricted and paired with a wellbeing note encouraging supportive manager/HR check-ins."
+    },
+    "verdict": {
+      "scores": {
+        "relevance": 3,
+        "diversity": 3,
+        "privacy_and_care": 3
+      },
+      "total": 9,
+      "verdict": "pass",
+      "reasoning": {
+        "relevance": "All people and group suggestions are specific, with clear roles, explicit relevance rationales, and why_now statements grounded in the employee's profile and goals (Rule 1, Rule 2, Rule 5, Rule 6, Rule 10).",
+        "diversity": "The set includes at least five suggestion types (peer, mentor, mentee, cross-opco collaborator, horizon-broadener) and a balance of people and group suggestions, with power dynamics notes for mentor/mentee relationships (Rule 3, Rule 7).",
+        "privacy_and_care": "All suggestions are based on professional attributes, not sensitive ones, and the presence of isolation signals triggers restricted distribution and a supportive wellbeing note as required (Rule 4, Rule 9)."
+      },
+      "rules_cited": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "9",
+        "10"
+      ],
+      "fix": ""
+    },
+    "revision_attempted": false,
+    "delivery": {
+      "path": "deliver_to_employee_only",
+      "message": "Suggestions passed rubric. Ready to deliver."
+    }
+  },
+  "agent_trace": [
+    {
+      "agent": "Intake",
+      "status": "ok"
+    },
+    {
+      "agent": "Search",
+      "status": "ok",
+      "rules_retrieved": [
+        9,
+        4,
+        6
+      ]
+    },
+    {
+      "agent": "Brush",
+      "status": "ok"
+    },
+    {
+      "agent": "Validator",
+      "status": "ok",
+      "total": 9,
+      "verdict": "pass"
+    },
+    {
+      "agent": "Route",
+      "delivery_path": "deliver_to_employee_only"
+    }
+  ],
+  "wall_clock_seconds": 16.12
+}

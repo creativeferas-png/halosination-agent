@@ -40,6 +40,16 @@ from app.agent03.validator import (
     PASS_THRESHOLD as STATUS_PASS_THRESHOLD,
 )
 
+# Agent 04 (Social) imports
+from app.agent04.intake import run_intake as run_social_intake
+from app.agent04.search import run_search as run_social_search
+from app.agent04.brush import run_brush as run_social_brush
+from app.agent04.validator import (
+    run_validator as run_social_validator,
+    run_brush_revision as run_social_brush_revision,
+    PASS_THRESHOLD as SOCIAL_PASS_THRESHOLD,
+)
+
 LOG_DIR = Path("logs")
 LOG_DIR.mkdir(exist_ok=True)
 log_file = LOG_DIR / f"run_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
@@ -89,6 +99,19 @@ class StatusRequest(BaseModel):
 
 
 class StatusResponse(BaseModel):
+    status: str
+    use_case_id: str
+    agent: str
+    output: dict
+    agent_trace: list
+
+
+class SocialRequest(BaseModel):
+    profile_text: str
+    context: dict | None = None
+
+
+class SocialResponse(BaseModel):
     status: str
     use_case_id: str
     agent: str
@@ -622,6 +645,177 @@ def run_status(payload: StatusRequest):
             "status_obj": status_obj,
             "retrieved_rules": retrieved_rules,
             "final_notes": final_draft,
+            "verdict": final_verdict,
+            "revision_attempted": revision_attempted,
+            "delivery": {
+                "path": delivery_path,
+                "message": message,
+            },
+        },
+        agent_trace=trace,
+    )
+
+
+
+
+@app.post("/run_social", response_model=SocialResponse)
+def run_social(payload: SocialRequest):
+    """
+    HALO Agent 04 (Social) - Employee Connection pipeline.
+
+    Same architectural spine as Agents 01/02/03:
+      Intake -> Search -> Brush -> Validator
+        if Validator.verdict == "pass"   -> Route -> deliver
+        if Validator.verdict == "revise" -> Brush revises ONCE -> Validator re-scores
+          if still failing               -> escalate to human review
+    """
+    preview = payload.profile_text[:100]
+    logger.info(f"SOCIAL_RUN_START | preview={preview!r}")
+    trace = []
+
+    # ----- Agent 1: Intake -----
+    logger.info("AGENT_STEP | agent=Agent04.Intake | action=parse_profile")
+    profile = run_social_intake(payload.profile_text)
+    trace.append({
+        "agent": "Agent04.Intake",
+        "action": "parse_profile",
+        "input_preview": payload.profile_text[:120],
+        "output": profile,
+        "status": "error" if "error" in profile else "ok",
+    })
+    if "error" in profile:
+        logger.warning("SOCIAL_RUN_DEGRADED | intake_failed")
+        return SocialResponse(
+            status="degraded", use_case_id="13",
+            agent="Agent 04 - Social",
+            output={"message": "Intake agent failed.", "detail": profile},
+            agent_trace=trace,
+        )
+
+    # ----- Agent 2: Search -----
+    logger.info("AGENT_HANDOFF | from=Agent04.Intake | to=Agent04.Search")
+    logger.info("AGENT_STEP | agent=Agent04.Search | action=retrieve_social_rules")
+    search_result = run_social_search(profile, top_k=3)
+    if "error" in search_result:
+        logger.warning("SOCIAL_SEARCH_DEGRADED | continuing with empty rules")
+        retrieved_rules = []
+    else:
+        retrieved_rules = search_result.get("retrieved_rules", [])
+    trace.append({
+        "agent": "Agent04.Search",
+        "action": "retrieve_social_rules",
+        "rules_retrieved": [r["rule_id"] for r in retrieved_rules],
+        "output": search_result,
+        "status": "error" if "error" in search_result else "ok",
+    })
+
+    # ----- Agent 3: Brush -----
+    rules_count = len(retrieved_rules)
+    logger.info(f"AGENT_HANDOFF | from=Agent04.Search | to=Agent04.Brush | rules_retrieved={rules_count}")
+    logger.info("AGENT_STEP | agent=Agent04.Brush | action=draft_suggestions")
+    draft = run_social_brush(profile, retrieved_rules=retrieved_rules)
+    trace.append({
+        "agent": "Agent04.Brush",
+        "action": "draft_suggestions",
+        "rules_used": [r["rule_id"] for r in retrieved_rules],
+        "output": draft,
+        "status": "error" if "error" in draft else "ok",
+    })
+    if "error" in draft:
+        logger.warning("SOCIAL_RUN_DEGRADED | brush_failed")
+        return SocialResponse(
+            status="degraded", use_case_id="13",
+            agent="Agent 04 - Social",
+            output={"message": "Brush agent failed.", "profile": profile, "detail": draft},
+            agent_trace=trace,
+        )
+
+    # ----- Agent 4: Validator -----
+    logger.info("AGENT_HANDOFF | from=Agent04.Brush | to=Agent04.Validator | round=1")
+    logger.info("AGENT_STEP | agent=Agent04.Validator | action=score_initial")
+    verdict_v1 = run_social_validator(profile, draft, is_revision=False, retrieved_rules=retrieved_rules)
+    trace.append({
+        "agent": "Agent04.Validator",
+        "action": "score_initial",
+        "output": verdict_v1,
+        "status": "error" if "error" in verdict_v1 else "ok",
+    })
+    if "error" in verdict_v1:
+        logger.warning("SOCIAL_RUN_DEGRADED | validator_failed")
+        return SocialResponse(
+            status="degraded", use_case_id="13",
+            agent="Agent 04 - Social",
+            output={"message": "Validator failed.", "profile": profile, "draft": draft, "detail": verdict_v1},
+            agent_trace=trace,
+        )
+
+    final_draft = draft
+    final_verdict = verdict_v1
+    revision_attempted = False
+
+    if verdict_v1.get("verdict") == "revise":
+        revision_attempted = True
+        fix = verdict_v1.get("fix", "")
+        v1_total = verdict_v1.get('total')
+        fix_preview = fix[:80]
+        logger.info(f"SOCIAL_REVISION_TRIGGERED | total={v1_total}/9 | fix={fix_preview!r}")
+        logger.info("AGENT_HANDOFF | from=Agent04.Validator | to=Agent04.Brush | action=revise")
+        logger.info("AGENT_STEP | agent=Agent04.Brush | action=revise")
+        revised_draft = run_social_brush_revision(profile, draft, fix, retrieved_rules=retrieved_rules)
+        trace.append({
+            "agent": "Agent04.Brush",
+            "action": "revise",
+            "fix_applied": fix,
+            "output": revised_draft,
+            "status": "error" if "error" in revised_draft else "ok",
+        })
+        if "error" not in revised_draft:
+            logger.info("AGENT_HANDOFF | from=Agent04.Brush | to=Agent04.Validator | round=2")
+            logger.info("AGENT_STEP | agent=Agent04.Validator | action=score_revised")
+            verdict_v2 = run_social_validator(profile, revised_draft, is_revision=True, retrieved_rules=retrieved_rules)
+            trace.append({
+                "agent": "Agent04.Validator",
+                "action": "score_revised",
+                "output": verdict_v2,
+                "status": "error" if "error" in verdict_v2 else "ok",
+            })
+            if "error" not in verdict_v2:
+                final_draft = revised_draft
+                final_verdict = verdict_v2
+
+    verdict_label = final_verdict.get("verdict", "unknown")
+    if verdict_label == "pass":
+        delivery_path = "deliver_to_employee_only" if final_draft.get("distribution") == "restricted" else "deliver_to_employee"
+        message = "Suggestions passed rubric. Ready to deliver."
+    elif verdict_label == "escalate":
+        delivery_path = "deliver_to_employee_cc_hr_partner"
+        message = "Suggestions still below threshold after one revision. Escalating with HR-partner context."
+    else:
+        delivery_path = "deliver_to_employee_cc_hr_partner"
+        message = f"Verdict: {verdict_label}. Routing with HR-partner review."
+
+    trace.append({
+        "agent": "Agent04.Route",
+        "action": "decide_delivery_path",
+        "delivery_path": delivery_path,
+        "driven_by_verdict": verdict_label,
+    })
+
+    steps_count = len(trace)
+    logger.info(
+        f"SOCIAL_RUN_DONE | status=success | verdict={verdict_label} | "
+        f"revision_attempted={revision_attempted} | rules_retrieved={rules_count} | "
+        f"trace_steps={steps_count}"
+    )
+
+    return SocialResponse(
+        status="success",
+        use_case_id="13",
+        agent="Agent 04 - Social (Employee Connection)",
+        output={
+            "profile": profile,
+            "retrieved_rules": retrieved_rules,
+            "final_suggestions": final_draft,
             "verdict": final_verdict,
             "revision_attempted": revision_attempted,
             "delivery": {

@@ -1,0 +1,223 @@
+{
+  "status": "success",
+  "use_case_id": "13",
+  "agent": "Agent 04 \u2014 Social (Employee Connection)",
+  "output": {
+    "profile": {
+      "name": "Hassan Mansour",
+      "role": "Product Manager",
+      "opco_or_team": "M42's customer-facing apps team",
+      "location": null,
+      "tenure": "4 years",
+      "expertise_areas": [
+        "loyalty programme product",
+        "retention mechanics",
+        "A/B testing",
+        "customer segmentation"
+      ],
+      "current_projects": [
+        "leading the loyalty programme product"
+      ],
+      "interests_professional": [
+        "growth product management",
+        "behavioural science",
+        "pricing strategy"
+      ],
+      "interests_personal": [],
+      "goals_stated": [
+        "find peers and mentors outside direct reporting chain",
+        "connect with PMs in other M42 OpCos working on growth/retention problems",
+        "find senior product mentors outside the consumer apps org",
+        "find a community or channel for ongoing learning"
+      ],
+      "languages": [],
+      "career_stage": "mid-career",
+      "social_context_signals": {
+        "new_to_company": false,
+        "recently_relocated": false,
+        "isolation_or_loneliness_signal": false,
+        "post_team_change": false,
+        "active_conflict_mentioned": true
+      },
+      "sensitive_attributes_detected": [],
+      "conflict_signals": [
+        "involved in a difficult performance review process with line manager Karim",
+        "HR is involved in the review process",
+        "does not want to connect with anyone in current reporting chain (Karim, Maya, or current team)"
+      ],
+      "open_questions": [
+        "location not given",
+        "languages not stated"
+      ]
+    },
+    "retrieved_rules": [
+      {
+        "rule_id": 9,
+        "title": "Sensitive social-context signals get flagged",
+        "text": "If the employee's profile contains signals suggesting social difficulty\n(loneliness, isolation, conflict, post-departure of close colleagues,\nrelocation), the suggestions should be paired with a note recommending HR\nor manager check-in support, and the distribution of the suggestion notes\nshould be restricted to the employee themselves. People in a vulnerable\nsocial moment are not subjects for breezy networking advice.",
+        "similarity": 0.4911
+      },
+      {
+        "rule_id": 4,
+        "title": "Respect privacy and consent boundaries",
+        "text": "Never suggest connections based on sensitive attributes (medical conditions,\nmental health history, family situations, religious affiliation, sexual\norientation, immigration status, salary band). Suggestions based on\nprofessional attributes (role, project, expertise, stated interests) are\nappropriate; suggestions based on personal/sensitive attributes are not.",
+        "similarity": 0.3575
+      },
+      {
+        "rule_id": 8,
+        "title": "Avoid suggestions that would create conflicts",
+        "text": "Never suggest connections that could create role conflicts: direct reports,\npeople in the employee's reporting chain, people the employee is currently\nreviewing or being reviewed by, or people in an active dispute or HR\nprocess with the employee. If a conflict signal is present in context,\nflag it explicitly and exclude the conflicted suggestions.",
+        "similarity": 0.3442
+      }
+    ],
+    "final_suggestions": {
+      "summary_60s": "You\u2019re a mid-career PM leading loyalty and retention, looking for peers and mentors outside your current reporting chain. Below are illustrative examples of peers working on growth/retention, senior product mentors in other OpCos, and cross-functional collaborators in data and pricing\u2014each of which a real connector tool would map to actual M42 colleagues and groups while excluding your current chain (Karim, Maya, and your current team). These suggestions focus on professional overlap in growth, behavioural science, and pricing, and avoid anyone tied to your ongoing performance review process.",
+      "metadata": {
+        "name": "Hassan Mansour",
+        "role": "Product Manager, M42 customer-facing apps team",
+        "career_stage": "mid-career",
+        "for_employee_only": true
+      },
+      "people_suggestions": [
+        {
+          "suggestion_type": "peer",
+          "illustrative_name": "Illustrative example: Lina Haddad",
+          "illustrative_role": "Senior Product Manager, Patient Engagement Platform at M42 Health",
+          "relevance_rationale": "Lina is an illustrative peer PM working on engagement and retention funnels for patient apps, closely aligned with your loyalty programme and growth product focus.",
+          "why_now": "You\u2019re actively leading the loyalty programme product and could immediately compare retention mechanics and A/B testing approaches across different user journeys.",
+          "power_dynamics_note": null,
+          "basis": "professional"
+        },
+        {
+          "suggestion_type": "peer",
+          "illustrative_name": "Illustrative example: Omar Rahim",
+          "illustrative_role": "Product Manager, Membership & Subscriptions at M42 Wellness",
+          "relevance_rationale": "Omar is an illustrative PM focusing on subscription churn, pricing experiments, and customer segmentation, mirroring your interests in retention mechanics and pricing strategy.",
+          "why_now": "Both of you are likely running live experiments on membership value propositions, so sharing test designs and learnings now could accelerate your current roadmap decisions.",
+          "power_dynamics_note": null,
+          "basis": "professional"
+        },
+        {
+          "suggestion_type": "cross_opco_collaborator",
+          "illustrative_name": "Illustrative example: Dr. Sara El-Sayed",
+          "illustrative_role": "Lead Behavioural Scientist, Digital Health Insights at M42 Analytics",
+          "relevance_rationale": "Sara is an illustrative behavioural scientist partnering with product teams on habit-forming features and experiment design, directly relevant to your behavioural science and A/B testing interests.",
+          "why_now": "As you refine loyalty mechanics, a conversation now could help you incorporate behavioural frameworks (e.g., nudges, choice architecture) into your upcoming experiments.",
+          "power_dynamics_note": null,
+          "basis": "professional"
+        },
+        {
+          "suggestion_type": "mentor",
+          "illustrative_name": "Illustrative example: Nabil Qureshi",
+          "illustrative_role": "Director of Product, B2C Growth at an M42 consumer services OpCo (outside your apps org)",
+          "relevance_rationale": "Nabil is an illustrative senior growth leader who has scaled retention-focused products across multiple markets, matching your goal of finding senior product mentors outside your current org.",
+          "why_now": "You\u2019re mid-career and navigating complex performance dynamics, so a mentor outside your reporting chain could provide neutral guidance on career moves and strategic product thinking.",
+          "power_dynamics_note": "This is an upward mentor relationship where you gain strategic and career guidance, while Nabil benefits from insight into on-the-ground loyalty experiments and emerging PM talent.",
+          "basis": "professional"
+        },
+        {
+          "suggestion_type": "horizon_broadener",
+          "illustrative_name": "Illustrative example: Farah Al Mansouri",
+          "illustrative_role": "Senior Manager, Pricing & Revenue Strategy at M42 Corporate",
+          "relevance_rationale": "Farah is an illustrative pricing strategist working on monetisation, discounting, and elasticity models that intersect with your interest in pricing strategy for loyalty programmes.",
+          "why_now": "As you iterate on loyalty benefits and tiers, connecting now could help you align product incentives with broader revenue and pricing principles.",
+          "power_dynamics_note": null,
+          "basis": "professional"
+        }
+      ],
+      "group_suggestions": [
+        {
+          "channel_or_group_name": "Illustrative example: #m42-product-growth-guild",
+          "what_it_does": "A cross-OpCo channel where PMs and analysts share growth and retention experiment results, dashboards, and playbooks.",
+          "why_this_employee_fits": "You\u2019re leading a loyalty programme and explicitly want peers working on growth/retention problems and a space for ongoing learning.",
+          "frequency_or_cadence": "Active weekly with experiment debriefs every 2\u20133 weeks."
+        },
+        {
+          "channel_or_group_name": "Illustrative example: #product-mentors-outside-chain",
+          "what_it_does": "A curated space that matches mid-career PMs with senior product leaders from different OpCos and outside their reporting lines for structured mentoring.",
+          "why_this_employee_fits": "You\u2019ve clearly stated a desire for senior product mentors outside your consumer apps org and current reporting chain.",
+          "frequency_or_cadence": "Mentor/mentee matches reviewed quarterly; light ongoing channel discussion."
+        },
+        {
+          "channel_or_group_name": "Illustrative example: #ab-testing-and-behavioural-science",
+          "what_it_does": "A community where product, data, and behavioural science folks discuss experiment design, metrics, and behavioural insights.",
+          "why_this_employee_fits": "Your expertise in A/B testing and interest in behavioural science make this a strong fit for deepening your experimentation craft.",
+          "frequency_or_cadence": "Posts several times a week; monthly virtual brown-bag sessions."
+        }
+      ],
+      "diversity_note": "These suggestions span peers, cross-OpCo collaborators, senior mentors, and horizon broadeners, plus both practice-focused and mentoring-focused groups, giving you varied perspectives beyond your current team and reporting chain.",
+      "wellbeing_note": null,
+      "conflicts_excluded": [
+        "direct_manager_connections",
+        "current_team_connections",
+        "anyone_in_reporting_chain",
+        "anyone_in_active_HR_or_review_process_with_you"
+      ],
+      "distribution": "restricted",
+      "distribution_reason": "Because there is an active performance review and HR process involving your manager, these suggestions are restricted to you to avoid surfacing sensitive dynamics more broadly.",
+      "rationale": "Rule_4 guided focusing all suggestions on professional overlap (role, projects, expertise, and stated goals) and avoiding any sensitive personal attributes. Rule_8 led to explicitly excluding your direct manager Karim, anyone named in your reporting chain (including Maya and your current team), and anyone involved in the active HR/review process, which is why conflicts_excluded is populated and all illustrative people are clearly outside that chain. Rule_9 influenced the restricted distribution choice given the sensitive ongoing performance review context, even though no loneliness signal was present, so these notes are for you rather than wide broadcast."
+    },
+    "verdict": {
+      "scores": {
+        "relevance": 3,
+        "diversity": 3,
+        "privacy_and_care": 3
+      },
+      "total": 9,
+      "verdict": "pass",
+      "reasoning": {
+        "relevance": "All suggestions are specific, with named illustrative roles, clear relevance rationales tied to Hassan's expertise and goals, and why_now is populated where applicable (Rule 1, Rule 2, Rule 5, Rule 6, Rule 10).",
+        "diversity": "There is a strong mix of suggestion_types (peer, mentor, cross_opco_collaborator, horizon_broadener), group and people suggestions, and power_dynamics_note is present for the mentor (Rule 3, Rule 7).",
+        "privacy_and_care": "All suggestions are based on professional attributes, sensitive/personal attributes are avoided, conflicts are explicitly excluded, and distribution is restricted due to the active HR process (Rule 4, Rule 8, Rule 9)."
+      },
+      "rules_cited": [
+        "Rule 1",
+        "Rule 2",
+        "Rule 3",
+        "Rule 4",
+        "Rule 5",
+        "Rule 6",
+        "Rule 7",
+        "Rule 8",
+        "Rule 9",
+        "Rule 10"
+      ],
+      "fix": ""
+    },
+    "revision_attempted": false,
+    "delivery": {
+      "path": "deliver_to_employee_only",
+      "message": "Suggestions passed rubric. Ready to deliver."
+    }
+  },
+  "agent_trace": [
+    {
+      "agent": "Intake",
+      "status": "ok"
+    },
+    {
+      "agent": "Search",
+      "status": "ok",
+      "rules_retrieved": [
+        9,
+        4,
+        8
+      ]
+    },
+    {
+      "agent": "Brush",
+      "status": "ok"
+    },
+    {
+      "agent": "Validator",
+      "status": "ok",
+      "total": 9,
+      "verdict": "pass"
+    },
+    {
+      "agent": "Route",
+      "delivery_path": "deliver_to_employee_only"
+    }
+  ],
+  "wall_clock_seconds": 18.74
+}

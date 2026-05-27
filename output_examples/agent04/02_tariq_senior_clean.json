@@ -1,0 +1,221 @@
+{
+  "status": "success",
+  "use_case_id": "13",
+  "agent": "Agent 04 \u2014 Social (Employee Connection)",
+  "output": {
+    "profile": {
+      "name": "Tariq Al-Sayed",
+      "role": "Director of Engineering, Platform Group",
+      "opco_or_team": "M42",
+      "location": "Abu Dhabi",
+      "tenure": "12 years at M42 and predecessors",
+      "expertise_areas": [
+        "large-scale distributed systems",
+        "cost optimisation at hyperscale",
+        "engineering leadership",
+        "building engineering culture",
+        "cloud migration",
+        "platform standardisation"
+      ],
+      "current_projects": [
+        "cloud migration programme",
+        "platform standardisation initiative"
+      ],
+      "interests_professional": [
+        "large-scale distributed systems",
+        "cost optimisation at hyperscale",
+        "building strong engineering culture in regional context",
+        "engineering leadership",
+        "networking with senior engineering leaders at G42 sister companies",
+        "connecting with emerging engineering leaders inside M42"
+      ],
+      "interests_personal": [],
+      "goals_stated": [
+        "looking to expand network with other senior engineering leaders at G42 sister companies working on similar platform problems",
+        "looking to connect with emerging engineering leaders inside M42 to share and learn about scaling teams and platforms"
+      ],
+      "languages": [
+        "English",
+        "Arabic"
+      ],
+      "career_stage": "senior",
+      "social_context_signals": {
+        "new_to_company": false,
+        "recently_relocated": false,
+        "isolation_or_loneliness_signal": false,
+        "post_team_change": false,
+        "active_conflict_mentioned": false
+      },
+      "sensitive_attributes_detected": [],
+      "conflict_signals": [
+        "has 3 direct reports (Senior Eng Managers)",
+        "manages ~40 engineers"
+      ],
+      "open_questions": []
+    },
+    "retrieved_rules": [
+      {
+        "rule_id": 9,
+        "title": "Sensitive social-context signals get flagged",
+        "text": "If the employee's profile contains signals suggesting social difficulty\n(loneliness, isolation, conflict, post-departure of close colleagues,\nrelocation), the suggestions should be paired with a note recommending HR\nor manager check-in support, and the distribution of the suggestion notes\nshould be restricted to the employee themselves. People in a vulnerable\nsocial moment are not subjects for breezy networking advice.",
+        "similarity": 0.4539
+      },
+      {
+        "rule_id": 4,
+        "title": "Respect privacy and consent boundaries",
+        "text": "Never suggest connections based on sensitive attributes (medical conditions,\nmental health history, family situations, religious affiliation, sexual\norientation, immigration status, salary band). Suggestions based on\nprofessional attributes (role, project, expertise, stated interests) are\nappropriate; suggestions based on personal/sensitive attributes are not.",
+        "similarity": 0.3536
+      },
+      {
+        "rule_id": 8,
+        "title": "Avoid suggestions that would create conflicts",
+        "text": "Never suggest connections that could create role conflicts: direct reports,\npeople in the employee's reporting chain, people the employee is currently\nreviewing or being reviewed by, or people in an active dispute or HR\nprocess with the employee. If a conflict signal is present in context,\nflag it explicitly and exclude the conflicted suggestions.",
+        "similarity": 0.3394
+      }
+    ],
+    "final_suggestions": {
+      "summary_60s": "You\u2019re well-positioned to plug into a broader community of senior platform and cloud leaders across G42 while also nurturing emerging leaders inside M42. The illustrative suggestions below focus on peers solving similar platform and cost-optimisation problems, cross-opco collaborators facing comparable migration challenges, and mentees who would benefit from your leadership experience. A real connector tool would map these examples to actual people and groups in the M42/G42 directory.",
+      "metadata": {
+        "name": "Tariq Al-Sayed",
+        "role": "Director of Engineering, Platform Group",
+        "career_stage": "senior",
+        "for_employee_only": false
+      },
+      "people_suggestions": [
+        {
+          "suggestion_type": "peer",
+          "illustrative_name": "Illustrative: Lina Haddad",
+          "illustrative_role": "Senior Director of Platform Engineering, G42 Cloud",
+          "relevance_rationale": "Lina is an illustrative senior platform leader driving large-scale cloud migration and platform standardisation efforts similar to your current programmes.",
+          "why_now": "You are in the middle of a cloud migration and platform standardisation initiative, making it timely to compare approaches to shared services, governance, and cost controls with a counterpart.",
+          "power_dynamics_note": null,
+          "basis": "professional"
+        },
+        {
+          "suggestion_type": "cross_opco_collaborator",
+          "illustrative_name": "Illustrative: Ahmed Mansoor",
+          "illustrative_role": "Head of Engineering, Data Platforms at G42 AI & Cloud",
+          "relevance_rationale": "Ahmed is an illustrative cross-opco leader running large-scale distributed data platforms where cost optimisation at hyperscale is a core concern, overlapping with your expertise.",
+          "why_now": "As you refine cost models and SLOs for your platform, comparing patterns with another G42 team tackling similar scale can accelerate your design decisions.",
+          "power_dynamics_note": null,
+          "basis": "professional"
+        },
+        {
+          "suggestion_type": "mentor",
+          "illustrative_name": "Illustrative: Sara Al-Mazrouei",
+          "illustrative_role": "VP of Engineering Excellence, G42 Group",
+          "relevance_rationale": "Sara is an illustrative senior leader focused on engineering culture and operating models across G42, aligning with your interest in building strong engineering culture in a regional context.",
+          "why_now": "You\u2019re actively scaling platform teams and culture; guidance from someone who has driven group-wide engineering transformation could help you anticipate the next stage of growth.",
+          "power_dynamics_note": "This would be an upward mentor relationship where you gain from Sara\u2019s broader organisational-change experience while she gains direct insight into platform realities at M42.",
+          "basis": "professional"
+        },
+        {
+          "suggestion_type": "mentee",
+          "illustrative_name": "Illustrative: Omar Khalifa",
+          "illustrative_role": "Engineering Manager, Clinical Platforms at M42",
+          "relevance_rationale": "Omar is an illustrative emerging engineering leader inside M42 managing a growing team on a platform-adjacent product, matching your goal to connect with and support emerging leaders.",
+          "why_now": "As his team scales, he will face challenges you\u2019ve already navigated (on-call models, platform contracts, tech debt), making this a good moment for structured mentoring.",
+          "power_dynamics_note": "This would be a downward mentor relationship where Omar benefits from your experience in scaling teams, while you gain ground-level feedback on how platform decisions land with product teams.",
+          "basis": "professional"
+        },
+        {
+          "suggestion_type": "horizon_broadener",
+          "illustrative_name": "Illustrative: Priya Narayanan",
+          "illustrative_role": "Director of FinOps and Cloud Economics, M42 Corporate Technology",
+          "relevance_rationale": "Priya is an illustrative FinOps leader whose focus on cloud economics complements your cost optimisation at hyperscale and platform standardisation work.",
+          "why_now": "As you mature your cloud migration and platform cost models, partnering with a FinOps counterpart can help align engineering decisions with financial guardrails and executive reporting.",
+          "power_dynamics_note": null,
+          "basis": "professional"
+        }
+      ],
+      "group_suggestions": [
+        {
+          "channel_or_group_name": "Illustrative: M42 Platform & SRE Leadership Forum",
+          "what_it_does": "A forum for platform, SRE, and infrastructure leaders across M42 to share designs, incident learnings, and standardisation patterns.",
+          "why_this_employee_fits": "Your role leading platform standardisation and large-scale distributed systems makes you a strong contributor and beneficiary of shared patterns and postmortems.",
+          "frequency_or_cadence": "Monthly virtual roundtable plus an active chat channel."
+        },
+        {
+          "channel_or_group_name": "Illustrative: G42 Engineering Leaders Council",
+          "what_it_does": "A cross-opco council where senior engineering leaders align on architecture principles, cloud strategy, and engineering culture across G42.",
+          "why_this_employee_fits": "You\u2019ve explicitly stated a goal to expand your network with senior engineering leaders at G42 sister companies working on similar platform problems.",
+          "frequency_or_cadence": "Quarterly plenary sessions with ongoing async discussion threads."
+        },
+        {
+          "channel_or_group_name": "Illustrative: M42 Emerging Eng Managers Circle",
+          "what_it_does": "A community for new and emerging engineering managers to discuss people leadership, delivery practices, and scaling teams.",
+          "why_this_employee_fits": "You\u2019re interested in connecting with emerging engineering leaders inside M42 and could both mentor and learn from their current challenges.",
+          "frequency_or_cadence": "Bi-weekly small-group sessions and an always-on chat space."
+        }
+      ],
+      "diversity_note": "These suggestions span peers, cross-opco collaborators, mentors, mentees, and horizon broadeners, and include both M42-internal and G42-wide communities to diversify your network.",
+      "wellbeing_note": null,
+      "conflicts_excluded": [],
+      "distribution": "wide",
+      "distribution_reason": null,
+      "rationale": "All people and group suggestions are based solely on professional attributes such as your role, current projects, and stated interests, in line with Rule 4\u2019s requirement to avoid sensitive attributes. Because your conflict_signals only indicate that you manage several teams and do not name specific individuals, no clearly conflicted direct reports or managers are suggested, aligning with Rule 8. Rule 9 does not apply here because there are no isolation or loneliness signals, so the distribution is set to wide without an additional wellbeing note."
+    },
+    "verdict": {
+      "scores": {
+        "relevance": 3,
+        "diversity": 3,
+        "privacy_and_care": 3
+      },
+      "total": 9,
+      "verdict": "pass",
+      "reasoning": {
+        "relevance": "All suggestions are specific, named, and include clear relevance rationales and why_now statements grounded in the employee's current projects and goals (Rule 1, Rule 2, Rule 5, Rule 6, Rule 10).",
+        "diversity": "The set spans at least five suggestion types (peer, cross-opco collaborator, mentor, mentee, horizon broadener), includes both people and group suggestions, and provides power_dynamics_notes for mentor/mentee relationships (Rule 3, Rule 7).",
+        "privacy_and_care": "All suggestions are based on professional attributes, with no sensitive or personal attributes used, and there are no conflict or vulnerability signals requiring special handling (Rule 4, Rule 8, Rule 9)."
+      },
+      "rules_cited": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10"
+      ],
+      "fix": ""
+    },
+    "revision_attempted": false,
+    "delivery": {
+      "path": "deliver_to_employee",
+      "message": "Suggestions passed rubric. Ready to deliver."
+    }
+  },
+  "agent_trace": [
+    {
+      "agent": "Intake",
+      "status": "ok"
+    },
+    {
+      "agent": "Search",
+      "status": "ok",
+      "rules_retrieved": [
+        9,
+        4,
+        8
+      ]
+    },
+    {
+      "agent": "Brush",
+      "status": "ok"
+    },
+    {
+      "agent": "Validator",
+      "status": "ok",
+      "total": 9,
+      "verdict": "pass"
+    },
+    {
+      "agent": "Route",
+      "delivery_path": "deliver_to_employee"
+    }
+  ],
+  "wall_clock_seconds": 14.68
+}
