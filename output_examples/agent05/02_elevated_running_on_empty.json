@@ -1,0 +1,165 @@
+{
+  "status": "success",
+  "use_case_id": "13",
+  "agent": "Agent 05 \u2014 Wellness (Self Check-in)",
+  "note": "DEMO artifact. Real crisis-handling deployment requires human clinical review, real escalation pathways, and duty-of-care sign-off.",
+  "output": {
+    "checkin": {
+      "name": null,
+      "tone_signals": [
+        "tired",
+        "matter-of-fact",
+        "overwhelmed",
+        "self-aware"
+      ],
+      "themes_mentioned": [
+        "work stress",
+        "sleep",
+        "emotional regulation"
+      ],
+      "person_own_phrases": [
+        "rough couple of weeks",
+        "work's been relentless",
+        "three deadlines stacked on top of each other",
+        "I've been logging in at night to keep up",
+        "I'm tired all the time",
+        "not sleeping great",
+        "I snapped at a colleague yesterday which isn't like me",
+        "just running on empty",
+        "wanted to put it somewhere",
+        "I just need a proper weekend off honestly"
+      ],
+      "severity": "elevated_concern",
+      "severity_rationale": "The person describes persistent exhaustion, poor sleep, work overload, and changes in behavior ('snapped at a colleague'), indicating significant stress affecting their functioning.",
+      "crisis_indicators": [],
+      "duration_signals": "couple of weeks",
+      "support_signals_mentioned": [],
+      "request_signals": [
+        "just to vent"
+      ],
+      "sensitive_topics_detected": [
+        "workplace conflict"
+      ],
+      "open_questions_for_brush": [
+        "no specific support mentioned",
+        "duration is a couple of weeks",
+        "multiple stressors interacting"
+      ]
+    },
+    "retrieved_rules": [
+      {
+        "rule_id": 6,
+        "title": "Elevated concern signals invite professional resources without pressure",
+        "text": "For elevated_concern check-ins, the response should gently invite the person\nto consider professional support (EAP, manager 1:1, HR partner) without making\nit feel mandatory or alarming. The agent should make resources easy to access\n('here's how to book a confidential EAP session') and reassure the person about\nconfidentiality where relevant.",
+        "similarity": 0.5868
+      },
+      {
+        "rule_id": 3,
+        "title": "Recognise severity and route accordingly",
+        "text": "The agent must classify the check-in into one of three severity levels:\n'general_wellbeing' (everyday stress, fatigue, life balance), 'elevated_concern'\n(persistent low mood, significant stress, relational/work struggles affecting\nfunction), or 'crisis_signal' (any mention of self-harm, suicide, immediate\ndanger, severe acute distress). Each level triggers different recommended\nresources and routing. Misclassification \u2014 especially under-classifying a crisis \u2014\nis the most dangerous failure mode.",
+        "similarity": 0.5315
+      },
+      {
+        "rule_id": 4,
+        "title": "Crisis signals get immediate, specific resources",
+        "text": "If crisis_signal is detected (mentions of self-harm, suicidal ideation, harming\nothers, immediate danger), the response MUST: (a) acknowledge the person's pain\nwithout minimising or amplifying, (b) immediately point to the specific named\nM42 support resources available right now \u2014 SAKINA (800 SAKINA / 800 725 462,\nconfidential support in Arabic or English) and the Lyra Employee Assistance\nProgram (24/7 via the Lyra Wellbeing Hub, access code M42XLYRA, or phone\n8000 120 120) \u2014 and, for situations of immediate physical danger, encourage the\nperson to contact local emergency services without delay, (c) restrict\ndistribution to the employee only AND flag for HR/EAP awareness, (d) avoid any\nsuggestion of waiting or scheduling \u2014 these resources are reachable now.\nResource details should be confirmed against the latest official M42\ncommunication, as contact details may change.",
+        "similarity": 0.5226
+      }
+    ],
+    "final_response": {
+      "severity": "elevated_concern",
+      "response_message": "It really does sound like it\u2019s been a rough couple of weeks, with work feeling relentless, three deadlines stacked, and you logging in at night just to keep up. Being tired all the time, not sleeping great, and then snapping at a colleague when that\u2019s not like you would leave anyone feeling like they\u2019re running on empty. Since this has been going on for a bit and is starting to spill into how you feel and interact at work, it could help to talk it through with someone neutral and confidential, alongside trying to protect that proper weekend off you mentioned. Even small boundaries, like choosing one evening this week where you don\u2019t log back in, can be a first step toward getting a bit of breathing room.",
+      "reflected_back": "You\u2019ve had a rough couple of weeks where work\u2019s been relentless, with three deadlines stacked on top of each other, you\u2019ve been logging in at night, you\u2019re tired all the time and not sleeping great, and you even snapped at a colleague which isn\u2019t like you, leaving you feeling like you\u2019re just running on empty.",
+      "resources": [
+        {
+          "name": "Lyra Employee Assistance Program (EAP)",
+          "how_to_access": "You can reach Lyra 24/7 via the Lyra Wellbeing Hub using access code M42XLYRA, or by calling 8000 120 120, or by emailing yourmenawellbeing@lyrahealth.com; you can choose a confidential video or phone session with a professional.",
+          "good_for": "Talking through ongoing work stress, sleep difficulties, and finding practical strategies to set boundaries and manage emotional reactions at work in a confidential space.",
+          "constraints": "Available 24/7; please confirm details against the latest official M42 communication, as contact information or access processes may change."
+        },
+        {
+          "name": "SAKINA",
+          "how_to_access": "Call 800 SAKINA (800 725 462) for confidential support in Arabic or English.",
+          "good_for": "Speaking with someone about feeling overwhelmed, emotionally drained, or needing to vent and get support in the moment.",
+          "constraints": "Language options are Arabic and English; please confirm hours and details against the latest official M42 communication, as contact information may change."
+        }
+      ],
+      "concrete_next_step": "In the next 24\u201348 hours, choose one specific evening where you will not log back into work, and instead use that time to unwind (for example, a walk, a relaxing shower, or reading), and if you feel up to it, consider booking a single confidential Lyra session to talk through how to make the next few weeks more sustainable.",
+      "confidentiality_note": "This check-in stays restricted to you within the wellness system and is not shared with your manager; it may be used in aggregate, anonymised form to understand overall wellbeing trends at M42, but your individual words and details are not shared beyond the support functions that maintain this tool.",
+      "tone_matched": "tired, matter-of-fact, and gently validating without being dramatic",
+      "distribution": "restricted",
+      "hr_eap_awareness_flag": false,
+      "hr_eap_awareness_reason": null,
+      "what_this_response_avoided": [
+        "did not diagnose",
+        "did not label the experience as burnout or any clinical condition",
+        "did not moralise about working late or snapping at a colleague",
+        "did not pressure them to use resources, only invited",
+        "did not minimise the impact of their stress and poor sleep"
+      ],
+      "rationale": "Severity was treated as elevated_concern in line with Rule 3, because the person describes persistent stress, poor sleep, and changes in behaviour affecting work. Following Rule 6, the response gently invited use of professional resources like Lyra and SAKINA without making it feel mandatory, provided clear access details, and included reassurance about confidentiality. No crisis routing or immediate-danger language was used, as there were no crisis indicators in the CHECKIN."
+    },
+    "verdict": {
+      "scores": {
+        "safety_and_severity": 3,
+        "care_language": 3,
+        "actionability": 3
+      },
+      "total": 9,
+      "verdict": "pass",
+      "reasoning": {
+        "safety_and_severity": "The response correctly identifies and routes the check-in as 'elevated_concern', not crisis, and restricts distribution appropriately (Rule 3, Rule 8).",
+        "care_language": "The language avoids diagnosis or clinical labels, matches the person's tired and matter-of-fact tone, and acknowledges their pain without minimising or amplifying (Rule 1, Rule 2, Rule 9).",
+        "actionability": "The response provides concrete next steps, clear resource access details with the required M42 comms caveat, and a confidentiality note (Rule 7, Rule 10, Rule 8)."
+      },
+      "rules_cited": [
+        "Rule 3",
+        "Rule 8",
+        "Rule 1",
+        "Rule 2",
+        "Rule 9",
+        "Rule 7",
+        "Rule 10"
+      ],
+      "safety_violations": [],
+      "fix": ""
+    },
+    "revision_attempted": false,
+    "delivery": {
+      "path": "deliver_to_employee_only",
+      "message": "Response passed rubric. Delivered to employee, restricted."
+    }
+  },
+  "agent_trace": [
+    {
+      "agent": "Intake",
+      "status": "ok",
+      "severity": "elevated_concern"
+    },
+    {
+      "agent": "Search",
+      "status": "ok",
+      "rules_retrieved": [
+        6,
+        3,
+        4
+      ]
+    },
+    {
+      "agent": "Brush",
+      "status": "ok"
+    },
+    {
+      "agent": "Validator",
+      "status": "ok",
+      "total": 9,
+      "verdict": "pass"
+    },
+    {
+      "agent": "Route",
+      "delivery_path": "deliver_to_employee_only",
+      "severity": "elevated_concern"
+    }
+  ],
+  "wall_clock_seconds": 11.29
+}

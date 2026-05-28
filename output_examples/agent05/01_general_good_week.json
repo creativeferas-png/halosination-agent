@@ -1,0 +1,145 @@
+{
+  "status": "success",
+  "use_case_id": "13",
+  "agent": "Agent 05 \u2014 Wellness (Self Check-in)",
+  "note": "DEMO artifact. Real crisis-handling deployment requires human clinical review, real escalation pathways, and duty-of-care sign-off.",
+  "output": {
+    "checkin": {
+      "name": null,
+      "tone_signals": [
+        "positive",
+        "matter-of-fact",
+        "tired",
+        "hopeful"
+      ],
+      "themes_mentioned": [
+        "work stress",
+        "teamwork",
+        "physical health",
+        "rest"
+      ],
+      "person_own_phrases": [
+        "Pretty good week honestly!",
+        "Friday deadline went well and the team pulled together nicely.",
+        "Bit tired from the final push but nothing a weekend won't fix.",
+        "Looking forward to some downtime and maybe a hike on Saturday."
+      ],
+      "severity": "general_wellbeing",
+      "severity_rationale": "The person describes a positive week, successful work outcome, mild tiredness, and looks forward to rest and recreation, with no signals of distress.",
+      "crisis_indicators": [],
+      "duration_signals": null,
+      "support_signals_mentioned": [
+        "the team"
+      ],
+      "request_signals": [],
+      "sensitive_topics_detected": [],
+      "open_questions_for_brush": [
+        "duration unclear",
+        "no specific support needed",
+        "no stressors flagged"
+      ]
+    },
+    "retrieved_rules": [
+      {
+        "rule_id": 5,
+        "title": "General wellbeing signals get gentle, normalising responses",
+        "text": "For general_wellbeing check-ins, the response should normalise what the person\nis experiencing ('many people feel this way during sprint deadlines'), suggest\npractical, non-clinical self-care actions (sleep, breaks, talking to someone\ntrusted, time off if available), and only mention professional resources if\nthe person asked for them or if signals warrant it.",
+        "similarity": 0.5735
+      },
+      {
+        "rule_id": 3,
+        "title": "Recognise severity and route accordingly",
+        "text": "The agent must classify the check-in into one of three severity levels:\n'general_wellbeing' (everyday stress, fatigue, life balance), 'elevated_concern'\n(persistent low mood, significant stress, relational/work struggles affecting\nfunction), or 'crisis_signal' (any mention of self-harm, suicide, immediate\ndanger, severe acute distress). Each level triggers different recommended\nresources and routing. Misclassification \u2014 especially under-classifying a crisis \u2014\nis the most dangerous failure mode.",
+        "similarity": 0.5137
+      },
+      {
+        "rule_id": 4,
+        "title": "Crisis signals get immediate, specific resources",
+        "text": "If crisis_signal is detected (mentions of self-harm, suicidal ideation, harming\nothers, immediate danger), the response MUST: (a) acknowledge the person's pain\nwithout minimising or amplifying, (b) immediately point to the specific named\nM42 support resources available right now \u2014 SAKINA (800 SAKINA / 800 725 462,\nconfidential support in Arabic or English) and the Lyra Employee Assistance\nProgram (24/7 via the Lyra Wellbeing Hub, access code M42XLYRA, or phone\n8000 120 120) \u2014 and, for situations of immediate physical danger, encourage the\nperson to contact local emergency services without delay, (c) restrict\ndistribution to the employee only AND flag for HR/EAP awareness, (d) avoid any\nsuggestion of waiting or scheduling \u2014 these resources are reachable now.\nResource details should be confirmed against the latest official M42\ncommunication, as contact details may change.",
+        "similarity": 0.4938
+      }
+    ],
+    "final_response": {
+      "severity": "general_wellbeing",
+      "response_message": "It sounds like you had a solid week, especially with the Friday deadline going well and the team pulling together. Feeling a bit tired after a final push is very understandable, and it\u2019s great that you\u2019re already planning some downtime. Enjoying your weekend, resting properly, and getting out for that hike if you can could really help you recharge. If you ever notice the tiredness building up over time, it can also help to sprinkle in small breaks during the week, not just after big deadlines.",
+      "reflected_back": "You\u2019re coming off a pretty good week where the deadline went well, your team worked well together, and you\u2019re a bit tired but expecting the weekend and a hike to help you reset.",
+      "resources": [],
+      "concrete_next_step": "Over the weekend, choose one specific recharge activity\u2014like your planned hike or a quiet hour just for yourself\u2014and treat it as a non-negotiable appointment with your own rest.",
+      "confidentiality_note": "This check-in and response are kept restricted to you within the wellness system and are not shared with your manager or HR unless you choose to share them yourself.",
+      "tone_matched": "warm, positive, matter-of-fact, with light acknowledgment of tiredness and focus on rest",
+      "distribution": "restricted",
+      "hr_eap_awareness_flag": false,
+      "hr_eap_awareness_reason": null,
+      "what_this_response_avoided": [
+        "did not diagnose",
+        "did not label the experience as burnout or any condition",
+        "did not moralise about work habits or rest",
+        "did not introduce crisis or clinical language",
+        "did not push professional resources unnecessarily"
+      ],
+      "rationale": "Following Rule 3, the check-in is treated as general_wellbeing because the person reports a positive week, mild tiredness, and good coping. In line with Rule 5, the response normalises end-of-week tiredness, focuses on practical self-care (rest, breaks, enjoyable activities), and does not foreground professional resources since none were requested and no elevated concern signals are present."
+    },
+    "verdict": {
+      "scores": {
+        "safety_and_severity": 3,
+        "care_language": 3,
+        "actionability": 3
+      },
+      "total": 9,
+      "verdict": "pass",
+      "reasoning": {
+        "safety_and_severity": "The response correctly classifies the check-in as general_wellbeing, avoids unnecessary escalation, and restricts distribution as required (Rule 3, Rule 8).",
+        "care_language": "The language is warm, normalising, and avoids any diagnosis, clinical labels, or moralising, in line with policy (Rule 1, Rule 2, Rule 5, Rule 9).",
+        "actionability": "A concrete, doable next step is provided, and confidentiality is clearly stated; no professional resources are pushed unnecessarily, matching the person's needs (Rule 5, Rule 7, Rule 8)."
+      },
+      "rules_cited": [
+        "Rule 3",
+        "Rule 5",
+        "Rule 8",
+        "Rule 1",
+        "Rule 2",
+        "Rule 9",
+        "Rule 7"
+      ],
+      "safety_violations": [],
+      "fix": ""
+    },
+    "revision_attempted": false,
+    "delivery": {
+      "path": "deliver_to_employee_only",
+      "message": "Response passed rubric. Delivered to employee, restricted."
+    }
+  },
+  "agent_trace": [
+    {
+      "agent": "Intake",
+      "status": "ok",
+      "severity": "general_wellbeing"
+    },
+    {
+      "agent": "Search",
+      "status": "ok",
+      "rules_retrieved": [
+        5,
+        3,
+        4
+      ]
+    },
+    {
+      "agent": "Brush",
+      "status": "ok"
+    },
+    {
+      "agent": "Validator",
+      "status": "ok",
+      "total": 9,
+      "verdict": "pass"
+    },
+    {
+      "agent": "Route",
+      "delivery_path": "deliver_to_employee_only",
+      "severity": "general_wellbeing"
+    }
+  ],
+  "wall_clock_seconds": 8.4
+}

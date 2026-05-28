@@ -50,6 +50,16 @@ from app.agent04.validator import (
     PASS_THRESHOLD as SOCIAL_PASS_THRESHOLD,
 )
 
+# Agent 05 (Wellness) imports
+from app.agent05.intake import run_intake as run_wellness_intake
+from app.agent05.search import run_search as run_wellness_search
+from app.agent05.brush import run_brush as run_wellness_brush
+from app.agent05.validator import (
+    run_validator as run_wellness_validator,
+    run_brush_revision as run_wellness_brush_revision,
+    PASS_THRESHOLD as WELLNESS_PASS_THRESHOLD,
+)
+
 LOG_DIR = Path("logs")
 LOG_DIR.mkdir(exist_ok=True)
 log_file = LOG_DIR / f"run_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
@@ -112,6 +122,19 @@ class SocialRequest(BaseModel):
 
 
 class SocialResponse(BaseModel):
+    status: str
+    use_case_id: str
+    agent: str
+    output: dict
+    agent_trace: list
+
+
+class WellnessRequest(BaseModel):
+    checkin_text: str
+    context: dict | None = None
+
+
+class WellnessResponse(BaseModel):
     status: str
     use_case_id: str
     agent: str
@@ -822,6 +845,139 @@ def run_social(payload: SocialRequest):
                 "path": delivery_path,
                 "message": message,
             },
+        },
+        agent_trace=trace,
+    )
+
+
+
+
+@app.post("/run_wellness", response_model=WellnessResponse)
+def run_wellness(payload: WellnessRequest):
+    """
+    HALO Agent 05 (Wellness) - Self Check-in pipeline.
+    Spine: Intake (severity) -> Search -> Brush -> Validator -> Route.
+    DEMO artifact: real crisis-handling needs clinical review and duty-of-care sign-off.
+    """
+    preview = payload.checkin_text[:80]
+    logger.info(f"WELLNESS_RUN_START | preview={preview!r}")
+    trace = []
+
+    logger.info("AGENT_STEP | agent=Agent05.Intake | action=parse_checkin")
+    checkin = run_wellness_intake(payload.checkin_text)
+    trace.append({
+        "agent": "Agent05.Intake", "action": "parse_checkin",
+        "input_preview": payload.checkin_text[:120],
+        "output": checkin, "status": "error" if "error" in checkin else "ok",
+    })
+    if "error" in checkin:
+        logger.warning("WELLNESS_RUN_DEGRADED | intake_failed")
+        return WellnessResponse(status="degraded", use_case_id="13", agent="Agent 05 - Wellness",
+            output={"message": "Intake agent failed.", "detail": checkin}, agent_trace=trace)
+
+    severity = checkin.get("severity", "unknown")
+    logger.info(f"WELLNESS_SEVERITY | severity={severity}")
+
+    logger.info("AGENT_HANDOFF | from=Agent05.Intake | to=Agent05.Search")
+    logger.info("AGENT_STEP | agent=Agent05.Search | action=retrieve_wellness_rules")
+    search_result = run_wellness_search(checkin, top_k=3)
+    if "error" in search_result:
+        logger.warning("WELLNESS_SEARCH_DEGRADED | continuing with empty rules")
+        retrieved_rules = []
+    else:
+        retrieved_rules = search_result.get("retrieved_rules", [])
+    trace.append({
+        "agent": "Agent05.Search", "action": "retrieve_wellness_rules",
+        "rules_retrieved": [r["rule_id"] for r in retrieved_rules],
+        "output": search_result, "status": "error" if "error" in search_result else "ok",
+    })
+
+    rules_count = len(retrieved_rules)
+    logger.info(f"AGENT_HANDOFF | from=Agent05.Search | to=Agent05.Brush | rules_retrieved={rules_count}")
+    logger.info("AGENT_STEP | agent=Agent05.Brush | action=draft_response")
+    draft = run_wellness_brush(checkin, retrieved_rules=retrieved_rules)
+    trace.append({
+        "agent": "Agent05.Brush", "action": "draft_response",
+        "rules_used": [r["rule_id"] for r in retrieved_rules],
+        "output": draft, "status": "error" if "error" in draft else "ok",
+    })
+    if "error" in draft:
+        logger.warning("WELLNESS_RUN_DEGRADED | brush_failed")
+        return WellnessResponse(status="degraded", use_case_id="13", agent="Agent 05 - Wellness",
+            output={"message": "Brush agent failed.", "checkin": checkin, "detail": draft}, agent_trace=trace)
+
+    logger.info("AGENT_HANDOFF | from=Agent05.Brush | to=Agent05.Validator | round=1")
+    logger.info("AGENT_STEP | agent=Agent05.Validator | action=score_initial")
+    verdict_v1 = run_wellness_validator(checkin, draft, is_revision=False, retrieved_rules=retrieved_rules)
+    trace.append({
+        "agent": "Agent05.Validator", "action": "score_initial",
+        "output": verdict_v1, "status": "error" if "error" in verdict_v1 else "ok",
+    })
+    if "error" in verdict_v1:
+        logger.warning("WELLNESS_RUN_DEGRADED | validator_failed")
+        return WellnessResponse(status="degraded", use_case_id="13", agent="Agent 05 - Wellness",
+            output={"message": "Validator failed.", "checkin": checkin, "draft": draft, "detail": verdict_v1}, agent_trace=trace)
+
+    final_draft = draft
+    final_verdict = verdict_v1
+    revision_attempted = False
+
+    if verdict_v1.get("verdict") == "revise":
+        revision_attempted = True
+        fix = verdict_v1.get("fix", "")
+        v1_total = verdict_v1.get("total")
+        fix_preview = fix[:80]
+        logger.info(f"WELLNESS_REVISION_TRIGGERED | total={v1_total}/9 | fix={fix_preview!r}")
+        logger.info("AGENT_HANDOFF | from=Agent05.Validator | to=Agent05.Brush | action=revise")
+        revised_draft = run_wellness_brush_revision(checkin, draft, fix, retrieved_rules=retrieved_rules)
+        trace.append({
+            "agent": "Agent05.Brush", "action": "revise", "fix_applied": fix,
+            "output": revised_draft, "status": "error" if "error" in revised_draft else "ok",
+        })
+        if "error" not in revised_draft:
+            logger.info("AGENT_HANDOFF | from=Agent05.Brush | to=Agent05.Validator | round=2")
+            verdict_v2 = run_wellness_validator(checkin, revised_draft, is_revision=True, retrieved_rules=retrieved_rules)
+            trace.append({
+                "agent": "Agent05.Validator", "action": "score_revised",
+                "output": verdict_v2, "status": "error" if "error" in verdict_v2 else "ok",
+            })
+            if "error" not in verdict_v2:
+                final_draft = revised_draft
+                final_verdict = verdict_v2
+
+    verdict_label = final_verdict.get("verdict", "unknown")
+    hr_eap_flag = final_draft.get("hr_eap_awareness_flag", False)
+
+    if final_draft.get("severity") == "crisis_signal" or hr_eap_flag:
+        delivery_path = "deliver_to_employee_flag_hr_eap_awareness"
+        message = "Delivered to employee only. Flagged for HR/EAP awareness to ensure support access (not for performance/disciplinary use)."
+    elif verdict_label == "pass":
+        delivery_path = "deliver_to_employee_only"
+        message = "Response passed rubric. Delivered to employee, restricted."
+    elif verdict_label == "escalate":
+        delivery_path = "deliver_to_employee_flag_human_review"
+        message = "Still below threshold after one revision. Flagged for human review."
+    else:
+        delivery_path = "deliver_to_employee_flag_human_review"
+        message = f"Verdict: {verdict_label}. Flagged for human review."
+
+    trace.append({
+        "agent": "Agent05.Route", "action": "decide_delivery_path",
+        "delivery_path": delivery_path, "driven_by_verdict": verdict_label,
+        "severity": final_draft.get("severity"),
+    })
+
+    steps_count = len(trace)
+    logger.info(f"WELLNESS_RUN_DONE | status=success | severity={final_draft.get('severity')} | verdict={verdict_label} | hr_eap_flag={hr_eap_flag} | revision_attempted={revision_attempted} | trace_steps={steps_count}")
+
+    return WellnessResponse(
+        status="success", use_case_id="13",
+        agent="Agent 05 - Wellness (Self Check-in)",
+        output={
+            "checkin": checkin, "retrieved_rules": retrieved_rules,
+            "final_response": final_draft, "verdict": final_verdict,
+            "revision_attempted": revision_attempted,
+            "delivery": {"path": delivery_path, "message": message},
         },
         agent_trace=trace,
     )

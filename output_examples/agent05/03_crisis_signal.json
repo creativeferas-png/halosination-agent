@@ -1,0 +1,166 @@
+{
+  "status": "success",
+  "use_case_id": "13",
+  "agent": "Agent 05 \u2014 Wellness (Self Check-in)",
+  "note": "DEMO artifact. Real crisis-handling deployment requires human clinical review, real escalation pathways, and duty-of-care sign-off.",
+  "output": {
+    "checkin": {
+      "name": null,
+      "tone_signals": [
+        "vulnerable",
+        "tired",
+        "hopeless"
+      ],
+      "themes_mentioned": [
+        "general wellbeing",
+        "isolation"
+      ],
+      "person_own_phrases": [
+        "Everything feels pointless lately",
+        "some days I genuinely wonder if anyone would notice if I just wasn't here anymore",
+        "I'm so tired of all of it",
+        "I don't see how it gets better"
+      ],
+      "severity": "crisis_signal",
+      "severity_rationale": "The statement 'some days I genuinely wonder if anyone would notice if I just wasn't here anymore' signals possible suicidal ideation and severe acute distress.",
+      "crisis_indicators": [
+        "suicidal ideation",
+        "severe acute distress"
+      ],
+      "duration_signals": "lately",
+      "support_signals_mentioned": [],
+      "request_signals": [],
+      "sensitive_topics_detected": [],
+      "open_questions_for_brush": [
+        "duration unclear",
+        "no specific support mentioned",
+        "possible isolation",
+        "hopelessness expressed"
+      ]
+    },
+    "retrieved_rules": [
+      {
+        "rule_id": 4,
+        "title": "Crisis signals get immediate, specific resources",
+        "text": "If crisis_signal is detected (mentions of self-harm, suicidal ideation, harming\nothers, immediate danger), the response MUST: (a) acknowledge the person's pain\nwithout minimising or amplifying, (b) immediately point to the specific named\nM42 support resources available right now \u2014 SAKINA (800 SAKINA / 800 725 462,\nconfidential support in Arabic or English) and the Lyra Employee Assistance\nProgram (24/7 via the Lyra Wellbeing Hub, access code M42XLYRA, or phone\n8000 120 120) \u2014 and, for situations of immediate physical danger, encourage the\nperson to contact local emergency services without delay, (c) restrict\ndistribution to the employee only AND flag for HR/EAP awareness, (d) avoid any\nsuggestion of waiting or scheduling \u2014 these resources are reachable now.\nResource details should be confirmed against the latest official M42\ncommunication, as contact details may change.",
+        "similarity": 0.606
+      },
+      {
+        "rule_id": 3,
+        "title": "Recognise severity and route accordingly",
+        "text": "The agent must classify the check-in into one of three severity levels:\n'general_wellbeing' (everyday stress, fatigue, life balance), 'elevated_concern'\n(persistent low mood, significant stress, relational/work struggles affecting\nfunction), or 'crisis_signal' (any mention of self-harm, suicide, immediate\ndanger, severe acute distress). Each level triggers different recommended\nresources and routing. Misclassification \u2014 especially under-classifying a crisis \u2014\nis the most dangerous failure mode.",
+        "similarity": 0.5246
+      },
+      {
+        "rule_id": 5,
+        "title": "General wellbeing signals get gentle, normalising responses",
+        "text": "For general_wellbeing check-ins, the response should normalise what the person\nis experiencing ('many people feel this way during sprint deadlines'), suggest\npractical, non-clinical self-care actions (sleep, breaks, talking to someone\ntrusted, time off if available), and only mention professional resources if\nthe person asked for them or if signals warrant it.",
+        "similarity": 0.4787
+      }
+    ],
+    "final_response": {
+      "severity": "crisis_signal",
+      "response_message": "Right now, you do not have to sit with this alone. You can reach out immediately to SAKINA at 800 SAKINA (800 725 462) for confidential support in Arabic or English, or contact the Lyra Employee Assistance Program 24/7 through the Lyra Wellbeing Hub using access code M42XLYRA, or by calling 8000 120 120; please confirm these details against the latest official M42 communication in case anything has changed. If at any point you feel in immediate physical danger, please contact your local emergency services without delay. It sounds incredibly heavy to feel like everything is pointless and to wonder if anyone would notice if you weren\u2019t here, and it makes sense that you\u2019re exhausted and unsure how things could get better. You deserve support with these thoughts and feelings, and it\u2019s okay to ask for help even if you\u2019re not sure exactly what you need. You don\u2019t have to decide everything right now\u2014just taking one small step to connect with someone safe can matter.",
+      "reflected_back": "You shared that everything feels pointless lately, that some days you genuinely wonder if anyone would notice if you just weren\u2019t here anymore, and that you\u2019re so tired of all of it and don\u2019t see how it gets better.",
+      "resources": [
+        {
+          "name": "SAKINA",
+          "how_to_access": "Call 800 SAKINA (800 725 462) for confidential support in Arabic or English; please confirm this number against the latest official M42 communication as contact details may change.",
+          "good_for": "Talking in real time with someone about intense thoughts, feeling hopeless, isolated, or overwhelmed, and exploring immediate emotional support options.",
+          "constraints": "Phone-based support; language availability is Arabic and English."
+        },
+        {
+          "name": "Lyra Employee Assistance Program (EAP)",
+          "how_to_access": "Access 24/7 via the Lyra Wellbeing Hub with access code M42XLYRA, email yourmenawellbeing@lyrahealth.com, or call 8000 120 120; confirm details against the latest official M42 communication as they may change.",
+          "good_for": "Confidential emotional support, short-term counselling options, and guidance on coping with ongoing stress, hopelessness, or isolation.",
+          "constraints": "Coverage, available modalities, and language options may depend on your location and current M42\u2013Lyra agreement; check the latest M42 guidance."
+        },
+        {
+          "name": "Local emergency services",
+          "how_to_access": "If you feel in immediate physical danger or at risk of harming yourself or someone else, contact your local emergency number right away (for example, 999, 112, or your country\u2019s equivalent).",
+          "good_for": "Situations where there is immediate risk to your safety or someone else\u2019s safety and you need urgent, in-person help.",
+          "constraints": "For immediate emergencies only; availability and response times depend on local services."
+        }
+      ],
+      "concrete_next_step": "In the next hour, choose one option\u2014either call SAKINA at 800 SAKINA (800 725 462) or open the Lyra Wellbeing Hub with access code M42XLYRA\u2014and tell the person or platform exactly what you wrote here about everything feeling pointless and wondering if anyone would notice if you weren\u2019t here.",
+      "confidentiality_note": "This wellness check-in and response are restricted to you and are not shared with your manager or wider team; however, because of the level of distress and potential risk you described, it may be flagged in anonymised form to the HR/EAP liaison so they are aware that someone at M42 may need stronger access to support, without identifying you personally unless you choose to share your details through SAKINA, Lyra, or HR directly.",
+      "tone_matched": "gentle, serious, and validating, acknowledging hopelessness and exhaustion without minimising or dramatizing it.",
+      "distribution": "restricted",
+      "hr_eap_awareness_flag": true,
+      "hr_eap_awareness_reason": "The check-in includes possible suicidal ideation and severe acute distress, classified as crisis_signal, which per policy requires HR/EAP awareness so support pathways remain available.",
+      "what_this_response_avoided": [
+        "did not diagnose any mental health condition",
+        "did not label the experience with clinical terms (e.g., depression, burnout)",
+        "did not offer medical, clinical, or medication advice",
+        "did not minimise or dismiss the intensity of their feelings",
+        "did not encourage waiting, delaying, or only scheduling something later",
+        "did not moralise, blame, or suggest they should feel differently",
+        "did not promise confidentiality beyond what the policy allows"
+      ],
+      "rationale": "The check-in was classified as crisis_signal due to suicidal ideation and severe acute distress, so the response follows Rule 3 by routing to the highest severity level. In line with Rule 4, the message leads immediately with specific crisis resources (SAKINA, Lyra, and local emergency services), acknowledges the person\u2019s pain without minimising or amplifying it, avoids suggesting waiting or scheduling, restricts distribution, and sets hr_eap_awareness_flag to true. Rule 5 is less central here, but its emphasis on normalising and supportive tone informed the gentle, validating language used."
+    },
+    "verdict": {
+      "scores": {
+        "safety_and_severity": 3,
+        "care_language": 3,
+        "actionability": 3
+      },
+      "total": 9,
+      "verdict": "pass",
+      "reasoning": {
+        "safety_and_severity": "The response correctly classifies the check-in as crisis_signal, leads with immediate access to SAKINA and Lyra resources, includes local emergency services, restricts distribution, and sets hr_eap_awareness_flag to true, fully aligning with Rule 3 and Rule 4.",
+        "care_language": "The language is gentle, validating, and avoids any diagnosis or clinical labels, matching the person's tone and adhering to Rule 1, Rule 2, and Rule 9.",
+        "actionability": "The response provides concrete next steps, specific resource access details with the required confirmation caveat, and a clear confidentiality/escalation note, in line with Rule 7, Rule 8, and Rule 10."
+      },
+      "rules_cited": [
+        "Rule 3",
+        "Rule 4",
+        "Rule 1",
+        "Rule 2",
+        "Rule 9",
+        "Rule 7",
+        "Rule 8",
+        "Rule 10"
+      ],
+      "safety_violations": [],
+      "fix": ""
+    },
+    "revision_attempted": false,
+    "delivery": {
+      "path": "deliver_to_employee_flag_hr_eap_awareness",
+      "message": "Delivered to employee only. Flagged for HR/EAP awareness to ensure support access (not for performance/disciplinary use)."
+    }
+  },
+  "agent_trace": [
+    {
+      "agent": "Intake",
+      "status": "ok",
+      "severity": "crisis_signal"
+    },
+    {
+      "agent": "Search",
+      "status": "ok",
+      "rules_retrieved": [
+        4,
+        3,
+        5
+      ]
+    },
+    {
+      "agent": "Brush",
+      "status": "ok"
+    },
+    {
+      "agent": "Validator",
+      "status": "ok",
+      "total": 9,
+      "verdict": "pass"
+    },
+    {
+      "agent": "Route",
+      "delivery_path": "deliver_to_employee_flag_hr_eap_awareness",
+      "severity": "crisis_signal"
+    }
+  ],
+  "wall_clock_seconds": 12.59
+}
