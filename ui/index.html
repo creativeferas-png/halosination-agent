@@ -210,6 +210,16 @@
   .coming-soon .icon { font-size: 48px; opacity: 0.3; margin-bottom: 16px; }
   .coming-soon h3 { font-size: 18px; color: var(--text); margin-bottom: 6px; }
   .coming-soon p { font-size: 13px; max-width: 460px; margin: 0 auto; line-height: 1.6; }
+
+    .sev-banner { display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:8px; font-size:13px; border:1px solid var(--border); }
+    .sev-banner .sev-dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
+    .sev-banner.general { background:rgba(34,197,94,0.08); border-color:rgba(34,197,94,0.3); }
+    .sev-banner.general .sev-dot { background:#22c55e; }
+    .sev-banner.elevated { background:rgba(234,179,8,0.08); border-color:rgba(234,179,8,0.35); }
+    .sev-banner.elevated .sev-dot { background:#eab308; }
+    .sev-banner.crisis { background:rgba(239,68,68,0.10); border-color:rgba(239,68,68,0.45); }
+    .sev-banner.crisis .sev-dot { background:#ef4444; animation:pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
 </style>
 </head>
 <body>
@@ -249,7 +259,7 @@
     <button class="tab" data-tab="agent05">
       <span class="agent-num">05</span>
       <span>Wellness</span>
-      <span class="tab-status soon">SOON</span>
+      <span class="tab-status live">LIVE</span>
     </button>
   </div>
 
@@ -380,10 +390,34 @@
     </div>
   </div>
   <div class="tab-panel" id="agent05">
-    <div class="coming-soon">
-      <div class="icon">💚</div>
-      <h3>Agent 05 — Wellness</h3>
-      <p>Self check-in → care-appropriate response + suggested resources + (anonymised) organisational signals. Validator emphasises care language, no diagnosis, sensitivity to severity escalation. Building in the current sprint.</p>
+    <div class="grid">
+      <div>
+        <div class="panel">
+          <h2>Wellness Check-in</h2>
+          <textarea id="a5-checkin" class="tall" placeholder="A confidential space to share how you're doing. Agent 05 responds with care-appropriate support and specific resources — it never diagnoses or labels, and it routes by severity. Check-ins stay restricted to you."></textarea>
+          <button class="primary" id="a5-submit">Share check-in →</button>
+          <div class="disclaimer-note" style="margin-top:10px;font-size:11px;color:var(--text-dim);line-height:1.5">Demo artifact. A real wellness tool handling crisis signals needs human clinical review and duty-of-care sign-off. If you are in genuine distress, please contact SAKINA (800 725 462) or Lyra EAP (8000 120 120).</div>
+          <div class="examples">
+            <h3>Try a sample check-in</h3>
+            <button class="example-btn" data-a5-example="01"><span class="label">Good week</span>Mild tiredness, positive tone — tests proportionate (non-escalating) response</button>
+            <button class="example-btn" data-a5-example="02"><span class="label">Running on empty</span>Persistent stress affecting function — invites resources without pressure</button>
+            <button class="example-btn" data-a5-example="03"><span class="label">Crisis signal</span>Tests the safety path: leads with resources, flags HR/EAP awareness, never diagnoses</button>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Agent Activity</h2>
+          <div id="a5-activity" class="activity"></div>
+        </div>
+      </div>
+      <div>
+        <div id="a5-results" class="panel">
+          <h2>Supportive Response</h2>
+          <div class="empty">
+            <div class="empty-icon">💚</div>
+            Share a check-in and submit. Agent 05 uses the same Intake → Search → Brush → Validator pattern — here Intake classifies severity, and the Validator caps safety to zero on any crisis-handling violation.
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -393,6 +427,7 @@ const API_AGENT01 = "http://localhost:8000/run";
 const API_AGENT02 = "http://localhost:8000/run_meeting";
 const API_AGENT03 = "http://localhost:8000/run_status";
 const API_AGENT04 = "http://localhost:8000/run_social";
+const API_AGENT05 = "http://localhost:8000/run_wellness";
 
 const AGENT01_SAMPLES = {
   "01": "hey can you make me a launch banner for Project Atlas? going out to healthcare audiences next week, needs to feel modern and trustworthy. M42 is the lead OpCo",
@@ -419,6 +454,14 @@ const AGENT04_SAMPLES = {
   "01": "Hi! I'm Layla Al-Mahmoud, recently joined M42 as a Senior Clinical Data Scientist about 3 months ago — I came from a public health background and spent 6 years at the WHO Geneva office before relocating to Abu Dhabi. I'm based in our HQ here and currently working on the predictive analytics pipeline for the cardiology programme. Really interested in clinical decision support, federated learning, and explainable AI for healthcare. Long-term I'd love to bridge clinical and AI work more deeply. Honestly, settling in has been harder than I expected — I'm still trying to find my footing socially in the office. Most of my old work circle is in Europe and the timezone gap makes it hard to stay close. Looking to meet people working on similar problems, ideally someone more experienced in regional healthcare regulation since I'm new to the GCC context. I speak English, French, and Arabic.",
   "02": "Tariq Al-Sayed — Director of Engineering, Platform Group, M42. 12 years at M42 and predecessors, before that 8 years at Microsoft and Amazon. Based in Abu Dhabi, originally from Amman.\n\nCurrently leading the cloud migration programme and the platform standardisation initiative across our four OpCos. Have 3 direct reports (Senior Eng Managers) and ~40 engineers total in the group.\n\nInterests: large-scale distributed systems, cost optimisation at hyperscale, building strong engineering culture in regional context. I write occasionally about engineering leadership.\n\nLooking to expand my network in two directions: (1) other senior engineering leaders at G42 sister companies working on similar platform problems — I think we could share war stories and avoid reinventing wheels; (2) emerging engineering leaders inside M42 who want to think about scaling teams and platforms — I have things to share and also things I want to learn from the next generation.\n\nSpeak English and Arabic fluently.",
   "03": "Hassan Mansour, Product Manager at M42's customer-facing apps team, 4 years here.\n\nHonestly the reason I'm filling this out is mixed. I'm in the middle of a difficult performance review process with my line manager Karim — there's a formal review on the table and HR is involved. I think it's been handled unfairly but I don't want to get into that here.\n\nWhat I'm actually interested in: I want to find peers and mentors outside my direct reporting chain. Specifically NOT Karim, NOT anyone on my current team, and NOT anyone in the chain above Karim (which goes up to Maya, the head of consumer products).\n\nMy actual work: I lead the loyalty programme product, with focus on retention mechanics, A/B testing, and customer segmentation. Interests are in growth product management, behavioural science, and pricing strategy. Looking for: (a) PMs in other M42 OpCos working on similar growth/retention problems; (b) senior product mentors outside the consumer apps org; (c) maybe a community or channel where I can keep learning even if my current role situation is unclear.\n\nI'm hoping this can be helpful without anything I say here ending up in the formal review thread."
+};
+
+
+
+const AGENT05_SAMPLES = {
+  "01": "Pretty good week honestly! Friday deadline went well and the team pulled together nicely. Bit tired from the final push but nothing a weekend won't fix. Mostly just checking in because the app reminded me to. Looking forward to some downtime and maybe a hike on Saturday.",
+  "02": "Rough couple of weeks. Work's been relentless \u2014 three deadlines stacked on top of each other and I've been logging in at night to keep up. I'm tired all the time, not sleeping great, and I snapped at a colleague yesterday which isn't like me. Nothing dramatic, I'm not falling apart or anything, just running on empty and wanted to put it somewhere. I think I just need a proper weekend off honestly.",
+  "03": "I don't really know why I'm writing this. Everything feels pointless lately and some days I genuinely wonder if anyone would notice if I just wasn't here anymore. I'm so tired of all of it and I don't see how it gets better."
 };
 
 const STAGES = [
@@ -460,6 +503,11 @@ document.querySelectorAll("[data-a4-example]").forEach(btn => {
     document.getElementById("a4-profile").value = AGENT04_SAMPLES[btn.dataset.a4Example];
   });
 });
+document.querySelectorAll("[data-a5-example]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.getElementById("a5-checkin").value = AGENT05_SAMPLES[btn.dataset.a5Example];
+  });
+});
 
 function renderStagesInitial(elementId) {
   const html = STAGES.map(s =>
@@ -497,6 +545,7 @@ renderStagesInitial("a1-activity");
 renderStagesInitial("a2-activity");
 renderStagesInitial("a3-activity");
 renderStagesInitial("a4-activity");
+renderStagesInitial("a5-activity");
 
 // AGENT 01 SUBMIT
 document.getElementById("a1-submit").addEventListener("click", async () => {
@@ -708,6 +757,30 @@ function renderAgent03Results(resp) {
 
 
 
+
+
+document.getElementById("a5-submit").addEventListener("click", async () => {
+  const checkinText = document.getElementById("a5-checkin").value.trim();
+  if (!checkinText) { alert("Share a check-in first."); return; }
+  const btn = document.getElementById("a5-submit");
+  btn.disabled = true; btn.textContent = "Agents working...";
+  document.getElementById("a5-results").innerHTML = '<h2>Supportive Response</h2><div class="empty"><div class="empty-icon">\u25D0</div>Agents are working \u2014 watch the activity panel</div>';
+  const animation = animateStages("a5-activity");
+  let response;
+  try {
+    const r = await fetch(API_AGENT05, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ checkin_text: checkinText }) });
+    response = await r.json();
+  } catch (e) {
+    document.getElementById("a5-activity").innerHTML = `<div class="error">Failed to reach API at ${API_AGENT05}. Is the server running on port 8000?</div>`;
+    btn.disabled = false; btn.textContent = "Share check-in →";
+    return;
+  }
+  await animation;
+  renderStagesAllDone("a5-activity");
+  renderAgent05Results(response);
+  btn.disabled = false; btn.textContent = "Share check-in →";
+});
+
 function renderAgent04Results(resp) {
   const out = resp.output || {};
   const profile = out.profile || {};
@@ -743,6 +816,50 @@ function renderAgent04Results(resp) {
   const deliveryHTML = `<div class="section"><div class="section-label">Delivery decision <span class="agent-tag">ROUTE</span></div><div class="delivery-card"><div class="delivery-path">→ ${esc(delivery.path||"deliver_to_employee")}</div><div class="delivery-msg">${esc(delivery.message||"Ready to deliver.")}</div></div></div>`;
 
   document.getElementById("a4-results").innerHTML = `<h2>Connection Suggestions</h2>${verdictHTML}${metaHTML}${summaryHTML}${wellbeingHTML}${conflictsHTML}${peopleHTML}${groupsHTML}${diversityHTML}${rulesHTML}${deliveryHTML}`;
+}
+
+
+
+function renderAgent05Results(resp) {
+  const out = resp.output || {};
+  const checkin = out.checkin || {};
+  const response = out.final_response || {};
+  const verdict = out.verdict || {};
+  const scores = verdict.scores || {};
+  const rules = out.retrieved_rules || [];
+  const delivery = out.delivery || {};
+  const vClass = verdict.verdict || "pass";
+  const severity = response.severity || checkin.severity || "unknown";
+  const violations = verdict.safety_violations || [];
+
+  const sevClass = severity === "crisis_signal" ? "crisis" : (severity === "elevated_concern" ? "elevated" : "general");
+  const sevLabel = severity.replace(/_/g, " ");
+
+  const sevBanner = `<div class="section"><div class="sev-banner ${sevClass}"><span class="sev-dot"></span>Severity: <strong>${esc(sevLabel)}</strong>${response.hr_eap_awareness_flag ? ' · <span style="color:var(--warn)">flagged for HR/EAP awareness</span>' : ""}</div></div>`;
+
+  const verdictHTML = `<div class="section"><div class="section-label">Validator verdict <span class="agent-tag">VALIDATOR</span></div><div class="verdict-card"><div class="verdict-header"><span class="verdict-badge ${vClass}">${vClass} · ${verdict.total ?? "?"}/9</span><span class="verdict-meta">${out.revision_attempted ? "after 1 revision" : "first pass"}${violations.length ? " · " + violations.length + " safety violation(s)" : " · 0 violations"}</span></div><div class="score-grid"><div class="score-cell"><div class="score-num">${scores.safety_and_severity ?? "—"}<span class="denom">/3</span></div><div class="score-label">Safety &amp; Severity</div></div><div class="score-cell"><div class="score-num">${scores.care_language ?? "—"}<span class="denom">/3</span></div><div class="score-label">Care Language</div></div><div class="score-cell"><div class="score-num">${scores.actionability ?? "—"}<span class="denom">/3</span></div><div class="score-label">Actionability</div></div></div>${verdict.reasoning ? `<div class="reasoning"><p><strong>Safety &amp; Severity:</strong> ${esc(verdict.reasoning.safety_and_severity||"")}</p><p><strong>Care Language:</strong> ${esc(verdict.reasoning.care_language||"")}</p><p><strong>Actionability:</strong> ${esc(verdict.reasoning.actionability||"")}</p></div>` : ""}</div></div>`;
+
+  const messageHTML = `<div class="section"><div class="section-label">Response to the person <span class="agent-tag">BRUSH</span></div><div class="summary-card" style="line-height:1.6">${esc(response.response_message||"—")}</div></div>`;
+
+  const reflectedHTML = response.reflected_back ? `<div class="section"><div class="section-label">Reflected back (their words, not a diagnosis) <span class="agent-tag">BRUSH</span></div><div class="item-card"><div class="item-title" style="font-weight:normal">${esc(response.reflected_back)}</div></div></div>` : "";
+
+  const resources = response.resources || [];
+  const resourcesHTML = resources.length ? `<div class="section"><div class="section-label">Resources (${resources.length}) <span class="agent-tag">BRUSH</span></div>${resources.map(r => `<div class="item-card"><div class="item-title">${esc(r.name||"")}</div><div class="item-meta" style="font-family:inherit;font-size:12px;line-height:1.5"><span><strong>Access:</strong> ${esc(r.how_to_access||"—")}</span></div><div class="item-meta" style="font-family:inherit;font-size:12px;line-height:1.5;margin-top:4px"><span><strong>Good for:</strong> ${esc(r.good_for||"—")}</span></div>${r.constraints ? `<div class="item-meta" style="font-family:inherit;font-size:12px;line-height:1.5;margin-top:4px"><span><strong>Note:</strong> ${esc(r.constraints)}</span></div>` : ""}</div>`).join("")}</div>` : "";
+
+  const nextStepHTML = response.concrete_next_step ? `<div class="section"><div class="section-label">Concrete next step (Rule 7) <span class="agent-tag">BRUSH</span></div><div class="item-card gap"><div class="item-title" style="font-weight:normal">→ ${esc(response.concrete_next_step)}</div></div></div>` : "";
+
+  const avoided = response.what_this_response_avoided || [];
+  const avoidedHTML = avoided.length ? `<div class="section"><div class="section-label">Self-audit: what this response avoided <span class="agent-tag">BRUSH</span></div>${avoided.map(a => `<div class="item-card"><div class="item-title" style="font-weight:normal;color:var(--text-dim)">✓ ${esc(a)}</div></div>`).join("")}</div>` : "";
+
+  const confHTML = response.confidentiality_note ? `<div class="section"><div class="section-label">Confidentiality &amp; escalation (Rule 8) <span class="agent-tag">BRUSH</span></div><div class="item-card"><div class="item-title" style="font-weight:normal">${esc(response.confidentiality_note)}</div></div></div>` : "";
+
+  const rulesHTML = rules.length ? `<div class="section"><div class="section-label">Retrieved wellness policy rules <span class="agent-tag">SEARCH</span></div><div class="rules-list">${rules.map(r => `<div class="rule-card"><div class="rule-header"><span class="rule-id">Rule ${r.rule_id}</span><span class="rule-title">${esc(r.title)}</span><div class="similarity-bar"><div class="similarity-fill" style="width:${(r.similarity*100).toFixed(0)}%"></div></div><span class="similarity-pct">${(r.similarity*100).toFixed(1)}%</span></div></div>`).join("")}</div></div>` : "";
+
+  const deliveryHTML = `<div class="section"><div class="section-label">Delivery decision <span class="agent-tag">ROUTE</span></div><div class="delivery-card"><div class="delivery-path">→ ${esc(delivery.path||"deliver_to_employee_only")}</div><div class="delivery-msg">${esc(delivery.message||"")}</div></div></div>`;
+
+  const caveatHTML = `<div class="section"><div class="item-card" style="border-color:var(--warn);opacity:0.85"><div class="item-title" style="font-weight:normal;font-size:11px;color:var(--text-dim)">Demo artifact. A 9/9 from an automated critic is not clinical validation. Real deployment of crisis-handling requires human clinical review, real escalation pathways, and duty-of-care sign-off.</div></div></div>`;
+
+  document.getElementById("a5-results").innerHTML = `<h2>Supportive Response</h2>${sevBanner}${verdictHTML}${messageHTML}${reflectedHTML}${resourcesHTML}${nextStepHTML}${avoidedHTML}${confHTML}${rulesHTML}${deliveryHTML}${caveatHTML}`;
 }
 
 function esc(s) {
