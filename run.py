@@ -8,7 +8,7 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -49,6 +49,10 @@ from app.agent04.validator import (
     run_brush_revision as run_social_brush_revision,
     PASS_THRESHOLD as SOCIAL_PASS_THRESHOLD,
 )
+
+# Router import
+from app.router import route_request, AGENT_ENDPOINTS
+from app.asset_render import render_brand_asset
 
 # Agent 05 (Wellness) imports
 from app.agent05.intake import run_intake as run_wellness_intake
@@ -140,6 +144,20 @@ class WellnessResponse(BaseModel):
     agent: str
     output: dict
     agent_trace: list
+
+
+class AssetRequest(BaseModel):
+    final_draft: dict
+
+
+class RouteRequest(BaseModel):
+    request_text: str
+
+
+class RouteResponse(BaseModel):
+    status: str
+    routing: dict
+    agent_result: dict | None = None
 
 
 class RunResponse(BaseModel):
@@ -980,6 +998,70 @@ def run_wellness(payload: WellnessRequest):
             "delivery": {"path": delivery_path, "message": message},
         },
         agent_trace=trace,
+    )
+
+
+
+
+# Map agent keys -> the in-process callables that run each full pipeline.
+# We call the existing endpoint functions directly to avoid an internal HTTP hop.
+def _dispatch_to_agent(agent_key, request_text):
+    if agent_key == "agent01_brand":
+        return run(RunRequest(request=request_text)).model_dump()
+    if agent_key == "agent02_productivity":
+        return run_meeting(MeetingRequest(transcript=request_text)).model_dump()
+    if agent_key == "agent03_task":
+        return run_status(StatusRequest(status_text=request_text)).model_dump()
+    if agent_key == "agent04_social":
+        return run_social(SocialRequest(profile_text=request_text)).model_dump()
+    if agent_key == "agent05_wellness":
+        return run_wellness(WellnessRequest(checkin_text=request_text)).model_dump()
+    return {"error": "unknown_agent", "agent_key": agent_key}
+
+
+@app.post("/route", response_model=RouteResponse)
+def route(payload: RouteRequest):
+    """
+    HALO unified front door. Routes a free-form request to the right agent,
+    then runs that agent's full pipeline and returns both the routing decision
+    and the agent's result in one response.
+    """
+    preview = payload.request_text[:80]
+    logger.info(f"ROUTE_START | preview={preview!r}")
+
+    routing = route_request(payload.request_text)
+    if "error" in routing:
+        logger.warning("ROUTE_DEGRADED | router_failed")
+        return RouteResponse(status="degraded", routing=routing, agent_result=None)
+
+    agent_key = routing.get("agent")
+    logger.info(f"ROUTE_DISPATCH | agent={agent_key}")
+    try:
+        agent_result = _dispatch_to_agent(agent_key, payload.request_text)
+    except Exception as exc:
+        logger.error(f"ROUTE_DISPATCH_FAIL | agent={agent_key} | error={exc!s}")
+        return RouteResponse(status="degraded", routing=routing,
+                             agent_result={"error": "dispatch_failure", "detail": str(exc)})
+
+    logger.info(f"ROUTE_DONE | agent={agent_key} | status={agent_result.get('status')}")
+    return RouteResponse(status="success", routing=routing, agent_result=agent_result)
+
+
+
+
+@app.post("/render_asset")
+def render_asset(payload: AssetRequest):
+    logger.info("RENDER_ASSET_START")
+    try:
+        asset_html = render_brand_asset(payload.final_draft)
+    except Exception as exc:
+        logger.error("RENDER_ASSET_FAIL | error=" + str(exc))
+        return Response(content="<h1>Asset render failed</h1>", media_type="text/html", status_code=500)
+    logger.info("RENDER_ASSET_DONE | bytes=" + str(len(asset_html)))
+    return Response(
+        content=asset_html,
+        media_type="text/html",
+        headers={"Content-Disposition": "attachment; filename=halo_brand_asset.html"},
     )
 
 

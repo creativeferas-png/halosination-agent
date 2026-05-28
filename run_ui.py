@@ -23,6 +23,11 @@ def index():
     return FileResponse(UI_DIR / "index.html")
 
 
+@app.get("/halo")
+def halo():
+    return FileResponse(UI_DIR / "halo.html")
+
+
 # Serve any static files in ui/ (in case we add CSS/JS files later)
 if UI_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(UI_DIR)), name="static")

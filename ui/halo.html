@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HALO</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --bg:#0a0e1a; --panel:#121829; --panel2:#1a2236; --border:#243049;
+    --text:#e8edf7; --dim:#8493b0; --accent:#3b82f6; --accent2:#1d4ed8;
+    --teal:#14b8a6; --amber:#eab308; --red:#ef4444; --green:#22c55e;
+  }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+  .wrap { max-width:760px; margin:0 auto; padding:24px 16px 140px; }
+  header { display:flex; align-items:center; gap:12px; padding:8px 0 20px; }
+  .logo { width:40px; height:40px; border-radius:10px; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:20px; color:#fff; }
+  header h1 { font-size:20px; font-weight:700; }
+  header p { font-size:12px; color:var(--dim); margin-top:2px; }
+  .intro { color:var(--dim); font-size:14px; line-height:1.6; margin-bottom:20px; padding:14px 16px; background:var(--panel); border-radius:12px; border:1px solid var(--border); }
+  .msg { margin-bottom:16px; }
+  .msg.user { text-align:right; }
+  .msg.user .bubble { display:inline-block; background:var(--accent); color:#fff; padding:12px 16px; border-radius:14px 14px 4px 14px; max-width:80%; text-align:left; font-size:15px; line-height:1.5; }
+  .routing { font-size:13px; color:var(--dim); margin:14px 0 10px; padding:10px 14px; background:var(--panel2); border-radius:10px; border-left:3px solid var(--accent); }
+  .routing .to { color:var(--text); font-weight:600; }
+  .routing.wellness { border-left-color:var(--red); }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:18px; margin-bottom:12px; }
+  .card h3 { font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--dim); margin-bottom:10px; }
+  .card .lead { font-size:15px; line-height:1.6; }
+  .badge { display:inline-block; font-size:11px; padding:3px 10px; border-radius:20px; font-weight:600; }
+  .badge.pass { background:rgba(34,197,94,0.15); color:#4ade80; }
+  .sev { display:inline-flex; align-items:center; gap:6px; font-size:13px; padding:6px 12px; border-radius:8px; margin-bottom:10px; }
+  .sev .dot { width:9px; height:9px; border-radius:50%; }
+  .sev.general { background:rgba(34,197,94,0.1); } .sev.general .dot { background:var(--green); }
+  .sev.elevated { background:rgba(234,179,8,0.1); } .sev.elevated .dot { background:var(--amber); }
+  .sev.crisis { background:rgba(239,68,68,0.12); } .sev.crisis .dot { background:var(--red); animation:pulse 1.4s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+  .scores { display:flex; gap:10px; margin:12px 0; }
+  .score { flex:1; background:var(--panel2); border-radius:10px; padding:12px; text-align:center; }
+  .score .n { font-size:22px; font-weight:700; color:var(--accent); }
+  .score .l { font-size:10px; color:var(--dim); text-transform:uppercase; letter-spacing:0.06em; margin-top:4px; }
+  .resource { background:var(--panel2); border-radius:10px; padding:12px; margin-bottom:8px; font-size:13px; line-height:1.5; }
+  .resource .rn { font-weight:600; color:var(--text); }
+  .resource .rd { color:var(--dim); margin-top:3px; }
+  .dl-btn { display:inline-flex; align-items:center; gap:8px; background:var(--teal); color:#04201c; font-weight:700; padding:12px 20px; border-radius:10px; border:none; cursor:pointer; font-size:14px; margin-top:8px; }
+  .dl-btn:hover { opacity:0.9; }
+  .caveat { font-size:11px; color:var(--dim); line-height:1.5; padding:12px 14px; border:1px solid var(--amber); border-radius:10px; margin-top:10px; opacity:0.85; }
+  .composer { position:fixed; bottom:0; left:0; right:0; background:var(--panel); border-top:1px solid var(--border); padding:14px 16px; }
+  .composer .inner { max-width:760px; margin:0 auto; display:flex; gap:10px; }
+  .composer textarea { flex:1; background:var(--panel2); border:1px solid var(--border); border-radius:12px; padding:12px 14px; color:var(--text); font-size:15px; font-family:inherit; resize:none; min-height:48px; max-height:120px; }
+  .composer textarea:focus { outline:none; border-color:var(--accent); }
+  .composer button { background:var(--accent); color:#fff; border:none; border-radius:12px; padding:0 22px; font-weight:600; font-size:15px; cursor:pointer; }
+  .composer button:disabled { opacity:0.5; cursor:default; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+  .chip { background:var(--panel2); border:1px solid var(--border); border-radius:20px; padding:7px 14px; font-size:12px; color:var(--dim); cursor:pointer; }
+  .chip:hover { color:var(--text); border-color:var(--accent); }
+  .working { color:var(--dim); font-size:14px; padding:10px 0; }
+  .err { color:#fca5a5; font-size:14px; padding:10px 14px; background:rgba(239,68,68,0.1); border-radius:10px; }
+  @media (max-width:600px){ .scores{flex-direction:column;} .wrap{padding:16px 12px 130px;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">H</div>
+    <div><h1>HALO</h1><p>One AI platform. Every employee. Work smarter, connect deeper, live better.</p></div>
+  </header>
+  <div class="intro">Tell HALO what you need in your own words. It routes your request to the right specialist — brand, productivity, tasks, connections, or wellbeing — and responds. One screen, no menus.</div>
+  <div class="chips" id="chips">
+    <div class="chip" data-ex="Write me a launch banner for our new cardiology app, going to hospital partners next week">Brand asset</div>
+    <div class="chip" data-ex="Here's my weekly status: finished the API integration, blocked on data migration, KPIs green">Status update</div>
+    <div class="chip" data-ex="I'm new here and want to meet people working on federated learning">Find connections</div>
+    <div class="chip" data-ex="Honestly I've been feeling really low and exhausted lately and not sure who to talk to">Wellbeing check-in</div>
+  </div>
+  <div id="thread"></div>
+</div>
+<div class="composer">
+  <div class="inner">
+    <textarea id="input" placeholder="Tell HALO what you need..." rows="1"></textarea>
+    <button id="send">Send</button>
+  </div>
+</div>
+<script>
+const API = "http://localhost:8000";
+const thread = document.getElementById("thread");
+const input = document.getElementById("input");
+const sendBtn = document.getElementById("send");
+
+document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => { input.value = c.dataset.ex; input.focus(); }));
+
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m])); }
+
+function addUser(text){ const d=document.createElement("div"); d.className="msg user"; d.innerHTML='<div class="bubble">'+esc(text)+'</div>'; thread.appendChild(d); }
+function addNode(html){ const d=document.createElement("div"); d.className="msg"; d.innerHTML=html; thread.appendChild(d); window.scrollTo(0,document.body.scrollHeight); return d; }
+
+async function send(){
+  const text = input.value.trim();
+  if(!text) return;
+  addUser(text);
+  input.value="";
+  sendBtn.disabled=true;
+  const working = addNode('<div class="working">HALO is routing your request...</div>');
+  let resp;
+  try{
+    const r = await fetch(API+"/route",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({request_text:text})});
+    resp = await r.json();
+  }catch(e){
+    working.innerHTML='<div class="err">Could not reach HALO at '+API+'. Is the API server running on port 8000?</div>';
+    sendBtn.disabled=false; return;
+  }
+  working.remove();
+  render(resp, text);
+  sendBtn.disabled=false;
+}
+
+function render(resp, requestText){
+  const routing = resp.routing||{};
+  const ar = resp.agent_result||{};
+  const agent = routing.agent||"";
+  const isWellness = agent==="agent05_wellness";
+  addNode('<div class="routing '+(isWellness?'wellness':'')+'">Routed to <span class="to">'+esc(routing.agent_label||"?")+'</span> · '+esc(routing.reason||"")+'</div>');
+
+  if(agent==="agent05_wellness") return renderWellness(ar);
+  if(agent==="agent01_brand") return renderBrand(ar, requestText);
+  if(agent==="agent04_social") return renderSocial(ar);
+  return renderGeneric(ar);
+}
+
+function verdictCard(v){
+  if(!v) return "";
+  const s=v.scores||{}; const keys=Object.keys(s);
+  let sc='<div class="scores">'+keys.map(k=>'<div class="score"><div class="n">'+(s[k]??"–")+'</div><div class="l">'+esc(k.replace(/_/g," "))+'</div></div>').join("")+'</div>';
+  return '<div class="card"><h3>Validator</h3><span class="badge pass">'+esc(v.verdict||"")+' · '+(v.total??"?")+'/9</span>'+sc+'</div>';
+}
+
+function renderWellness(ar){
+  const out=ar.output||{}; const fr=out.final_response||{}; const sev=fr.severity||"general_wellbeing";
+  const sc=sev==="crisis_signal"?"crisis":(sev==="elevated_concern"?"elevated":"general");
+  let h='<div class="card"><div class="sev '+sc+'"><span class="dot"></span>'+esc(sev.replace(/_/g," "))+(fr.hr_eap_awareness_flag?' · flagged for HR/EAP awareness':'')+'</div>';
+  h+='<div class="lead">'+esc(fr.response_message||"")+'</div></div>';
+  const res=fr.resources||[];
+  if(res.length){ h+='<div class="card"><h3>Resources</h3>'+res.map(r=>'<div class="resource"><div class="rn">'+esc(r.name)+'</div><div class="rd">'+esc(r.how_to_access||"")+'</div></div>').join("")+'</div>'; }
+  if(fr.concrete_next_step) h+='<div class="card"><h3>One next step</h3><div class="lead">'+esc(fr.concrete_next_step)+'</div></div>';
+  h+=verdictCard(out.verdict);
+  h+='<div class="caveat">Demo artifact. A 9/9 from an automated critic is not clinical validation. Real deployment of crisis-handling requires human clinical review, real escalation pathways, and duty-of-care sign-off.</div>';
+  addNode(h);
+}
+
+function renderBrand(ar, requestText){
+  const out=ar.output||{}; const fd=out.final_draft||{}; const copy=fd.copy||{};
+  let h='<div class="card"><h3>On-brand copy</h3><div class="lead"><strong>'+esc(copy.headline||"")+'</strong>';
+  if(copy.subhead) h+='<br><span style="color:var(--dim)">'+esc(copy.subhead)+'</span>';
+  if(copy.body) h+='<br><br>'+esc(copy.body);
+  h+='</div></div>';
+  h+=verdictCard(out.verdict);
+  h+='<div class="card"><h3>Execute</h3><div class="lead" style="color:var(--dim);font-size:14px">HALO can render this into a real, downloadable branded asset.</div><button class="dl-btn" id="dlbtn">⬇ Download asset</button></div>';
+  const node=addNode(h);
+  const btn=node.querySelector("#dlbtn");
+  btn.addEventListener("click", async ()=>{
+    btn.textContent="Rendering..."; btn.disabled=true;
+    try{
+      const r=await fetch(API+"/render_asset",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({final_draft:fd})});
+      const blob=await r.blob();
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a"); a.href=url; a.download="halo_brand_asset.html"; a.click();
+      URL.revokeObjectURL(url);
+      btn.textContent="✓ Downloaded"; 
+    }catch(e){ btn.textContent="Download failed — retry"; btn.disabled=false; }
+  });
+}
+
+function renderSocial(ar){
+  const out=ar.output||{}; const sg=out.final_suggestions||{};
+  let h='<div class="card"><h3>Connection suggestions</h3>';
+  if(sg.summary_60s) h+='<div class="lead">'+esc(sg.summary_60s)+'</div>';
+  h+='</div>';
+  const ppl=sg.people_suggestions||[];
+  if(ppl.length){ h+='<div class="card"><h3>People</h3>'+ppl.slice(0,4).map(p=>'<div class="resource"><div class="rn">'+esc(p.illustrative_name||"")+'</div><div class="rd">'+esc(p.relevance_rationale||"")+'</div></div>').join("")+'</div>'; }
+  h+=verdictCard(out.verdict);
+  addNode(h);
+}
+
+function renderGeneric(ar){
+  const out=ar.output||{};
+  const draft=out.final_draft||out.final_summary||out.final_response||{};
+  let lead = draft.summary_60s || draft.summary || (draft.copy&&draft.copy.headline) || JSON.stringify(draft).slice(0,300);
+  let h='<div class="card"><h3>Result</h3><div class="lead">'+esc(lead)+'</div></div>'+verdictCard(out.verdict);
+  addNode(h);
+}
+
+sendBtn.addEventListener("click", send);
+input.addEventListener("keydown", e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); send(); }});
+</script>
+</body>
+</html>
