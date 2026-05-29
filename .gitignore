@@ -14,6 +14,8 @@ __pycache__/
 # Logs (keep folder, ignore contents)
 logs/*.log
 logs/*.jsonl
+# Reference trace artifact - keep this one for rubric evidence
+!logs/agent_trace.jsonl
 
 # macOS
 .DS_Store

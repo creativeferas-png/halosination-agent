@@ -53,6 +53,7 @@ from app.agent04.validator import (
 # Router import
 from app.router import route_request, AGENT_ENDPOINTS
 from app.asset_render import render_brand_asset
+from app.trace_logger import trace_event
 from app.aggregator import summarise_real_signals
 from app.dashboard_synth import get_illustrative_view, MIN_RESPONSES_THRESHOLD
 
@@ -170,7 +171,7 @@ class RunResponse(BaseModel):
 
 
 @app.get("/")
-def health():
+def root_ping():
     return {"status": "ok", "service": "HALOsination Brand & Brief Agent"}
 
 
@@ -191,6 +192,8 @@ def run(payload: RunRequest):
     """
     logger.info(f"RUN_START | request={payload.request[:100]!r}")
     trace = []
+    run_id = f"run_{int(__import__('time').time()*1000)}"
+    trace_event("Orchestrator", "run_start", input_summary=payload.request, output_summary="dispatched to Intake", target_agent="Intake", run_id=run_id)
 
     # ----- Agent 1: Intake -----
     logger.info("AGENT_STEP | agent=Intake | action=invoke")
@@ -212,6 +215,7 @@ def run(payload: RunRequest):
 
     # ----- Agent 2: Search (NEW: retrieve brand rules) -----
     logger.info(f"AGENT_HANDOFF | from=Intake | to=Search | asset_type={brief.get('asset_type')}")
+    trace_event("Intake", "parse_request", input_summary=payload.request[:120], output_summary=f"asset_type={brief.get('asset_type')}, audience={brief.get('audience')}", target_agent="Search", run_id=run_id)
     logger.info("AGENT_STEP | agent=Search | action=retrieve_brand_rules")
     search_result = run_search(brief, top_k=3)
     trace.append({
@@ -230,6 +234,7 @@ def run(payload: RunRequest):
 
     # ----- Agent 3: Brush (initial draft, now grounded in retrieved rules) -----
     logger.info(f"AGENT_HANDOFF | from=Search | to=Brush | rules_retrieved={len(retrieved_rules)}")
+    trace_event("Search", "retrieve_rules", input_summary=f"asset_type={brief.get('asset_type')}", output_summary=f"retrieved {len(retrieved_rules)} brand rules", target_agent="Brush", confidence=(retrieved_rules[0].get("similarity") if retrieved_rules else None), run_id=run_id)
     logger.info("AGENT_STEP | agent=Brush | action=invoke")
     draft = run_brush(brief, retrieved_rules=retrieved_rules)
     trace.append({
@@ -249,8 +254,19 @@ def run(payload: RunRequest):
 
     # ----- Agent 4: Validator (first scoring, sees the same retrieved rules) -----
     logger.info(f"AGENT_HANDOFF | from=Brush | to=Validator | round=1")
+    trace_event("Brush", "draft", input_summary=f"brief + {len(retrieved_rules)} rules", output_summary="initial draft (copy + visual_spec)", target_agent="Validator", run_id=run_id)
     logger.info("AGENT_STEP | agent=Validator | action=score_initial")
     verdict_v1 = run_validator(brief, draft, is_revision=False, retrieved_rules=retrieved_rules)
+    if "error" not in verdict_v1:
+        _v = verdict_v1.get("verdict","unknown")
+        _t = verdict_v1.get("total", 0)
+        trace_event("Validator", "validate_initial",
+            input_summary="initial draft + 3 brand rules",
+            output_summary=f"score {_t}/9, verdict={_v}",
+            target_agent=("Brush" if _v=="revise" else ("Orchestrator" if _v=="pass" else "Human")),
+            confidence=_t/9.0,
+            status=("needs_revision" if _v=="revise" else ("success" if _v=="pass" else "escalated")),
+            run_id=run_id)
     trace.append({
         "agent": "Validator",
         "action": "score_initial",
@@ -275,6 +291,7 @@ def run(payload: RunRequest):
         fix = verdict_v1.get("fix", "")
         logger.info(f"REVISION_TRIGGERED | total={verdict_v1.get('total')}/9 | fix={fix[:80]!r}")
         logger.info(f"AGENT_HANDOFF | from=Validator | to=Brush | action=revise")
+        trace_event("Validator", "validate", input_summary="initial draft", output_summary=f"score {verdict_v1.get('total')}/9, verdict=revise, fix={fix[:60]}", target_agent="Brush", confidence=verdict_v1.get("total",0)/9.0, status="needs_revision", run_id=run_id)
         logger.info("AGENT_STEP | agent=Brush | action=revise")
         revised_draft = run_brush_revision(brief, draft, fix, retrieved_rules=retrieved_rules)
         trace.append({
@@ -287,8 +304,20 @@ def run(payload: RunRequest):
 
         if "error" not in revised_draft:
             logger.info(f"AGENT_HANDOFF | from=Brush | to=Validator | round=2")
+            trace_event("Brush", "revise", input_summary=f"critique: {fix[:80]}", output_summary="revised draft", target_agent="Validator", retry_count=1, run_id=run_id)
             logger.info("AGENT_STEP | agent=Validator | action=score_revised")
             verdict_v2 = run_validator(brief, revised_draft, is_revision=True, retrieved_rules=retrieved_rules)
+            if "error" not in verdict_v2:
+                _v2 = verdict_v2.get("verdict","unknown")
+                _t2 = verdict_v2.get("total", 0)
+                trace_event("Validator", "validate_revised",
+                    input_summary="revised draft + 3 brand rules",
+                    output_summary=f"score {_t2}/9, verdict={_v2} (post-revision)",
+                    target_agent=("Orchestrator" if _v2=="pass" else "Human"),
+                    confidence=_t2/9.0,
+                    status=("success" if _v2=="pass" else "escalated"),
+                    retry_count=1,
+                    run_id=run_id)
             trace.append({
                 "agent": "Validator",
                 "action": "score_revised",
@@ -322,6 +351,10 @@ def run(payload: RunRequest):
         "note": "Phase 6 will wire actual delivery (email/Slack/Marcom asset library).",
     })
 
+    trace_event("Orchestrator", "deliver",
+        input_summary=f"final verdict={verdict_label}, revision_attempted={revision_attempted}",
+        output_summary=f"delivery_path={delivery_path}",
+        target_agent=None, run_id=run_id, status="success")
     logger.info(
         f"RUN_DONE | status=success | verdict={verdict_label} | "
         f"revision_attempted={revision_attempted} | rules_retrieved={len(retrieved_rules)} | "
