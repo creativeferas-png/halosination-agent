@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HALO Wellbeing Dashboard</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --bg:#0a0e1a; --panel:#121829; --panel2:#1a2236; --border:#243049;
+    --text:#e8edf7; --dim:#8493b0; --accent:#3b82f6; --accent2:#1d4ed8;
+    --teal:#14b8a6; --amber:#eab308; --red:#ef4444; --green:#22c55e;
+  }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+  .wrap { max-width:980px; margin:0 auto; padding:24px 16px 40px; }
+  header { display:flex; align-items:center; gap:12px; padding:8px 0 20px; }
+  .logo { width:40px; height:40px; border-radius:10px; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:20px; color:#fff; }
+  header h1 { font-size:20px; font-weight:700; }
+  header p { font-size:12px; color:var(--dim); margin-top:2px; }
+  .nav { display:flex; gap:14px; margin-bottom:20px; font-size:13px; }
+  .nav a { color:var(--dim); text-decoration:none; }
+  .nav a:hover, .nav a.active { color:var(--text); }
+  .commit-card { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:18px 20px; margin-bottom:24px; font-size:13px; line-height:1.6; color:var(--dim); }
+  .commit-card strong { color:var(--text); }
+  .section-title { font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--dim); margin:24px 0 12px; }
+  .section-title .label { background:var(--panel2); padding:3px 10px; border-radius:20px; margin-left:8px; font-size:10px; }
+  .label.real { color:#4ade80; border:1px solid rgba(34,197,94,0.3); }
+  .label.illus { color:#fbbf24; border:1px solid rgba(234,179,8,0.3); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:20px; }
+  .tile { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:18px; }
+  .tile .n { font-size:34px; font-weight:700; color:var(--accent); line-height:1; }
+  .tile .n.warn { color:var(--amber); }
+  .tile .n.bad { color:var(--red); }
+  .tile .n.good { color:var(--green); }
+  .tile .l { font-size:12px; color:var(--dim); text-transform:uppercase; letter-spacing:0.05em; margin-top:8px; }
+  .tile .sub { font-size:11px; color:var(--dim); margin-top:6px; line-height:1.4; }
+  .sev-row { display:flex; gap:8px; margin-top:10px; font-size:12px; }
+  .sev-row .pill { padding:4px 10px; border-radius:6px; background:var(--panel2); }
+  .sev-row .pill.general { color:#4ade80; }
+  .sev-row .pill.elevated { color:#fbbf24; }
+  .sev-row .pill.crisis { color:#f87171; }
+  .team-card { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:12px; }
+  .team-card h3 { font-size:15px; font-weight:600; margin-bottom:4px; }
+  .team-card .meta { font-size:12px; color:var(--dim); margin-bottom:14px; }
+  .team-card .stats { display:flex; gap:20px; flex-wrap:wrap; margin-bottom:14px; }
+  .team-card .stat { font-size:13px; }
+  .team-card .stat .v { color:var(--text); font-weight:600; }
+  .team-card .trend { font-size:12px; padding:10px 14px; background:var(--panel2); border-radius:10px; line-height:1.5; }
+  .team-card .trend.warn { border-left:3px solid var(--amber); }
+  .team-card.blocked { border-color:rgba(234,179,8,0.4); }
+  .team-card.blocked .blocked-msg { padding:14px; background:rgba(234,179,8,0.08); border-radius:10px; color:#fbbf24; font-size:13px; line-height:1.6; }
+  .intervention { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:18px; margin-bottom:10px; font-size:14px; line-height:1.6; }
+  .intervention .for-team { font-size:11px; color:var(--accent); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; font-weight:600; }
+  .intervention .basis { font-size:11px; color:var(--dim); margin-top:8px; font-style:italic; }
+  .loading { padding:40px; text-align:center; color:var(--dim); }
+  @media (max-width:600px) { header h1 { font-size:17px; } header p { font-size:11px; } .tile .n { font-size:28px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">H</div>
+    <div><h1>HALO Wellbeing Dashboard</h1><p>Aggregate, anonymised, threshold-gated — for HR/HC use</p></div>
+  </header>
+  <div class="nav">
+    <a href="/halo">← Back to HALO</a>
+    <a href="/">Tabbed view</a>
+    <a href="/dashboard-ui" class="active">Dashboard</a>
+  </div>
+  <div class="commit-card" id="commit">Loading...</div>
+  <div id="content"><div class="loading">Loading dashboard...</div></div>
+</div>
+<script>
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m])); }
+
+async function load(){
+  try {
+    const r = await fetch("http://localhost:8000/dashboard");
+    const data = await r.json();
+    render(data);
+  } catch(e) {
+    document.getElementById("content").innerHTML = '<div class="loading">Could not reach HALO API on port 8000. Is it running?</div>';
+  }
+}
+
+function render(d){
+  document.getElementById("commit").innerHTML =
+    '<strong>How this dashboard is built.</strong> ' + esc(d.design_note||"") +
+    ' Minimum-count threshold: <strong>N&nbsp;>=&nbsp;' + esc(d.threshold_setting) + '</strong> responses required before any team-level signals are displayed.';
+
+  const real = d.real_signals || {};
+  const illus = d.illustrative_view || {};
+  let html = '';
+
+  html += '<div class="section-title">Live aggregation <span class="label real">REAL - from this demo saved outputs</span></div>';
+  const sev = real.wellness_severity_distribution || {};
+  html += '<div class="grid">';
+  html += tile(real.total_records, "Records aggregated", "Across all 5 agents");
+  html += tileSev(sev);
+  html += tile(real.isolation_signals, "Isolation signals", "Agent 04 social context", real.isolation_signals>0?'warn':'');
+  html += tile(real.restricted_distribution_count, "Restricted-distribution outputs", "Sensitive content detected", real.restricted_distribution_count>0?'warn':'');
+  html += tile(real.active_tasks_total, "Active tasks tracked", "Agent 03 status updates");
+  html += tile((real.risks_total||0) + (real.risks_or_blockers_total||0), "Risks / blockers flagged", "Across meetings + status");
+  html += '</div>';
+
+  if(illus.teams){
+    html += '<div class="section-title">Illustrative populated view <span class="label illus">SYNTHETIC - how it would look at org scale</span></div>';
+    html += '<div class="commit-card" style="border-color:rgba(234,179,8,0.3);color:#fbbf24">' + esc(illus.data_source_note||"") + '</div>';
+    for(const t of illus.teams){
+      html += renderTeam(t);
+    }
+  }
+
+  if(illus.interventions && illus.interventions.length){
+    html += '<div class="section-title">Suggested interventions <span class="label illus">From illustrative data above</span></div>';
+    for(const i of illus.interventions){
+      html += '<div class="intervention"><div class="for-team">' + esc(i.for_team) + '</div>' + esc(i.suggestion) + '<div class="basis">' + esc(i.evidence_basis) + '</div></div>';
+    }
+  }
+
+  document.getElementById("content").innerHTML = html;
+}
+
+function tile(n, label, sub, cls){
+  cls = cls || '';
+  return '<div class="tile"><div class="n ' + cls + '">' + (n==null?0:n) + '</div><div class="l">' + esc(label) + '</div><div class="sub">' + esc(sub||"") + '</div></div>';
+}
+
+function tileSev(sev){
+  const c = sev.crisis_signal||0;
+  const e = sev.elevated_concern||0;
+  const g = sev.general_wellbeing||0;
+  const cls = c>0?'bad':(e>0?'warn':'good');
+  return '<div class="tile"><div class="n ' + cls + '">' + (g+e+c) + '</div><div class="l">Wellness check-ins</div><div class="sev-row"><span class="pill general">'+g+' general</span><span class="pill elevated">'+e+' elevated</span><span class="pill crisis">'+c+' crisis</span></div></div>';
+}
+
+function renderTeam(t){
+  if(t.signals === null || t.signals === undefined){
+    return '<div class="team-card blocked"><h3>' + esc(t.team_name) + '</h3><div class="meta">' + esc(t.period_label||"") + ' - ' + esc(t.responses_this_period) + ' of ' + esc(t.team_size) + ' people responded</div><div class="blocked-msg"><strong>Team-level signals hidden.</strong> ' + esc(t.below_threshold_reason||"") + '</div></div>';
+  }
+  const s = t.signals || {};
+  const w = s.wellness || {};
+  let stats = '';
+  stats += statBlock('Wellness', (w.general_wellbeing||0) + ' general - ' + (w.elevated_concern||0) + ' elevated - ' + (w.crisis_signal||0) + ' crisis');
+  stats += statBlock('Isolation signals', s.isolation_signals||0);
+  stats += statBlock('Tasks per person (avg)', s.active_tasks_avg_per_person||0);
+  stats += statBlock('Restricted outputs', s.restricted_distribution_count||0);
+  const trend = t.trend_vs_previous;
+  let trendBlock = '';
+  if(trend){
+    const warn = trend.elevated_concern_change_pct > 0 || trend.meeting_load_change_pct > 20;
+    trendBlock = '<div class="trend ' + (warn?'warn':'') + '"><strong>Trend:</strong> ' + esc(trend.direction_summary||"") + (trend.elevated_concern_change_pct?(' - elevated_concern ' + (trend.elevated_concern_change_pct>0?'+':'') + trend.elevated_concern_change_pct + '%'):'') + (trend.meeting_load_change_pct?(' - meeting load ' + (trend.meeting_load_change_pct>0?'+':'') + trend.meeting_load_change_pct + '%'):'') + '</div>';
+  }
+  return '<div class="team-card"><h3>' + esc(t.team_name) + '</h3><div class="meta">' + esc(t.period_label||"") + ' - ' + esc(t.responses_this_period) + ' of ' + esc(t.team_size) + ' people responded</div><div class="stats">' + stats + '</div>' + trendBlock + '</div>';
+}
+
+function statBlock(label, value){
+  return '<div class="stat"><span style="color:var(--dim)">' + esc(label) + ':</span> <span class="v">' + esc(value) + '</span></div>';
+}
+
+load();
+</script>
+</body>
+</html>

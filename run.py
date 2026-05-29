@@ -53,6 +53,8 @@ from app.agent04.validator import (
 # Router import
 from app.router import route_request, AGENT_ENDPOINTS
 from app.asset_render import render_brand_asset
+from app.aggregator import summarise_real_signals
+from app.dashboard_synth import get_illustrative_view, MIN_RESPONSES_THRESHOLD
 
 # Agent 05 (Wellness) imports
 from app.agent05.intake import run_intake as run_wellness_intake
@@ -1063,6 +1065,46 @@ def render_asset(payload: AssetRequest):
         media_type="text/html",
         headers={"Content-Disposition": "attachment; filename=halo_brand_asset.html"},
     )
+
+
+
+
+@app.get("/dashboard")
+def dashboard():
+    """HALO aggregate wellbeing dashboard.
+
+    Returns two sections:
+      - real_signals: live aggregation from this demo's saved agent outputs
+        (never includes names, content, or individual records)
+      - illustrative_view: synthetic team-level data CLEARLY LABELLED as such,
+        included to demonstrate what the populated dashboard would look like
+        at organisational scale, with the N>=5 threshold safeguard visible.
+
+    Design commitments:
+      - Manager-of-own-team view is intentionally NOT built (closer to surveillance).
+      - This is an HR/HC view of trends + suggested interventions only.
+      - The Wellness agent's promise of 'restricted to you' is preserved by design:
+        nothing in this endpoint identifies any individual.
+    """
+    logger.info("DASHBOARD_REQUEST")
+    try:
+        real = summarise_real_signals()
+    except Exception as exc:
+        logger.error("DASHBOARD_REAL_FAIL | error=" + str(exc))
+        real = {"error": "aggregation_failed", "detail": str(exc)}
+    try:
+        illustrative = get_illustrative_view()
+    except Exception as exc:
+        logger.error("DASHBOARD_ILLUSTRATIVE_FAIL | error=" + str(exc))
+        illustrative = {"error": "illustrative_failed", "detail": str(exc)}
+    logger.info("DASHBOARD_DONE")
+    return {
+        "status": "success",
+        "design_note": "Aggregate-only. Never identifies individuals. Manager-of-own-team view is not built. Wellness agent's confidentiality promise is preserved.",
+        "threshold_setting": MIN_RESPONSES_THRESHOLD,
+        "real_signals": real,
+        "illustrative_view": illustrative,
+    }
 
 
 if __name__ == "__main__":
