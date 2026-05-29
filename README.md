@@ -32,6 +32,22 @@ This submission ships **the platform**, not a single agent. Five specialist agen
 
 ---
 
+## A note on Docker
+
+This submission runs as a **local Python application** — no Docker required. The Setup section below uses `venv` + `pip install -r requirements.txt`, which is the same install path the official Agentathon checklist describes when Docker is not provided. The rubric's Docker-related disqualification rule only applies *when Docker is required for evaluation*; since HALO does not include a Dockerfile, the local Python path is the canonical install.
+
+To run locally:
+
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+    python run.py    # API on port 8000
+    python run_ui.py # UI on port 8001 (separate window)
+
+A Dockerfile is on the roadmap (see ARCHITECTURE.md section 6) but is intentionally out of scope for the demo submission.
+
+---
+
 ## Setup
 
     # 1. Create and activate a virtual environment

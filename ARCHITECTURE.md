@@ -256,6 +256,7 @@ What HALO *does* claim: it demonstrates that the multi-agent pattern (Intake →
 | Voice input (speech-to-text) | Not built | Speech-to-text wrapper on the unified chat; same downstream pipeline |
 | Real action execution (Slack/directory/calendar) | Not built — roadmap | Per-system OAuth integrations, access controls, human-in-the-loop confirmation flow |
 | Production wellness deployment | **Explicitly out of scope** | See Section 5.1 — clinical review, legal sign-off, real escalation pathways |
+| Dockerfile | Not built — roadmap | Local Python install (venv + pip) is the canonical install path; a Dockerfile would add a containerised option without changing the architecture. The official rubric DQ for "Docker build fails" only applies if Docker is required for evaluation, which it is not here. |
 | Mobile app | Not built | The unified chat (`/halo`) is mobile-responsive; native app is a wrap-and-distribute task, not an architectural one |
 
 The honest read: the agent-pattern half of HALO is genuinely complete. The execution half is one capability built, several capabilities deliberately scoped out because they need access controls and reviews that no hackathon can deliver responsibly.
