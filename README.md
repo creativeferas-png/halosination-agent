@@ -1,43 +1,34 @@
-# HALO — Agent 01: Brand & Brief Agent
+# HALO — One AI platform for every employee
 
 **G42 Agentathon submission — Use Case #13 Media Content Generation**
 **Team:** HALOsination (solo build — Feras Assil)
 
----
-
-## About HALO
-
-**HALO** is M42's vision for a single AI-powered employee platform — connecting M365, Oracle, and OneHub so every employee can **work smarter, connect deeper, and live better** through one natural conversation.
-
-HALO is structured as 5 agents across 3 layers:
-
-| # | Agent | Layer | Status |
-|---|---|---|---|
-| **01** | **Brand & Brief** | Work | This submission |
-| 02 | Productivity (meetings, notes) | Work | In build |
-| 03 | Task & KPI | Work | In build |
-| 04 | Social (connection, interest matching) | Social | In build |
-| 05 | Wellness (check-ins, signals) | Wellness | In build |
-
-The agents share a single architectural pattern — **Intake -> Search -> Brush -> Validator -> Route** — applied to 5 different problem domains. This pattern is fully proven end-to-end in Agent 01 and is the template for Agents 02-05.
+> **Tagline:** One AI platform. Every employee. Work smarter, connect deeper, live better.
 
 ---
 
-## Agent 01 — Brand & Brief
+## What's in the repo
 
-Lets any G42-group employee request, rebrand, or commission on-brand assets in plain language. The 5 agents enforce brand compliance **at the point of creation**, with the Validator citing specific brand rule IDs in every verdict.
+This submission ships **the platform**, not a single agent. Five specialist agents plus the platform layer that ties them together:
 
-### Architecture
-
-| Agent | Role | Model |
+| | What it does | Status |
 |---|---|---|
-| **Intake** | Parses the plain-language request into a structured BRIEF | GPT-4.1 |
-| **Search** | Retrieves the top-3 most relevant brand rules from the brand index | text-embedding-3-large |
-| **Brush** | Drafts copy + visual spec, grounded in the retrieved brand rules | GPT-5.1 |
-| **Validator** | Scores the draft 0-9 on a 3x3 brand rubric, can trigger one revision | GPT-4.1 |
-| **Route** | Policy-driven delivery path based on the verdict | (no LLM) |
+| **Agent 01** — Brand & Brief | On-brand content from plain-English requests | LIVE |
+| **Agent 02** — Productivity | Meeting transcripts to structured summaries | LIVE |
+| **Agent 03** — Task & KPI | Status updates to trackable structure | LIVE |
+| **Agent 04** — Social | Employee profile to connection suggestions | LIVE |
+| **Agent 05** — Wellness | Self check-ins to care-appropriate responses (demo artifact — see ARCHITECTURE.md section 5) | LIVE |
+| **Router** | Free-form request to right agent, with safety bias | LIVE |
+| **Execution** | Agent 01 output to real downloadable branded asset | LIVE |
+| **Aggregate dashboard** | Cross-agent signals to privacy-by-design HR view | LIVE |
 
-The Validator -> Brush revision loop is hard-capped at one attempt, then escalates to human review. See **ARCHITECTURE.md** for the full system spec including agent specifications, data flow, case studies, and roadmap.
+**Three user surfaces** (see Setup + Run below):
+
+- `http://localhost:8001/` — tabbed UI, one panel per agent (architecture-transparent demo)
+- `http://localhost:8001/halo` — unified single-screen chat (product-feel demo)
+- `http://localhost:8001/dashboard-ui` — aggregate wellbeing dashboard
+
+**One architectural pattern, five domains.** Every agent shares the same Intake -> Search -> Brush -> Validator -> Route spine. One generalised Search agent serves all five. The agents differ in their policies and rubrics; the substrate is shared. See **ARCHITECTURE.md** for the full design rationale, safety/ethics framing, and the built-vs-roadmap table.
 
 ---
 
@@ -52,153 +43,90 @@ The Validator -> Brush revision loop is hard-capped at one attempt, then escalat
 
     # 3. Configure environment variables
     cp .env.example .env
-    # Edit .env and add your Compass API key
+    # Edit .env: add OPENAI_API_KEY and set OPENAI_BASE_URL=https://api.core42.ai/v1
 
-    # 4. Build the brand rules index (one-time)
-    python scripts/build_brand_index.py
+    # 4. Build the 5 policy indexes (one-time)
+    python scripts/build_policy_index.py data/brand_index.md       data/brand_index.json
+    python scripts/build_policy_index.py data/meeting_policy.md    data/meeting_policy_index.json
+    python scripts/build_policy_index.py data/task_policy.md       data/task_policy_index.json
+    python scripts/build_policy_index.py data/social_policy.md     data/social_policy_index.json
+    python scripts/build_policy_index.py data/wellness_policy.md   data/wellness_policy_index.json
 
-## Environment variables
+## Run
 
-| Variable | Description |
-|---|---|
-| OPENAI_API_KEY | Your Compass API key |
-| OPENAI_BASE_URL | Compass endpoint — https://api.core42.ai/v1 |
+Two windows:
 
-## Running
-
-Two servers, two ports:
-
-    # Terminal 1 — mandatory API on port 8000
+    # Window 1 — API on port 8000
     python run.py
 
-    # Terminal 2 — optional UI on port 8001
+    # Window 2 — UI on port 8001
     python run_ui.py
 
-Then open **http://localhost:8001** in your browser for the demo interface, or hit the mandatory API directly:
+Then open `http://localhost:8001/halo` for the product-feel demo, or `http://localhost:8001/` for the architecture-transparent tabbed view.
+
+## API endpoints
+
+All on port 8000:
+
+| Method | Path | Purpose |
+|---|---|---|
+| POST | /run | Agent 01 (Brand & Brief) — the mandatory submission endpoint |
+| POST | /run_meeting | Agent 02 (Productivity) |
+| POST | /run_status | Agent 03 (Task & KPI) |
+| POST | /run_social | Agent 04 (Social) |
+| POST | /run_wellness | Agent 05 (Wellness) |
+| POST | /route | Unified router: classify + dispatch + run, in one call |
+| POST | /render_asset | Render Agent 01 output to a downloadable HTML asset |
+| GET | /dashboard | Aggregate wellbeing dashboard data |
+
+### Smoke test
+
+The mandatory submission entry point:
 
     curl -X POST http://localhost:8000/run \
       -H "Content-Type: application/json" \
-      -d @input_examples/01_project_atlas_banner.json
+      -d '{"request": "Create a launch announcement banner for Project Atlas, healthcare audience"}'
 
-## Compass models in use
+The unified router (the platform front door):
 
-- gpt-4.1 — Intake (parsing), Validator (scoring), revision drafting
-- gpt-5.1 — Brush (creative drafting at higher temperature)
-- text-embedding-3-large — Search (retrieval over the brand rules index)
-
-All three Compass model classes are exercised end-to-end per request.
-
-## Project structure
-
-    halo-agent/
-    ├── app/                          # core agent logic
-    │   ├── intake_agent.py
-    │   ├── search_agent.py
-    │   ├── brush_agent.py
-    │   └── validator_agent.py
-    ├── data/
-    │   ├── brand_guidelines.md       # 10 brand rules
-    │   └── brand_index.json          # pre-computed embeddings
-    ├── scripts/
-    │   └── build_brand_index.py      # one-time embedding script
-    ├── ui/index.html                 # optional demo UI
-    ├── input_examples/               # 4 sample inputs
-    ├── output_examples/              # 4 sample outputs (all 9/9)
-    ├── logs/                         # auto-generated agent traces
-    ├── run.py                        # MANDATORY POST /run on port 8000
-    ├── run_ui.py                     # optional UI on port 8001
-    ├── requirements.txt
-    ├── metadata.json
-    ├── .env.example
-    ├── ARCHITECTURE.md               # full system documentation
-    └── README.md                     # this file
-
-## Sample inputs/outputs
-
-Four stress-test pairs are saved, all scoring **9/9** on the 3x3 rubric (brand_voice / visual_spec / audience_fit) with rule_ids cited by the Validator:
-
-1. Project Atlas launch banner for healthcare audiences
-2. "Punchy/disruptive" clinical AI social post for hospital CIOs (tone-pressure test)
-3. Pediatric oncology imaging service banner (sensitive-context test)
-4. "Revolutionary/crush/dominate" AI platform pitch (forbidden-words stress test)
-
-See input_examples/ and output_examples/ for the full pairs.# HALO — Brand & Brief Agent
-
-**G42 Agentathon submission — Use Case #1 (Multi-Agent Office)**
-
-HALO Brand & Brief Agent is a multi-agent system that lets any G42 employee request, rebrand, or commission on-brand assets in plain language. Marcom owns the brand source-of-truth; the agents serve the whole group.
-
-## Agents
-
-| Agent | Role |
-|---|---|
-| **Intake** | Parses the employee request and structures the brief |
-| **Search** | Retrieves on-brand assets and brand guidelines (embeddings) |
-| **Brush** | Generates or adapts content to brand specifications |
-| **Route** | Routes the finalised brief or asset to the correct owner |
-| **Validator** | Scores output against brand rules, triggers revision loop |
-
-Agents collaborate through a LangGraph state machine. The Validator can return work to the Brush agent for iterative revision (planner ↔ critic ↔ executor pattern).
-
-## Setup
-
-\`\`\`bash
-# 1. Create and activate a virtual environment
-python3 -m venv venv
-source venv/bin/activate
-
-# 2. Install dependencies
-pip install -r requirements.txt
-
-# 3. Configure environment variables
-cp .env.example .env
-# Edit .env and add your Compass API key
-\`\`\`
-
-## Environment variables
-
-| Variable | Description |
-|---|---|
-| \`OPENAI_API_KEY\` | Your Compass API key |
-| \`OPENAI_BASE_URL\` | Compass endpoint — \`https://api.core42.ai/v1\` |
-
-## Running the agent
-
-\`\`\`bash
-python run.py
-\`\`\`
-
-The server starts on **port 8000** and exposes the mandatory \`POST /run\` endpoint.
-
-## Testing
-
-\`\`\`bash
-curl -X POST http://localhost:8000/run \\
-  -H "Content-Type: application/json" \\
-  -d '{"request": "Create a launch announcement banner for Project Atlas, healthcare audience"}'
-\`\`\`
+    curl -X POST http://localhost:8000/route \
+      -H "Content-Type: application/json" \
+      -d '{"request_text": "Write me a launch banner for our new cardiology app, going to hospital partners next week"}'
 
 ## Models
 
-Calls Compass for all LLM operations:
+All LLM operations via Compass:
 
-- \`gpt-4.1\` — Intake, Route, Validator
-- \`gpt-5.1\` — Brush (creative generation)
-- \`text-embedding-3-large\` — Search (asset retrieval)
+- `gpt-4.1` — Intake, Validator, Router
+- `gpt-5.1` — Brush (creative generation)
+- `text-embedding-3-large` — Search (3072-dim policy retrieval)
 
-## Submission structure
+## Repo map
 
-\`\`\`
-halo-agent/
-├── app/                 # core agent logic
-├── data/                # brand guidelines, asset index
-├── scripts/             # helper scripts
-├── input_examples/      # sample inputs (≥3)
-├── output_examples/     # sample outputs (≥3)
-├── logs/                # agent-to-agent interaction traces
-├── run.py               # MANDATORY entry point
-├── requirements.txt
-├── metadata.json
-├── .env.example
-└── README.md
-\`\`\`
+    halo-agent/
+    |-- app/
+    |   |-- intake_agent.py + search_agent.py + brush_agent.py + validator_agent.py   (Agent 01)
+    |   |-- agent02..05/   (intake, search, brush, validator per agent)
+    |   |-- router.py            (unified front door)
+    |   |-- asset_render.py      (Agent 01 execution)
+    |   |-- aggregator.py        (cross-agent signal aggregation)
+    |   `-- dashboard_synth.py   (illustrative team data, clearly labelled)
+    |-- data/                    (5 policy docs + 5 indexes)
+    |-- scripts/build_policy_index.py
+    |-- input_examples/agent01..05/   (13 sample inputs)
+    |-- output_examples/agent01..05/  (13 matching outputs, all 9/9)
+    |-- ui/index.html + halo.html + dashboard.html
+    |-- run.py                   (FastAPI app — 9 endpoints)
+    |-- run_ui.py
+    |-- README.md
+    |-- ARCHITECTURE.md          (full platform doc — design rationale + safety + roadmap)
+    |-- metadata.json            (use_case_id "13")
+    `-- .env                     (Compass API key, gitignored)
+
+---
+
+## Important — Wellness agent caveat
+
+Agent 05 (Wellness) handles self check-ins including potential crisis signals. **It is a demo artifact.** A 9/9 from an automated critic is not clinical validation. Real deployment of crisis-handling requires human clinical review, real escalation pathways, and duty-of-care sign-off. The caveat is shown in the UI alongside every Wellness response and detailed in **ARCHITECTURE.md section 5**.
+
+If you are using this code as a starting point for anything that would touch a real person in distress, please read ARCHITECTURE.md section 5 first.
