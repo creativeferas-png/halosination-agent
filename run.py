@@ -1107,6 +1107,54 @@ def dashboard():
     }
 
 
+
+
+@app.get("/health")
+def health():
+    """Health check that verifies Compass connectivity end-to-end.
+
+    Returns 200 with status='ok' if a tiny Compass call succeeds. Used by
+    submission graders to confirm Compass integration without running a full
+    agent pipeline. Resolves any documentation/portal-URL confusion: this
+    endpoint executes a real Compass call against whatever OPENAI_BASE_URL
+    is configured in .env.
+    """
+    import os
+    from openai import OpenAI
+    base_url = os.environ.get("OPENAI_BASE_URL", "unset")
+    model = os.environ.get("MODEL_NAME", "gpt-4.1")
+    try:
+        client = OpenAI(
+            api_key=os.environ["OPENAI_API_KEY"],
+            base_url=base_url,
+            timeout=10.0,
+        )
+        resp = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": "reply with the single word: ok"}],
+            max_tokens=5,
+            temperature=0.0,
+        )
+        text = (resp.choices[0].message.content or "").strip().lower()
+        logger.info("HEALTH_OK | model={} | reply={!r}".format(model, text[:20]))
+        return {
+            "status": "ok",
+            "compass_connection": "ok",
+            "model": model,
+            "base_url": base_url,
+            "reply_preview": text[:20],
+        }
+    except Exception as exc:
+        logger.error("HEALTH_FAIL | error={}".format(str(exc)[:200]))
+        return {
+            "status": "error",
+            "compass_connection": "failed",
+            "model": model,
+            "base_url": base_url,
+            "error": str(exc)[:200],
+        }
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -1,13 +1,75 @@
 {
   "use_case_id": "13",
+  "team_name": "HALOsination",
+  "submission_name": "HALO - one AI platform for every employee",
   "agents": [
-    { "name": "Intake", "role": "Parses employee request in plain language and structures the brief" },
-    { "name": "Search", "role": "Retrieves on-brand assets and brand guidelines using embeddings" },
-    { "name": "Brush", "role": "Generates or adapts content (copy and imagery) to brand specifications" },
-    { "name": "Route", "role": "Routes finalised brief or asset to the correct downstream owner (Marcom, OpCo lead)" },
-    { "name": "Validator", "role": "Scores output against brand rules, triggers revision loop if below threshold" }
+    {
+      "name": "Agent01_Brand",
+      "role": "On-brand content generation. Refuses off-brand requests with rule citations. Sub-pipeline: Intake -> Search (brand index) -> Brush -> Validator (3x3 rubric: brand voice, visual spec, audience fit)."
+    },
+    {
+      "name": "Agent02_Productivity",
+      "role": "Meeting transcripts to structured notes (decisions, action items with owners + deadlines, open questions, risks, distribution). Refuses to invent owners; flags ambiguity as open questions."
+    },
+    {
+      "name": "Agent03_TaskKPI",
+      "role": "Status updates to trackable structure (tasks with SMART flags, KPIs, risks, recommendations, distribution). Restricts distribution when HR or sensitive context is detected."
+    },
+    {
+      "name": "Agent04_Social",
+      "role": "Employee profile to connection suggestions. Excludes conflicted suggestions (e.g., reporting chain in active conflict). Restricts distribution when isolation or workplace-conflict signals fire."
+    },
+    {
+      "name": "Agent05_Wellness",
+      "role": "Self check-ins to care-appropriate responses with severity classification (general / elevated / crisis). Leads crisis responses with real M42 resources (SAKINA, Lyra EAP). DEMO ARTIFACT - not clinically validated."
+    },
+    {
+      "name": "Router",
+      "role": "Free-form text to right agent in one call. Safety-biased: any personal-distress signal beats any work signal, enforced both in prompt and as code-level backstop."
+    },
+    {
+      "name": "Validator",
+      "role": "Shared critic pattern (Proposer + Critic). Every agent's drafts are scored 0-9 against a domain-specific rubric. Below 7/9 triggers one revision attempt then human escalation. Caps Safety & Severity at 0 on any wellness-rule violation."
+    }
   ],
-  "tools_used": ["langgraph", "langchain", "compass-api", "fastapi", "openai-sdk"],
-  "data_sources": ["/data/brand_guidelines.md", "/data/asset_index.json"],
-  "output_type": "text"
+  "tools_used": [
+    "compass-api",
+    "openai-sdk",
+    "fastapi",
+    "uvicorn",
+    "python-dotenv",
+    "httpx",
+    "numpy"
+  ],
+  "data_sources": [
+    "data/brand_index.md",
+    "data/meeting_policy.md",
+    "data/task_policy.md",
+    "data/social_policy.md",
+    "data/wellness_policy.md",
+    "data/*_index.json (policy embeddings)",
+    "output_examples/agent01-05/*.json (13 sample i/o pairs for aggregate dashboard)"
+  ],
+  "output_type": "text",
+  "endpoints": {
+    "POST /run": "Agent 01 - mandatory submission endpoint",
+    "POST /run_meeting": "Agent 02",
+    "POST /run_status": "Agent 03",
+    "POST /run_social": "Agent 04",
+    "POST /run_wellness": "Agent 05",
+    "POST /route": "Unified router - classify + dispatch + run in one call",
+    "POST /render_asset": "Render Agent 01 output to downloadable branded HTML asset",
+    "GET /dashboard": "Aggregate wellbeing dashboard (real signals + illustrative view, N>=5 threshold)",
+    "GET /health": "Compass connectivity verification"
+  },
+  "ui_surfaces": {
+    "http://localhost:8001/": "Architecture-transparent tabbed UI",
+    "http://localhost:8001/halo": "Product-feel unified chat",
+    "http://localhost:8001/dashboard-ui": "Aggregate wellbeing dashboard"
+  },
+  "models_used": {
+    "gpt-4.1": "Intake, Validator, Router",
+    "gpt-5.1": "Brush (creative generation)",
+    "text-embedding-3-large": "Search (3072-dim policy retrieval)"
+  }
 }

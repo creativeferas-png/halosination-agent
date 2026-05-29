@@ -70,6 +70,7 @@ All on port 8000:
 
 | Method | Path | Purpose |
 |---|---|---|
+| GET | /health | Compass connectivity verification (returns ok + model + base_url) |
 | POST | /run | Agent 01 (Brand & Brief) — the mandatory submission endpoint |
 | POST | /run_meeting | Agent 02 (Productivity) |
 | POST | /run_status | Agent 03 (Task & KPI) |
@@ -122,6 +123,20 @@ All LLM operations via Compass:
     |-- ARCHITECTURE.md          (full platform doc — design rationale + safety + roadmap)
     |-- metadata.json            (use_case_id "13")
     `-- .env                     (Compass API key, gitignored)
+
+---
+
+## A note on the Compass URL
+
+The official Agentathon checklist lists `https://compass.core42.ai/v1` as the Compass base URL. That URL serves the **Compass web portal** (the page where you log in to view your API key), not the API itself. The actual API endpoint that returns model lists and serves completions is `https://api.core42.ai/v1`, which is what this submission uses.
+
+If a judge runs the checklist's verification curl literally against `compass.core42.ai/v1/models`, the response will be HTML (the portal page). To verify this submission's Compass integration cleanly, use the `/health` endpoint:
+
+    curl http://localhost:8000/health
+
+This calls Compass directly through whatever URL is configured in `.env`. A working integration returns:
+
+    {"status":"ok","compass_connection":"ok","model":"gpt-4.1","base_url":"https://api.core42.ai/v1","reply_preview":"ok"}
 
 ---
 
