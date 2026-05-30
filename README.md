@@ -7,9 +7,34 @@
 
 ---
 
+## The HALO Vision
+
+**HALO is an agentic orchestration layer for the M42 workplace.** The vision is one place an employee talks to, in plain language, that quietly coordinates with the systems they already use.
+
+Imagine the morning of a typical M42 employee:
+
+- *"Squeeze a meeting with Ahmed tomorrow for 30 minutes."*
+- *"Remind me to call the event supplier in 3 days."*
+- *"Any important emails I missed this week?"*
+- *"Fix this presentation per M42 brand guidelines."*
+- *"I need the M42 logo in PNG format."*
+- *"Find me people working on federated learning who are open to chat."*
+- *"I have been struggling this week, what support is available?"*
+
+One conversation. No tab-switching, no menu hunting, no second-guessing which system owns what.
+
+This experience emerges from two layers working together:
+
+1. **The agentic reasoning layer** — intent classification, policy retrieval, rule-cited validation, safety-biased routing, output drafting. The hard part. **This is what this submission ships.**
+2. **The connector layer** — the systems that already exist inside M42 (M365, brand asset library, Yammer/Teams, HR systems). **This is deployment work, named and scoped in ARCHITECTURE.md section 7.**
+
+The hard part is shipped. The integration work is named.
+
+---
+
 ## What's in the repo
 
-This submission ships **the platform**, not a single agent. Five specialist agents plus the platform layer that ties them together:
+This submission ships **the reasoning substrate** of HALO — five specialist agents demonstrating that the orchestration pattern generalises, plus the platform layer that turns them into one experience:
 
 | | What it does | Status |
 |---|---|---|
@@ -28,7 +53,7 @@ This submission ships **the platform**, not a single agent. Five specialist agen
 - `http://localhost:8001/halo` — unified single-screen chat (product-feel demo)
 - `http://localhost:8001/dashboard-ui` — aggregate wellbeing dashboard
 
-**One architectural pattern, five domains.** Every agent shares the same Intake -> Search -> Brush -> Validator -> Route spine. One generalised Search agent serves all five. The agents differ in their policies and rubrics; the substrate is shared. See **ARCHITECTURE.md** for the full design rationale, safety/ethics framing, and the built-vs-roadmap table.
+**One architectural pattern, five domains.** Every agent shares the same Intake -> Search -> Brush -> Validator -> Route spine. One generalised Search agent serves all five. The agents differ in their policies and rubrics; the substrate is shared. The connector layer (M365, brand library, Yammer, HR systems) that turns reasoning into action is named and scoped in **ARCHITECTURE.md section 7**. See ARCHITECTURE.md for the full design rationale, safety/ethics framing, and the built-vs-roadmap table.
 
 ---
 
