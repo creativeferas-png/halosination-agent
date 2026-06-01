@@ -9,9 +9,9 @@
 
 ## The HALO Vision
 
-**HALO is an agentic orchestration layer for the M42 workplace.** The vision is one place an employee talks to, in plain language, that quietly coordinates with the systems they already use.
+**HALO is an agentic orchestration layer for the modern enterprise workplace** — designed and prototyped against M42 as the case study. The vision is one place an employee talks to, in plain language, that quietly coordinates with the systems they already use.
 
-Imagine the morning of a typical M42 employee:
+Imagine the morning of a typical knowledge worker in any large enterprise — at M42, where this prototype was built, or any organisation running M365 and a modern HR platform:
 
 - *"Squeeze a meeting with Ahmed tomorrow for 30 minutes."*
 - *"Remind me to call the event supplier in 3 days."*
@@ -26,7 +26,7 @@ One conversation. No tab-switching, no menu hunting, no second-guessing which sy
 This experience emerges from two layers working together:
 
 1. **The agentic reasoning layer** — intent classification, policy retrieval, rule-cited validation, safety-biased routing, output drafting. The hard part. **This is what this submission ships.**
-2. **The connector layer** — the systems that already exist inside M42 (M365, brand asset library, Yammer/Teams, HR systems). **This is deployment work, named and scoped in ARCHITECTURE.md section 7.**
+2. **The connector layer** — the enterprise systems any modern organisation already runs (M365, brand asset libraries, Yammer/Teams, HRIS, EAP). At M42 specifically: M365 + Oracle Fusion / OneHub + the M42 brand library + Lyra/SAKINA. **This is deployment work, named and scoped in ARCHITECTURE.md section 7.**
 
 The hard part is shipped. The integration work is named.
 
