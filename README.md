@@ -87,7 +87,7 @@ A Dockerfile is on the roadmap (see ARCHITECTURE.md section 6) but is intentiona
     # Edit .env: add OPENAI_API_KEY and set OPENAI_BASE_URL=https://api.core42.ai/v1
 
     # 4. Build the 5 policy indexes (one-time)
-    python scripts/build_policy_index.py data/brand_index.md       data/brand_index.json
+    python scripts/build_policy_index.py data/brand_guidelines.md       data/brand_index.json
     python scripts/build_policy_index.py data/meeting_policy.md    data/meeting_policy_index.json
     python scripts/build_policy_index.py data/task_policy.md       data/task_policy_index.json
     python scripts/build_policy_index.py data/social_policy.md     data/social_policy_index.json
