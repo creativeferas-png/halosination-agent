@@ -8,7 +8,7 @@
 
 ## 0. What HALO is
 
-**HALO is an agentic orchestration layer for the M42 workplace.** The vision is one place an employee talks to, in plain language, that quietly coordinates with the systems they already use — calendar, email, brand assets, Yammer, HR.
+**HALO is an agentic orchestration layer for the modern enterprise workplace** — designed and prototyped against M42 as the case study. The vision is one place an employee talks to, in plain language, that quietly coordinates with the systems they already use — calendar, email, brand assets, Yammer, HR.
 
 This submission ships **the orchestration layer's reasoning substrate**: five specialist agents that demonstrate the pattern works across very different domains, plus a unified router with a safety bias, real file execution for the brand domain, and an aggregate wellbeing dashboard built privacy-first.
 
@@ -40,7 +40,7 @@ This document walks through the vision (§1), the architecture (§2–§3), the 
 
 ## 1. The HALO Vision
 
-Imagine the morning of a typical M42 employee. They say or type:
+Imagine the morning of a typical knowledge worker in any large enterprise — at M42, where this prototype was built, or at any organisation running M365 and a modern HR platform. They say or type:
 
 - *"Squeeze a meeting with Ahmed tomorrow for 30 minutes."*
 - *"Remind me to call the event supplier in 3 days."*
@@ -57,7 +57,7 @@ One conversation. No tab-switching, no menu hunting, no second-guessing which sy
 This experience emerges from two layers working together:
 
 1. **The agentic reasoning layer** — intent classification, policy retrieval, rule-cited validation, safety-biased routing, output drafting. This is the hard part. **This is what this submission ships.**
-2. **The connector layer** — the systems that already exist inside M42: M365 (calendar, email, files), the brand asset library, Yammer/Teams, ServiceNow, the HR system, Lyra/SAKINA. **This is the deployment work that turns HALO into the product.**
+2. **The connector layer** — the enterprise systems any modern organisation already runs: M365 (calendar, email, files), a brand asset library, Yammer/Teams, ServiceNow, an HRIS, an EAP. At M42 specifically that means M365 + Oracle Fusion / OneHub + the M42 brand library + Lyra/SAKINA; at another organisation the analogues would be different but the integration points are the same. **This is the deployment work that turns HALO into the product.**
 
 Every voice-command example above maps to a clear engineering path. Each one has a "reasoning half" (already shipped) and a "connector half" (named, scoped, ready to integrate):
 
@@ -71,17 +71,19 @@ Every voice-command example above maps to a clear engineering path. Each one has
 | Find peers in X domain | Connection suggestion + bias exclusion + privacy rules (Agent 04) | Directory + Yammer/Teams group APIs · weeks of governance work |
 | Wellbeing support | Severity classification + real M42 resources (Agent 05) | Self-service already complete; HR escalation pathway is a programme, not a sprint |
 
+The deployment targets named above (M365 Graph, Oracle Fusion / OneHub) are M42-specific instances of a wider pattern. Any organisation running M365 plus a modern HRIS (Oracle Fusion HCM, Workday, BambooHR, SAP SuccessFactors) would have analogous connector requirements; the agentic reasoning layer is portable across them.
+
 ### What this submission demonstrates
 
 The five specialist agents in this submission are not five separate prototypes — they are **the reasoning halves of seven future deployed capabilities**, all sharing the same architectural pattern: Intake → Search → Brush → Validator → Route. The Router on top is the front door that turns "five separate APIs" into "one conversation."
 
-If a judge has time for only one read, it is this: **HALO is one architectural pattern, applied across five domains today, designed to extend into the M42 deployment connectors that turn agentic reasoning into agentic action.** The hard part is already shipped. The integration work is named.
+If a judge has time for only one read, it is this: **HALO is one architectural pattern, applied across five domains today, designed to extend into the enterprise deployment connectors — M365, a modern HRIS, brand asset libraries — that any knowledge-work organisation already runs. M42 is the case study; the pattern is general.** The hard part is already shipped. The integration work is named.
 
 ---
 
 ## 2. Executive summary
 
-HALO is a multi-agent system that lets any M42 / G42-group employee request, structure, or be supported on plain-English asks across five work and wellbeing domains — and ensures every output is verifiably on-policy before it leaves the system.
+HALO is a multi-agent system that lets any employee in a knowledge-work organisation request, structure, or be supported on plain-English asks across five work and wellbeing domains — and ensures every output is verifiably on-policy before it leaves the system. M42 was the case study during development; the architecture, policies, and integration patterns generalise to any organisation running M365 plus a modern HRIS.
 
 The pain point is real and operational. Across G42, M42, Core42, Inception, and Mubadala Health, every OpCo produces content, runs meetings, tracks status, makes introductions, and (quietly) carries the weight of its people every day. Marcom owns the brand source-of-truth, but cannot review every asset. Managers want to know who is at risk, but cannot read every status update. HR wants to support wellbeing, but cannot survey everyone every week. **Today, off-brand assets ship, signals get missed, and people in difficulty wait too long for support** — not because anyone is doing a bad job, but because the volume is impossible.
 
@@ -121,6 +123,15 @@ A single big LLM call can do impressive things, but it cannot be **audited** and
 1. **Separation of concerns.** Intake extracts structure faithfully; Brush drafts; Validator scores. Each step is a smaller, more reliable LLM call than asking one model to do all of it at once.
 2. **Critic loop.** The Validator scores Brush's draft against the same rules Brush had access to. Disagreement triggers one revision attempt; persistent disagreement escalates to a human. This is the architectural mechanism that prevents the most consequential failure modes — an off-brand asset shipping, an unsafe wellness response going out, a status with buried sensitive content being broadcast.
 3. **Trace.** Every step logs its inputs, outputs, and the rules cited. The agent_trace returned by every endpoint is the audit log.
+
+**A note on what the committed trace shows — and what it doesn't.**
+
+The committed reference trace at `logs/agent_trace.jsonl` contains 12 events from two real `/run` calls, both passing 9/9 first time. The Validator → Brush revision loop is fully implemented (`run.py` lines 277-295, `app/brush_agent.py::run_brush_revision`) but did not fire on these particular inputs because **Brush self-disciplines against retrieved rules** — it refuses forbidden words (e.g., "crush") from the input prompt *before* Validator sees the draft. The same pattern held across all 13 sample i/o pairs covering stress-test inputs (off-brand language, sensitive HR context, active workplace conflict, crisis signals): zero triggered revision. Brush refused at the drafting layer; Validator ratified at the scoring layer.
+
+This is intentional architecture: **Validator is a safety net, not a regular-flow component.** Removing it would still measurably change outputs — the safety net would no longer be there to catch any drift Brush missed, and the rule-citation audit trail would disappear. But on rule-grounded inputs handled by a well-disciplined Brush, the net catches little. We read this as evidence the substrate works, not as evidence it doesn\'t.
+
+**To observe the revision loop firing in real time:** raise the Validator pass-threshold in `app/validator_agent.py` from 7/9 to 8/9. A 7/9 Brush draft will then trigger one revision attempt before passing or escalating. The loop is one configuration knob away from being routinely visible — we kept the threshold at 7/9 in the submitted build because it reflects the production calibration we\'d defend, not the demo behaviour we want to manufacture.
+
 
 ### 3.3 Why retrieval-augmented (RAG) policies
 
@@ -306,7 +317,7 @@ This is the full picture: what is in the repo today, what the deployment connect
 
 ### 7.2 Deployment connectors — the path from agentic reasoning to agentic action
 
-These are the integrations that turn the shipped reasoning substrate into the product vision described in §1. None of them is technically blocked; all of them are integration/governance work.
+These are the integrations that turn the shipped reasoning substrate into the product vision described in §1. The specific targets below are illustrated against M42's stack (M365 + Oracle Fusion HCM); any organisation running an analogous enterprise stack (Workday, BambooHR, SAP SuccessFactors, etc.) would have equivalent integration points. None of these is technically blocked; all of them are integration/governance work.
 
 | Connector | What it unlocks | Effort estimate | Status |
 |---|---|---|---|
@@ -403,4 +414,4 @@ python run_ui.py
 
 ## 11. Acknowledgements
 
-Built solo by Feras Assil during the G42 Agentathon sprint window. Submission name "HALOsination" was the original Agent 01 codename; HALO is the platform the agentathon submission grew into. M42 wellbeing resources (SAKINA, Lyra) are taken from an internal M42 Human Capital communication and are used with the explicit caveat that they should be confirmed against the latest official source. The architectural patterns (Intake → Search → Brush → Validator → Route, Proposer + Critic, Context-Packer + Actor) are the agentic governance patterns named in the official Agentathon guidance; **HALO's contribution is showing that the orchestration layer pattern generalises across domains, and naming the deployment connectors that turn agentic reasoning into agentic action inside the M42 workplace.**
+Built solo by Feras Assil during the G42 Agentathon sprint window. Submission name "HALOsination" was the original Agent 01 codename; HALO is the platform the agentathon submission grew into. M42 wellbeing resources (SAKINA, Lyra) are taken from an internal M42 Human Capital communication and are used with the explicit caveat that they should be confirmed against the latest official source. The architectural patterns (Intake → Search → Brush → Validator → Route, Proposer + Critic, Context-Packer + Actor) are the agentic governance patterns named in the official Agentathon guidance; **HALO's contribution is showing that the orchestration layer pattern generalises across domains, and naming the deployment connectors that turn agentic reasoning into agentic action inside any knowledge-work organisation — with M42 as the case study that grounded the design in concrete user, role, and integration realities.**
