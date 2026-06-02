@@ -42,7 +42,7 @@
     "numpy"
   ],
   "data_sources": [
-    "data/brand_index.md",
+    "data/brand_guidelines.md",
     "data/meeting_policy.md",
     "data/task_policy.md",
     "data/social_policy.md",
