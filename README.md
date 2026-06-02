@@ -7,6 +7,19 @@
 
 ---
 
+## The problem & the user
+
+**The problem.** Every employee loses time to the same scattered friction — turning a
+vague request into an on-brand asset, pulling decisions and owners out of meeting sprawl,
+wrangling updates into something trackable, finding the right person to talk to, and,
+when things get heavy, not knowing where to turn for support. These live in disconnected
+tools today, and the wellbeing piece has no scalable, privacy-safe channel at all.
+
+**The user.** Every employee, across work, social, and wellbeing — the whole workforce of
+any organisation that deploys HALO. Sponsored and piloted by M42's Marcom & Creative
+Services team (where it originated), built to scale across G42's operating companies.
+
+
 ## The HALO Vision
 
 **HALO is an agentic orchestration layer for the modern enterprise workplace** — designed and prototyped against M42 as the case study. The vision is one place an employee talks to, in plain language, that quietly coordinates with the systems they already use.
