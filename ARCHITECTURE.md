@@ -358,7 +358,7 @@ pip install -r requirements.txt
 **Build the 5 policy indexes** (one-time):
 
 ```bash
-python scripts/build_policy_index.py data/brand_index.md data/brand_index.json
+python scripts/build_policy_index.py data/brand_guidelines.md data/brand_index.json
 python scripts/build_policy_index.py data/meeting_policy.md data/meeting_policy_index.json
 python scripts/build_policy_index.py data/task_policy.md data/task_policy_index.json
 python scripts/build_policy_index.py data/social_policy.md data/social_policy_index.json
