@@ -83,6 +83,12 @@ If a judge has time for only one read, it is this: **HALO is one architectural p
 
 ## 2. Executive summary
 
+**The business case in brief** — the four questions, answered:
+- **Problem.** Across every OpCo, off-brand assets ship, risk signals in meetings and status updates get missed, and people in difficulty wait too long — because the volume of content, meetings, and check-ins is impossible to review by hand.
+- **Who benefits.** Every employee, across work, social, and wellbeing; sponsored and piloted by M42 Marcom & Creative Services, scaling to G42 OpCos.
+- **Why agentic.** A Proposer→Critic→Router pipeline grounds outputs in retrieved policy, validates against a rubric before delivery, and enforces a code-level safety override —auditable and refusable in ways a single call or a script cannot be (see §3.2).
+- **Deployment.** Reasoning substrate is live; the connector layer (M365 Graph, Oracle Fusion/OneHub, brand library) is named, scoped, and effort-estimated in §7.
+
 HALO is a multi-agent system that lets any employee in a knowledge-work organisation request, structure, or be supported on plain-English asks across five work and wellbeing domains — and ensures every output is verifiably on-policy before it leaves the system. M42 was the case study during development; the architecture, policies, and integration patterns generalise to any organisation running M365 plus a modern HRIS.
 
 The pain point is real and operational. Across G42, M42, Core42, Inception, and Mubadala Health, every OpCo produces content, runs meetings, tracks status, makes introductions, and (quietly) carries the weight of its people every day. Marcom owns the brand source-of-truth, but cannot review every asset. Managers want to know who is at risk, but cannot read every status update. HR wants to support wellbeing, but cannot survey everyone every week. **Today, off-brand assets ship, signals get missed, and people in difficulty wait too long for support** — not because anyone is doing a bad job, but because the volume is impossible.
